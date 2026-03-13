@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { ArrowRight, Loader2, CheckCircle2, XCircle, Trophy, RotateCcw } from "lucide-react";
+import { ArrowRight, Loader2, CheckCircle2, XCircle, RotateCcw } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface QuizModuleProps {
   lessonTitle: string;
@@ -12,6 +13,7 @@ interface Question {
   question: string;
   options: string[];
   correctIndex: number;
+  explanation: string;
 }
 
 const subjectNames: Record<string, string> = {
@@ -21,23 +23,10 @@ const subjectNames: Record<string, string> = {
   science: "العلوم",
 };
 
-const generateMockQuestions = (lesson: string, subject: string): Question[] => {
-  const subjectLabel = subjectNames[subject] || subject;
-  return Array.from({ length: 10 }, (_, i) => ({
-    question: `سؤال ${i + 1}: ما هو المفهوم الصحيح المتعلق بـ "${lesson}" في مادة ${subjectLabel}؟`,
-    options: [
-      `الإجابة الصحيحة لسؤال ${i + 1}`,
-      `إجابة خاطئة أ`,
-      `إجابة خاطئة ب`,
-      `إجابة خاطئة ج`,
-    ],
-    correctIndex: 0,
-  }));
-};
-
 const QuizModule = ({ lessonTitle, subject, onBack, onRestart }: QuizModuleProps) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [currentQ, setCurrentQ] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [score, setScore] = useState(0);
@@ -45,10 +34,22 @@ const QuizModule = ({ lessonTitle, subject, onBack, onRestart }: QuizModuleProps
   const [finished, setFinished] = useState(false);
 
   useEffect(() => {
-    // Simulated question generation
-    setTimeout(() => {
-      const qs = generateMockQuestions(lessonTitle, subject);
-      // Shuffle options for each question
+    fetchQuestions();
+  }, [lessonTitle, subject]);
+
+  const fetchQuestions = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("generate-quiz", {
+        body: { lessonTitle, subject: subjectNames[subject] || subject },
+      });
+
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
+
+      const qs: Question[] = data.questions;
+      // Shuffle options
       const shuffled = qs.map((q) => {
         const indices = q.options.map((_, i) => i);
         for (let i = indices.length - 1; i > 0; i--) {
@@ -63,9 +64,13 @@ const QuizModule = ({ lessonTitle, subject, onBack, onRestart }: QuizModuleProps
         };
       });
       setQuestions(shuffled);
+    } catch (err: any) {
+      console.error("Quiz error:", err);
+      setError(err.message || "حدث خطأ أثناء إنشاء الأسئلة");
+    } finally {
       setLoading(false);
-    }, 2000);
-  }, [lessonTitle, subject]);
+    }
+  };
 
   const handleAnswer = (idx: number) => {
     if (answered) return;
@@ -100,7 +105,21 @@ const QuizModule = ({ lessonTitle, subject, onBack, onRestart }: QuizModuleProps
       <div className="min-h-screen flex flex-col items-center justify-center px-4">
         <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
         <p className="text-foreground font-bold text-lg">جاري تحضير اختبار العباقرة...</p>
-        <p className="text-muted-foreground text-sm mt-2">يتم إنشاء 10 أسئلة عن "{lessonTitle}"</p>
+        <p className="text-muted-foreground text-sm mt-2">يتم إنشاء 10 أسئلة ذكية عن "{lessonTitle}"</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4">
+        <p className="text-destructive font-bold text-lg mb-4">{error}</p>
+        <button onClick={fetchQuestions} className="text-primary font-medium hover:underline">
+          إعادة المحاولة
+        </button>
+        <button onClick={onBack} className="text-muted-foreground font-medium hover:underline mt-3">
+          العودة للدرس
+        </button>
       </div>
     );
   }
@@ -115,7 +134,6 @@ const QuizModule = ({ lessonTitle, subject, onBack, onRestart }: QuizModuleProps
           <h2 className="text-2xl font-bold text-foreground mb-2">نتيجة الاختبار</h2>
           <p className="text-muted-foreground mb-6">{lessonTitle}</p>
 
-          {/* Score circle */}
           <div className="relative w-32 h-32 mx-auto mb-6">
             <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="42" fill="none" stroke="hsl(var(--muted))" strokeWidth="8" />
@@ -135,7 +153,6 @@ const QuizModule = ({ lessonTitle, subject, onBack, onRestart }: QuizModuleProps
             </div>
           </div>
 
-          {/* Progress bar */}
           <div className="w-full h-3 rounded-full bg-muted mb-3 overflow-hidden">
             <div
               className="h-full rounded-full gradient-emerald transition-all duration-1000"
@@ -179,7 +196,6 @@ const QuizModule = ({ lessonTitle, subject, onBack, onRestart }: QuizModuleProps
       </button>
 
       <div className="max-w-lg mx-auto w-full">
-        {/* Progress */}
         <div className="flex items-center justify-between mb-2 text-sm text-muted-foreground">
           <span>السؤال {currentQ + 1} من {questions.length}</span>
           <span>النتيجة: {score}/{currentQ + (answered ? 1 : 0)}</span>
@@ -191,12 +207,10 @@ const QuizModule = ({ lessonTitle, subject, onBack, onRestart }: QuizModuleProps
           />
         </div>
 
-        {/* Question */}
         <div className="glass-card rounded-2xl p-6 mb-6 animate-slide-up">
           <h3 className="text-lg font-bold text-foreground leading-8">{q.question}</h3>
         </div>
 
-        {/* Options */}
         <div className="space-y-3">
           {q.options.map((opt, i) => {
             let optionClasses = "glass-card rounded-xl p-4 text-right transition-all duration-300 cursor-pointer active:scale-[0.98] border-2";
@@ -234,7 +248,16 @@ const QuizModule = ({ lessonTitle, subject, onBack, onRestart }: QuizModuleProps
           })}
         </div>
 
-        {/* Next button */}
+        {/* Explanation after answering */}
+        {answered && q.explanation && (
+          <div className="mt-4 glass-card rounded-xl p-4 border-2 border-primary/20 bg-primary/5 animate-slide-up">
+            <p className="text-foreground/80 text-sm leading-7">
+              <span className="font-bold text-primary">💡 التوضيح: </span>
+              {q.explanation}
+            </p>
+          </div>
+        )}
+
         {answered && (
           <button
             onClick={handleNext}
