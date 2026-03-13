@@ -1,5 +1,6 @@
-import { ArrowRight, Play, FileText, Loader2 } from "lucide-react";
+import { ArrowRight, Play, FileText, Loader2, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface LessonContentProps {
   lessonTitle: string;
@@ -20,6 +21,9 @@ const LessonContent = ({ lessonTitle, subject, onStartQuiz, onBack }: LessonCont
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const ainSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(lessonTitle + " عين التعليمية")}`;
+  const fahemSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(lessonTitle + " فاهم")}`;
+
   useEffect(() => {
     generateSummary();
   }, [lessonTitle, subject]);
@@ -27,24 +31,22 @@ const LessonContent = ({ lessonTitle, subject, onStartQuiz, onBack }: LessonCont
   const generateSummary = async () => {
     setLoading(true);
     setError("");
-    
-    // Simulated summary since we don't have backend yet
-    // This will be replaced with actual AI call when Cloud is enabled
-    setTimeout(() => {
-      setSummary(
-        `📚 ملخص درس "${lessonTitle}" في مادة ${subjectNames[subject] || subject}:\n\n` +
-        `يتناول هذا الدرس المفاهيم الأساسية المتعلقة بـ "${lessonTitle}". ` +
-        `يُعد هذا الموضوع من المواضيع المهمة التي يحتاج الطالب إلى فهمها بشكل جيد.\n\n` +
-        `🔑 النقاط الرئيسية:\n` +
-        `• التعريف بمفهوم ${lessonTitle} وأهميته\n` +
-        `• القواعد والأسس المتعلقة بالموضوع\n` +
-        `• أمثلة تطبيقية توضيحية\n` +
-        `• تمارين وأنشطة للتدريب\n\n` +
-        `💡 نصيحة: راجع الدرس أكثر من مرة وحاول حل التمارين بنفسك قبل الاطلاع على الإجابات.\n\n` +
-        `⚡ لتفعيل الملخصات الذكية بالذكاء الاصطناعي، يرجى تفعيل Lovable Cloud.`
-      );
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("generate-summary", {
+        body: { lessonTitle, subject: subjectNames[subject] || subject },
+      });
+
+      if (fnError) throw new Error(fnError.message);
+      if (data?.error) throw new Error(data.error);
+
+      setSummary(data.summary);
+    } catch (err: any) {
+      console.error("Summary error:", err);
+      setError(err.message || "حدث خطأ أثناء إنشاء الملخص");
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   return (
@@ -66,16 +68,33 @@ const LessonContent = ({ lessonTitle, subject, onStartQuiz, onBack }: LessonCont
 
         {/* Video Section */}
         <div className="glass-card rounded-2xl overflow-hidden animate-scale-in" style={{ animationDelay: "0.1s" }}>
-          <div className="aspect-video bg-gradient-to-br from-foreground/5 to-foreground/10 flex flex-col items-center justify-center gap-3">
+          <div className="aspect-video bg-gradient-to-br from-foreground/5 to-foreground/10 flex flex-col items-center justify-center gap-4 p-6">
             <div className="w-16 h-16 rounded-full gradient-emerald flex items-center justify-center shadow-emerald">
               <Play className="w-7 h-7 text-primary-foreground mr-[-2px]" />
             </div>
-            <p className="text-muted-foreground text-sm font-medium">
-              فيديو شرح: {lessonTitle}
+            <p className="text-foreground font-bold text-lg text-center">
+              ابحث عن فيديو شرح: {lessonTitle}
             </p>
-            <p className="text-muted-foreground/60 text-xs">
-              من منصة عين التعليمية / فاهم
-            </p>
+            <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
+              <a
+                href={ainSearchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 py-3 px-4 rounded-xl gradient-emerald text-primary-foreground font-bold text-center shadow-emerald active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                عين التعليمية
+              </a>
+              <a
+                href={fahemSearchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 py-3 px-4 rounded-xl border-2 border-primary text-primary font-bold text-center hover:bg-primary/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                فاهم
+              </a>
+            </div>
           </div>
         </div>
 
@@ -91,7 +110,7 @@ const LessonContent = ({ lessonTitle, subject, onStartQuiz, onBack }: LessonCont
           {loading ? (
             <div className="flex items-center justify-center py-10">
               <Loader2 className="w-8 h-8 text-primary animate-spin" />
-              <span className="mr-3 text-muted-foreground">جاري إنشاء الملخص...</span>
+              <span className="mr-3 text-muted-foreground">جاري إنشاء الملخص بالذكاء الاصطناعي...</span>
             </div>
           ) : error ? (
             <div className="text-center py-6">
