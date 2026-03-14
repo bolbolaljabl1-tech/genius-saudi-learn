@@ -6,11 +6,12 @@ import LessonContent from "@/components/LessonContent";
 import QuizModule from "@/components/QuizModule";
 import CameraSolver from "@/components/CameraSolver";
 import Leaderboard from "@/components/Leaderboard";
+import GamesHub from "@/components/GamesHub";
 import StudentNameModal from "@/components/StudentNameModal";
 import AppFooter from "@/components/AppFooter";
 import { useXP } from "@/hooks/useXP";
 
-type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard";
+type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games";
 
 const Index = () => {
   const [screen, setScreen] = useState<Screen>("stage");
@@ -20,44 +21,18 @@ const Index = () => {
   const { xp, studentName, badges, addXP, awardBadge, saveStudentName } = useXP();
   const [showNameModal, setShowNameModal] = useState(false);
 
-  const handleStageSelect = (s: string) => {
-    setStage(s);
-    setScreen("subject");
-  };
-
-  const handleSubjectSelect = (s: string) => {
-    setSubject(s);
-    setScreen("search");
-  };
-
-  const handleLessonSearch = (title: string) => {
-    setLessonTitle(title);
-    setScreen("lesson");
-  };
+  const handleStageSelect = (s: string) => { setStage(s); setScreen("subject"); };
+  const handleSubjectSelect = (s: string) => { setSubject(s); setScreen("search"); };
+  const handleLessonSearch = (title: string) => { setLessonTitle(title); setScreen("lesson"); };
 
   const handleQuizComplete = (score: number, total: number) => {
-    if (score === total) {
-      addXP(100);
-      awardBadge("وسام العبقري");
-    } else {
-      addXP(Math.round((score / total) * 50));
-    }
-  };
-
-  const handleCameraXP = () => {
-    addXP(20);
-  };
-
-  const handleVideoXP = () => {
-    addXP(10);
+    if (score === total) { addXP(100); awardBadge("وسام العبقري"); }
+    else { addXP(Math.round((score / total) * 50)); }
   };
 
   const openLeaderboard = () => {
-    if (!studentName) {
-      setShowNameModal(true);
-    } else {
-      setScreen("leaderboard");
-    }
+    if (!studentName) { setShowNameModal(true); }
+    else { setScreen("leaderboard"); }
   };
 
   const handleNameSave = (name: string) => {
@@ -67,7 +42,7 @@ const Index = () => {
   };
 
   return (
-    <div className="pb-14">
+    <div className="pb-16">
       {showNameModal && <StudentNameModal onSave={handleNameSave} />}
 
       {screen === "stage" && (
@@ -75,43 +50,18 @@ const Index = () => {
           onSelect={handleStageSelect}
           onCamera={() => setScreen("camera")}
           onLeaderboard={openLeaderboard}
+          onGames={() => setScreen("games")}
           xp={xp}
           studentName={studentName}
         />
       )}
-      {screen === "subject" && (
-        <SubjectSelection stage={stage} onSelect={handleSubjectSelect} onBack={() => setScreen("stage")} />
-      )}
-      {screen === "search" && (
-        <LessonSearch subject={subject} onSearch={handleLessonSearch} onBack={() => setScreen("subject")} />
-      )}
-      {screen === "lesson" && (
-        <LessonContent
-          lessonTitle={lessonTitle}
-          subject={subject}
-          onStartQuiz={() => setScreen("quiz")}
-          onBack={() => setScreen("search")}
-          onVideoXP={handleVideoXP}
-        />
-      )}
-      {screen === "quiz" && (
-        <QuizModule
-          lessonTitle={lessonTitle}
-          subject={subject}
-          onBack={() => setScreen("lesson")}
-          onRestart={() => {
-            setScreen("lesson");
-            setTimeout(() => setScreen("quiz"), 100);
-          }}
-          onQuizComplete={handleQuizComplete}
-        />
-      )}
-      {screen === "camera" && (
-        <CameraSolver onBack={() => setScreen("stage")} onXP={handleCameraXP} />
-      )}
-      {screen === "leaderboard" && (
-        <Leaderboard onBack={() => setScreen("stage")} currentName={studentName} currentXP={xp} />
-      )}
+      {screen === "subject" && <SubjectSelection stage={stage} onSelect={handleSubjectSelect} onBack={() => setScreen("stage")} />}
+      {screen === "search" && <LessonSearch subject={subject} onSearch={handleLessonSearch} onBack={() => setScreen("subject")} />}
+      {screen === "lesson" && <LessonContent lessonTitle={lessonTitle} subject={subject} onStartQuiz={() => setScreen("quiz")} onBack={() => setScreen("search")} onVideoXP={() => addXP(10)} />}
+      {screen === "quiz" && <QuizModule lessonTitle={lessonTitle} subject={subject} onBack={() => setScreen("lesson")} onRestart={() => { setScreen("lesson"); setTimeout(() => setScreen("quiz"), 100); }} onQuizComplete={handleQuizComplete} />}
+      {screen === "camera" && <CameraSolver onBack={() => setScreen("stage")} onXP={() => addXP(20)} />}
+      {screen === "leaderboard" && <Leaderboard onBack={() => setScreen("stage")} currentName={studentName} currentXP={xp} />}
+      {screen === "games" && <GamesHub onBack={() => setScreen("stage")} onXP={(amount) => addXP(amount)} onBadge={(badge) => awardBadge(badge)} />}
       <AppFooter />
     </div>
   );

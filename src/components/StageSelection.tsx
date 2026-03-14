@@ -1,4 +1,4 @@
-import { GraduationCap, BookOpen, Camera, Trophy } from "lucide-react";
+import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2 } from "lucide-react";
 import appIcon from "@/assets/app-icon.png";
 import heroBanner from "@/assets/hero-banner.png";
 
@@ -6,11 +6,12 @@ interface StageSelectionProps {
   onSelect: (stage: string) => void;
   onCamera: () => void;
   onLeaderboard: () => void;
+  onGames: () => void;
   xp: number;
   studentName: string;
 }
 
-const StageSelection = ({ onSelect, onCamera, onLeaderboard, xp, studentName }: StageSelectionProps) => {
+const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, xp, studentName }: StageSelectionProps) => {
   const stages = [
     {
       id: "elementary",
@@ -32,50 +33,60 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, xp, studentName }: 
     <div className="min-h-screen flex flex-col items-center px-4 py-6">
       {/* Top bar with XP */}
       <div className="w-full max-w-xl flex items-center justify-between mb-4 animate-slide-up">
-        <button onClick={onLeaderboard} className="flex items-center gap-2 glass-card rounded-full px-4 py-2 hover:shadow-emerald transition-all active:scale-[0.98]">
-          <Trophy className="w-4 h-4 text-primary" />
-          <span className="text-foreground font-bold text-sm">{xp} XP</span>
+        <button onClick={onLeaderboard} className="flex items-center gap-2 neu-btn px-5 py-3 hover:shadow-emerald transition-all active:scale-[0.98]">
+          <Trophy className="w-5 h-5 text-gold" />
+          <span className="text-foreground font-extrabold text-lg">{xp} XP</span>
         </button>
         {studentName && (
-          <span className="text-muted-foreground text-sm font-medium">مرحباً {studentName}</span>
+          <span className="text-muted-foreground text-lg font-bold">مرحباً {studentName} 👋</span>
         )}
-        <img src={appIcon} alt="منصة الطالب العبقري" className="w-10 h-10 rounded-xl" />
+        <img src={appIcon} alt="منصة الطالب العبقري" className="w-12 h-12 rounded-xl shadow-emerald" />
       </div>
 
       {/* Hero Banner */}
       <div className="w-full max-w-xl mb-6 animate-scale-in">
-        <img src={heroBanner} alt="منصة الطالب العبقري" className="w-full rounded-2xl shadow-emerald" />
+        <img src={heroBanner} alt="منصة الطالب العبقري" className="w-full rounded-2xl shadow-emerald-lg" />
       </div>
 
       {/* Camera Solver Button */}
       <button
         onClick={onCamera}
-        className="w-full max-w-xl mb-6 py-4 rounded-2xl bg-gradient-to-l from-primary to-accent text-primary-foreground font-bold text-lg shadow-emerald-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in"
+        className="w-full max-w-xl mb-4 py-5 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-2xl shadow-emerald-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in"
         style={{ animationDelay: "0.05s" }}
       >
-        <Camera className="w-6 h-6" />
-        📸 أصوّر سؤالك
+        <Camera className="w-7 h-7" />
+        📸 صور سؤالك
+      </button>
+
+      {/* Games Button */}
+      <button
+        onClick={onGames}
+        className="w-full max-w-xl mb-6 py-5 rounded-2xl gradient-gold text-gold-foreground font-extrabold text-2xl shadow-gold active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in"
+        style={{ animationDelay: "0.1s" }}
+      >
+        <Gamepad2 className="w-7 h-7" />
+        🎮 ألعاب العباقرة
       </button>
 
       {/* Stage Label */}
-      <div className="text-center mb-6 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-        <p className="text-muted-foreground text-lg">اختر مرحلتك الدراسية للبدء</p>
+      <div className="text-center mb-6 animate-slide-up" style={{ animationDelay: "0.15s" }}>
+        <p className="text-muted-foreground text-xl font-bold">اختر مرحلتك الدراسية للبدء</p>
       </div>
 
       {/* Stage Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-xl">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-xl">
         {stages.map((stage) => (
           <button
             key={stage.id}
             onClick={() => onSelect(stage.id)}
-            className="group glass-card rounded-2xl p-8 text-center transition-all duration-300 hover:shadow-emerald-lg hover:scale-[1.03] active:scale-[0.98] animate-scale-in cursor-pointer"
+            className="group neu-card p-8 text-center transition-all duration-300 hover:shadow-emerald-lg hover:scale-[1.03] active:scale-[0.98] animate-scale-in cursor-pointer"
             style={{ animationDelay: stage.delay }}
           >
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-emerald shadow-emerald mb-5 transition-transform duration-300 group-hover:scale-110">
-              <stage.icon className="w-8 h-8 text-primary-foreground" />
+            <div className="inline-flex items-center justify-center w-18 h-18 rounded-2xl gradient-emerald shadow-emerald mb-5 transition-transform duration-300 group-hover:scale-110 w-[4.5rem] h-[4.5rem]">
+              <stage.icon className="w-9 h-9 text-primary-foreground" />
             </div>
-            <h2 className="text-xl font-bold text-foreground mb-2">{stage.title}</h2>
-            <p className="text-muted-foreground text-sm">{stage.description}</p>
+            <h2 className="text-2xl font-extrabold text-foreground mb-2">{stage.title}</h2>
+            <p className="text-muted-foreground text-base">{stage.description}</p>
           </button>
         ))}
       </div>
@@ -83,10 +94,10 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, xp, studentName }: 
       {/* Leaderboard Button */}
       <button
         onClick={onLeaderboard}
-        className="w-full max-w-xl mt-6 py-3 rounded-xl border border-border text-foreground font-bold hover:bg-muted transition-all active:scale-[0.98] flex items-center justify-center gap-2 animate-scale-in"
+        className="w-full max-w-xl mt-6 py-4 rounded-2xl neu-btn text-foreground font-extrabold text-xl hover:shadow-gold transition-all active:scale-[0.98] flex items-center justify-center gap-3 animate-scale-in"
         style={{ animationDelay: "0.4s" }}
       >
-        <Trophy className="w-5 h-5 text-primary" />
+        <Trophy className="w-6 h-6 text-gold" />
         🏆 لوحة المتصدرين
       </button>
     </div>

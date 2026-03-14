@@ -6,7 +6,7 @@
 
 @layer base {
   :root {
-    --background: 150 20% 97%;
+    --background: 0 0% 99%;
     --foreground: 160 30% 10%;
 
     --card: 0 0% 100%;
@@ -43,6 +43,10 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
+    --gold: 45 93% 47%;
+    --gold-foreground: 0 0% 100%;
+    --gold-light: 45 100% 90%;
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;
@@ -62,6 +66,7 @@
   body {
     @apply bg-background text-foreground font-tajawal;
     direction: rtl;
+    font-size: 18px;
   }
 }
 
@@ -74,6 +79,10 @@
     background: linear-gradient(135deg, hsl(160 84% 30%), hsl(155 60% 40%));
   }
 
+  .gradient-gold {
+    background: linear-gradient(135deg, hsl(45 93% 47%), hsl(38 92% 50%));
+  }
+
   .shadow-emerald {
     box-shadow: 0 10px 40px -10px hsl(160 84% 39% / 0.3);
   }
@@ -82,8 +91,35 @@
     box-shadow: 0 20px 60px -15px hsl(160 84% 39% / 0.4);
   }
 
+  .shadow-gold {
+    box-shadow: 0 10px 40px -10px hsl(45 93% 47% / 0.4);
+  }
+
   .glass-card {
     @apply bg-card/80 backdrop-blur-lg border border-border/50;
+  }
+
+  .neu-card {
+    background: hsl(0 0% 100%);
+    border-radius: 1.25rem;
+    box-shadow:
+      8px 8px 20px hsl(0 0% 85%),
+      -8px -8px 20px hsl(0 0% 100%);
+  }
+
+  .neu-btn {
+    background: hsl(0 0% 100%);
+    border-radius: 1rem;
+    box-shadow:
+      5px 5px 15px hsl(0 0% 85%),
+      -5px -5px 15px hsl(0 0% 100%);
+    transition: all 0.2s ease;
+  }
+
+  .neu-btn:active {
+    box-shadow:
+      inset 3px 3px 8px hsl(0 0% 85%),
+      inset -3px -3px 8px hsl(0 0% 100%);
   }
 
   .animate-float {
@@ -120,5 +156,26 @@
 
   .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
+  }
+
+  @keyframes bounce-in {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  .animate-bounce-in {
+    animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+  }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent 0%, hsl(0 0% 100% / 0.3) 50%, transparent 100%);
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
   }
 }
