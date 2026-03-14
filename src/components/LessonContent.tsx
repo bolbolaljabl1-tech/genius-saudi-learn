@@ -81,6 +81,7 @@ const LessonContent = ({ lessonTitle, subject, onStartQuiz, onBack, onVideoXP }:
                 href={ainSearchUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => onVideoXP?.()}
                 className="flex-1 py-3 px-4 rounded-xl gradient-emerald text-primary-foreground font-bold text-center shadow-emerald active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 <ExternalLink className="w-4 h-4" />
@@ -90,6 +91,7 @@ const LessonContent = ({ lessonTitle, subject, onStartQuiz, onBack, onVideoXP }:
                 href={fahemSearchUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => onVideoXP?.()}
                 className="flex-1 py-3 px-4 rounded-xl border-2 border-primary text-primary font-bold text-center hover:bg-primary/10 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
               >
                 <ExternalLink className="w-4 h-4" />

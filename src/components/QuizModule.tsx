@@ -24,7 +24,7 @@ const subjectNames: Record<string, string> = {
   science: "العلوم",
 };
 
-const QuizModule = ({ lessonTitle, subject, onBack, onRestart }: QuizModuleProps) => {
+const QuizModule = ({ lessonTitle, subject, onBack, onRestart, onQuizComplete }: QuizModuleProps) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
