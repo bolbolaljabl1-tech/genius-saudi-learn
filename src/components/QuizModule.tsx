@@ -7,6 +7,7 @@ interface QuizModuleProps {
   subject: string;
   onBack: () => void;
   onRestart: () => void;
+  onQuizComplete?: (score: number, total: number) => void;
 }
 
 interface Question {
@@ -23,7 +24,7 @@ const subjectNames: Record<string, string> = {
   science: "العلوم",
 };
 
-const QuizModule = ({ lessonTitle, subject, onBack, onRestart }: QuizModuleProps) => {
+const QuizModule = ({ lessonTitle, subject, onBack, onRestart, onQuizComplete }: QuizModuleProps) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -83,7 +84,9 @@ const QuizModule = ({ lessonTitle, subject, onBack, onRestart }: QuizModuleProps
 
   const handleNext = () => {
     if (currentQ + 1 >= questions.length) {
+      const finalScore = score;
       setFinished(true);
+      onQuizComplete?.(finalScore, questions.length);
     } else {
       setCurrentQ((c) => c + 1);
       setSelectedAnswer(null);
