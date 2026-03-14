@@ -14,7 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      leaderboard: {
+        Row: {
+          badges: string[] | null
+          created_at: string | null
+          id: string
+          student_name: string
+          updated_at: string | null
+          xp: number
+        }
+        Insert: {
+          badges?: string[] | null
+          created_at?: string | null
+          id?: string
+          student_name: string
+          updated_at?: string | null
+          xp?: number
+        }
+        Update: {
+          badges?: string[] | null
+          created_at?: string | null
+          id?: string
+          student_name?: string
+          updated_at?: string | null
+          xp?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
