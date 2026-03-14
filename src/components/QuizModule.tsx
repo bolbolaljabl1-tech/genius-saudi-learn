@@ -84,9 +84,9 @@ const QuizModule = ({ lessonTitle, subject, onBack, onRestart, onQuizComplete }:
 
   const handleNext = () => {
     if (currentQ + 1 >= questions.length) {
+      const finalScore = score;
       setFinished(true);
-      onQuizComplete?.(score + (idx === questions[currentQ].correctIndex ? 1 : 0), questions.length);
-    } else {
+      onQuizComplete?.(finalScore, questions.length);
     } else {
       setCurrentQ((c) => c + 1);
       setSelectedAnswer(null);
