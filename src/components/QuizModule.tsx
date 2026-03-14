@@ -7,6 +7,7 @@ interface QuizModuleProps {
   subject: string;
   onBack: () => void;
   onRestart: () => void;
+  onQuizComplete?: (score: number, total: number) => void;
 }
 
 interface Question {
