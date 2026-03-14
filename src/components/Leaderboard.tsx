@@ -25,20 +25,20 @@ const Leaderboard = ({ onBack, currentName, currentXP }: LeaderboardProps) => {
 
   const syncAndFetch = async () => {
     if (currentName) {
-      const { data: existing } = await supabase
+      const { data: existing } = await (supabase as any)
         .from("leaderboard")
         .select("id")
         .eq("student_name", currentName)
         .maybeSingle();
 
       if (existing) {
-        await supabase.from("leaderboard").update({ xp: currentXP, updated_at: new Date().toISOString() }).eq("id", existing.id);
+        await (supabase as any).from("leaderboard").update({ xp: currentXP, updated_at: new Date().toISOString() }).eq("id", existing.id);
       } else {
-        await supabase.from("leaderboard").insert({ student_name: currentName, xp: currentXP });
+        await (supabase as any).from("leaderboard").insert({ student_name: currentName, xp: currentXP });
       }
     }
 
-    const { data } = await supabase
+    const { data } = await (supabase as any)
       .from("leaderboard")
       .select("*")
       .order("xp", { ascending: false })
@@ -49,9 +49,9 @@ const Leaderboard = ({ onBack, currentName, currentXP }: LeaderboardProps) => {
   };
 
   const getRankIcon = (i: number) => {
-    if (i === 0) return <Trophy className="w-6 h-6 text-yellow-500" />;
-    if (i === 1) return <Medal className="w-6 h-6 text-gray-400" />;
-    if (i === 2) return <Medal className="w-6 h-6 text-amber-600" />;
+    if (i === 0) return <Trophy className="w-6 h-6 text-warning" />;
+    if (i === 1) return <Medal className="w-6 h-6 text-muted-foreground" />;
+    if (i === 2) return <Medal className="w-6 h-6 text-accent" />;
     return <span className="w-6 h-6 text-center text-muted-foreground font-bold">{i + 1}</span>;
   };
 
