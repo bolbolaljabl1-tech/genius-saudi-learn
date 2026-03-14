@@ -7,6 +7,7 @@ interface LessonContentProps {
   subject: string;
   onStartQuiz: () => void;
   onBack: () => void;
+  onVideoXP?: () => void;
 }
 
 const subjectNames: Record<string, string> = {
