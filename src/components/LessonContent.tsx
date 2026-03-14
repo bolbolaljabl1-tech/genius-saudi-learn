@@ -17,7 +17,7 @@ const subjectNames: Record<string, string> = {
   science: "العلوم",
 };
 
-const LessonContent = ({ lessonTitle, subject, onStartQuiz, onBack }: LessonContentProps) => {
+const LessonContent = ({ lessonTitle, subject, onStartQuiz, onBack, onVideoXP }: LessonContentProps) => {
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
