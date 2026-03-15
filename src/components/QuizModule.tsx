@@ -126,7 +126,7 @@ const QuizModule = ({ lessonTitle, subject, onBack, onRestart, onQuizComplete }:
         <div className="neu-card p-8 max-w-md w-full text-center animate-bounce-in">
           {score === questions.length && <img src={appIcon} alt="وسام العبقري" className="w-24 h-24 mx-auto mb-4 rounded-2xl shadow-gold" />}
           <div className="text-6xl mb-4">{motivation.emoji}</div>
-          <h2 className="text-3xl font-extrabold text-foreground mb-2">نتيجة الاختبار</h2>
+          <h2 className="text-3xl font-extrabold text-heading mb-2">نتيجة الاختبار</h2>
           <p className="text-muted-foreground text-lg mb-6">{lessonTitle}</p>
 
           <div className="relative w-36 h-36 mx-auto mb-6">
