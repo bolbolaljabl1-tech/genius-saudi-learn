@@ -25,7 +25,7 @@ const subjectNames: Record<string, string> = {
   quran: "القرآن الكريم",
 };
 
-const LessonContent = ({ lessonTitle, subject, onStartQuiz, onBack, onVideoXP }: LessonContentProps) => {
+const LessonContent = ({ lessonTitle, subject, stage, onStartQuiz, onBack, onVideoXP }: LessonContentProps) => {
   const [summary, setSummary] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
