@@ -52,7 +52,7 @@ const QuizModule = ({ lessonTitle, subject, stage, onBack, onRestart, onQuizComp
     setError("");
     try {
       const { data, error: fnError } = await supabase.functions.invoke("generate-quiz", {
-        body: { lessonTitle, subject: subjectNames[subject] || subject },
+        body: { lessonTitle, subject: subjectNames[subject] || subject, stage },
       });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);

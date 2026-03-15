@@ -44,7 +44,7 @@ const LessonContent = ({ lessonTitle, subject, stage, onStartQuiz, onBack, onVid
     setError("");
     try {
       const { data, error: fnError } = await supabase.functions.invoke("generate-summary", {
-        body: { lessonTitle, subject: subjectDisplayName },
+        body: { lessonTitle, subject: subjectDisplayName, stage },
       });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
