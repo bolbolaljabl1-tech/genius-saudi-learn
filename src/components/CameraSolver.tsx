@@ -107,8 +107,8 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
 
         {answer && (
           <div className="neu-card p-6 border-2 border-primary/20 animate-slide-up">
-            <h3 className="text-xl font-extrabold text-foreground mb-4 flex items-center gap-2">💡 الإجابة والشرح</h3>
-            <div className="text-foreground/85 leading-9 whitespace-pre-line text-lg">{answer}</div>
+            <h3 className="text-xl font-extrabold text-heading mb-4 flex items-center gap-2">💡 الإجابة والشرح</h3>
+            <div className="text-body-blue leading-9 whitespace-pre-line text-lg">{answer}</div>
           </div>
         )}
       </div>

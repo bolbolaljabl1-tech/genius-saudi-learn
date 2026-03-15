@@ -1,4 +1,4 @@
-import { ArrowRight, Play, FileText, Loader2, ExternalLink } from "lucide-react";
+import { ArrowRight, Play, FileText, Loader2, ExternalLink, Gamepad2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -11,10 +11,10 @@ interface LessonContentProps {
 }
 
 const subjectNames: Record<string, string> = {
-  arabic: "اللغة العربية",
-  english: "اللغة الإنجليزية",
+  arabic: "لغتي",
   math: "الرياضيات",
   science: "العلوم",
+  social: "الدراسات الاجتماعية",
 };
 
 const LessonContent = ({ lessonTitle, subject, onStartQuiz, onBack, onVideoXP }: LessonContentProps) => {
@@ -24,6 +24,7 @@ const LessonContent = ({ lessonTitle, subject, onStartQuiz, onBack, onVideoXP }:
 
   const ainSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(lessonTitle + " عين التعليمية")}`;
   const fahemSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(lessonTitle + " فاهم")}`;
+  const wordwallUrl = `https://wordwall.net/ar/community?term=${encodeURIComponent((subjectNames[subject] || subject) + " " + lessonTitle)}`;
 
   useEffect(() => { generateSummary(); }, [lessonTitle, subject]);
 
@@ -53,17 +54,17 @@ const LessonContent = ({ lessonTitle, subject, onStartQuiz, onBack, onVideoXP }:
 
       <div className="max-w-2xl mx-auto w-full space-y-6">
         <div className="text-center animate-slide-up">
-          <h2 className="text-3xl font-extrabold text-foreground mb-1">{lessonTitle}</h2>
+          <h2 className="text-3xl font-extrabold text-heading mb-1">{lessonTitle}</h2>
           <p className="text-muted-foreground text-lg">{subjectNames[subject]}</p>
         </div>
 
         {/* Video Section */}
         <div className="neu-card overflow-hidden animate-scale-in" style={{ animationDelay: "0.1s" }}>
           <div className="aspect-video bg-gradient-to-br from-foreground/5 to-foreground/10 flex flex-col items-center justify-center gap-4 p-6">
-            <div className="w-18 h-18 rounded-full gradient-emerald flex items-center justify-center shadow-emerald w-[4.5rem] h-[4.5rem]">
+            <div className="w-[4.5rem] h-[4.5rem] rounded-full gradient-emerald flex items-center justify-center shadow-emerald">
               <Play className="w-8 h-8 text-primary-foreground mr-[-2px]" />
             </div>
-            <p className="text-foreground font-extrabold text-xl text-center">ابحث عن فيديو شرح: {lessonTitle}</p>
+            <p className="text-heading font-extrabold text-xl text-center">ابحث عن فيديو شرح: {lessonTitle}</p>
             <div className="flex flex-col sm:flex-row gap-3 w-full max-w-sm">
               <a href={ainSearchUrl} target="_blank" rel="noopener noreferrer" onClick={() => onVideoXP?.()} className="flex-1 py-4 px-4 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-lg text-center shadow-emerald active:scale-[0.98] transition-all flex items-center justify-center gap-2">
                 <ExternalLink className="w-5 h-5" />عين التعليمية
@@ -81,7 +82,7 @@ const LessonContent = ({ lessonTitle, subject, onStartQuiz, onBack, onVideoXP }:
             <div className="w-12 h-12 rounded-xl gradient-emerald flex items-center justify-center">
               <FileText className="w-6 h-6 text-primary-foreground" />
             </div>
-            <h3 className="text-xl font-extrabold text-foreground">شرح مختصر نصي</h3>
+            <h3 className="text-xl font-extrabold text-heading">شرح الدرس</h3>
           </div>
           {loading ? (
             <div className="flex items-center justify-center py-10">
@@ -94,9 +95,21 @@ const LessonContent = ({ lessonTitle, subject, onStartQuiz, onBack, onVideoXP }:
               <button onClick={generateSummary} className="text-primary font-bold text-lg hover:underline">إعادة المحاولة</button>
             </div>
           ) : (
-            <div className="text-foreground/85 leading-9 whitespace-pre-line text-lg">{summary}</div>
+            <div className="text-body-blue leading-9 whitespace-pre-line text-lg">{summary}</div>
           )}
         </div>
+
+        {/* Smart Games Hub - Wordwall */}
+        <a
+          href={wordwallUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full py-5 rounded-2xl gradient-gold text-gold-foreground font-extrabold text-2xl shadow-gold transition-all duration-300 hover:shadow-emerald-lg active:scale-[0.98] animate-scale-in flex items-center justify-center gap-3"
+          style={{ animationDelay: "0.25s" }}
+        >
+          <Gamepad2 className="w-7 h-7" />
+          🎮 مركز الألعاب الذكي
+        </a>
 
         {/* Quiz Button */}
         <button onClick={onStartQuiz} className="w-full py-5 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-2xl shadow-emerald transition-all duration-300 hover:shadow-emerald-lg active:scale-[0.98] animate-scale-in" style={{ animationDelay: "0.3s" }}>

@@ -201,7 +201,7 @@ const QuizModule = ({ lessonTitle, subject, onBack, onRestart, onQuizComplete }:
 
         {answered && q.explanation && (
           <div className="mt-4 neu-card p-5 border-2 border-primary/20 bg-primary/5 animate-slide-up">
-            <p className="text-foreground/80 text-base leading-8">
+           <p className="text-body-blue text-base leading-8">
               <span className="font-extrabold text-primary">💡 التوضيح: </span>{q.explanation}
             </p>
           </div>

@@ -34,7 +34,7 @@ const LessonSearch = ({ subject, onSearch, onBack }: LessonSearchProps) => {
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-emerald shadow-emerald mb-5 animate-pulse-glow">
             <Sparkles className="w-10 h-10 text-primary-foreground" />
           </div>
-          <h2 className="text-3xl font-extrabold text-foreground mb-2">{subjectNames[subject] || subject}</h2>
+          <h2 className="text-3xl font-extrabold text-heading mb-2">{subjectNames[subject] || subject}</h2>
           <p className="text-muted-foreground text-xl">ابحث عن الدرس الذي تريد مراجعته</p>
         </div>
 
