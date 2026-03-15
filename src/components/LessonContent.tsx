@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 interface LessonContentProps {
   lessonTitle: string;
   subject: string;
+  stage?: string;
   onStartQuiz: () => void;
   onBack: () => void;
   onVideoXP?: () => void;
