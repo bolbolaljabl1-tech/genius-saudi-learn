@@ -191,7 +191,7 @@ const GamesHub = ({ onBack, onXP, onBadge }: GamesHubProps) => {
           <ArrowRight className="w-5 h-5" />
           <span className="font-bold text-lg">رجوع</span>
         </button>
-        <h2 className="text-2xl font-extrabold text-foreground text-center mb-2">🧩 مطابقة القواعد</h2>
+        <h2 className="text-2xl font-extrabold text-heading text-center mb-2">🧩 مطابقة القواعد</h2>
         <p className="text-muted-foreground text-center mb-6 text-lg">اختر المصطلح ثم اضغط على تعريفه</p>
         {matchedPairs.length === grammarPairs.length ? (
           <div className="text-center py-10 animate-bounce-in">
