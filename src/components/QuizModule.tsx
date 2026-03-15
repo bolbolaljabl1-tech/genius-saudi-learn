@@ -20,10 +20,10 @@ interface Question {
 }
 
 const subjectNames: Record<string, string> = {
-  arabic: "اللغة العربية",
-  english: "اللغة الإنجليزية",
+  arabic: "لغتي",
   math: "الرياضيات",
   science: "العلوم",
+  social: "الدراسات الاجتماعية",
 };
 
 const QuizModule = ({ lessonTitle, subject, onBack, onRestart, onQuizComplete }: QuizModuleProps) => {
