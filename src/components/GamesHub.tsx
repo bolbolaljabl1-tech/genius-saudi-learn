@@ -240,7 +240,7 @@ const GamesHub = ({ onBack, onXP, onBadge }: GamesHubProps) => {
           <ArrowRight className="w-5 h-5" />
           <span className="font-bold text-lg">رجوع</span>
         </button>
-        <h2 className="text-2xl font-extrabold text-foreground text-center mb-2">✏️ تحدي الإملاء</h2>
+        <h2 className="text-2xl font-extrabold text-heading text-center mb-2">✏️ تحدي الإملاء</h2>
 
         {spellingDone ? (
           <div className="text-center py-10 animate-bounce-in">
