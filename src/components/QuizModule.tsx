@@ -24,6 +24,13 @@ const subjectNames: Record<string, string> = {
   math: "الرياضيات",
   science: "العلوم",
   social: "الدراسات الاجتماعية",
+  islamic: "الدراسات الإسلامية",
+  digital: "المهارات الرقمية",
+  art: "التربية الفنية",
+  pe: "التربية البدنية",
+  life: "المهارات الحياتية",
+  english: "اللغة الإنجليزية",
+  quran: "القرآن الكريم",
 };
 
 const QuizModule = ({ lessonTitle, subject, onBack, onRestart, onQuizComplete }: QuizModuleProps) => {
