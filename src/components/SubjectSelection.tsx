@@ -10,10 +10,10 @@ const SubjectSelection = ({ stage, onSelect, onBack }: SubjectSelectionProps) =>
   const stageTitle = stage === "elementary" ? "المرحلة الابتدائية" : "المرحلة المتوسطة";
 
   const subjects = [
-    { id: "arabic", title: "اللغة العربية", icon: BookOpen, color: "from-emerald-500 to-teal-600" },
-    { id: "english", title: "اللغة الإنجليزية", icon: Globe, color: "from-sky-500 to-blue-600" },
+    { id: "arabic", title: "لغتي", icon: BookOpen, color: "from-emerald-500 to-teal-600" },
     { id: "math", title: "الرياضيات", icon: Calculator, color: "from-amber-500 to-orange-600" },
     { id: "science", title: "العلوم", icon: FlaskConical, color: "from-violet-500 to-purple-600" },
+    { id: "social", title: "الدراسات الاجتماعية", icon: Globe, color: "from-sky-500 to-blue-600" },
   ];
 
   return (
@@ -24,7 +24,7 @@ const SubjectSelection = ({ stage, onSelect, onBack }: SubjectSelectionProps) =>
       </button>
 
       <div className="text-center mb-10 animate-slide-up">
-        <h2 className="text-3xl font-extrabold text-foreground mb-2">{stageTitle}</h2>
+        <h2 className="text-3xl font-extrabold text-heading mb-2">{stageTitle}</h2>
         <p className="text-muted-foreground text-xl">اختر المادة التي تريد مراجعتها</p>
       </div>
 
@@ -39,7 +39,7 @@ const SubjectSelection = ({ stage, onSelect, onBack }: SubjectSelectionProps) =>
             <div className={`inline-flex items-center justify-center w-16 h-16 rounded-xl bg-gradient-to-br ${subject.color} shadow-lg mb-4 transition-transform duration-300 group-hover:scale-110`}>
               <subject.icon className="w-8 h-8 text-primary-foreground" />
             </div>
-            <h3 className="text-lg font-extrabold text-foreground">{subject.title}</h3>
+            <h3 className="text-lg font-extrabold text-heading">{subject.title}</h3>
           </button>
         ))}
       </div>

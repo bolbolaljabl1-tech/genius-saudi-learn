@@ -47,6 +47,9 @@
     --gold-foreground: 0 0% 100%;
     --gold-light: 45 100% 90%;
 
+    --heading: 0 0% 0%;
+    --body-blue: 240 100% 50%;
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;

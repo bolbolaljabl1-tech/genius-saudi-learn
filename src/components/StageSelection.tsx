@@ -85,7 +85,7 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, xp, studen
             <div className="inline-flex items-center justify-center w-18 h-18 rounded-2xl gradient-emerald shadow-emerald mb-5 transition-transform duration-300 group-hover:scale-110 w-[4.5rem] h-[4.5rem]">
               <stage.icon className="w-9 h-9 text-primary-foreground" />
             </div>
-            <h2 className="text-2xl font-extrabold text-foreground mb-2">{stage.title}</h2>
+            <h2 className="text-2xl font-extrabold text-heading mb-2">{stage.title}</h2>
             <p className="text-muted-foreground text-base">{stage.description}</p>
           </button>
         ))}

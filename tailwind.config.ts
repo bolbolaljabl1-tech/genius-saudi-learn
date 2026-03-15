@@ -67,6 +67,8 @@ export default {
           light: "hsl(var(--emerald-light))",
           glow: "hsl(var(--emerald-glow))",
         },
+        heading: "hsl(var(--heading))",
+        "body-blue": "hsl(var(--body-blue))",
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
