@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Camera, Loader2, ArrowRight, ImageIcon } from "lucide-react";
+import { Camera, Loader2, ArrowRight, ImageIcon, Volume2, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface CameraSolverProps {
@@ -12,6 +12,7 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -44,6 +45,22 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleSpeech = () => {
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+    if (!answer) return;
+    const utterance = new SpeechSynthesisUtterance(answer);
+    utterance.lang = "ar-SA";
+    utterance.rate = 0.9;
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    window.speechSynthesis.speak(utterance);
+    setIsSpeaking(true);
   };
 
   return (
@@ -82,7 +99,7 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
             <img src={imagePreview} alt="صورة السؤال" className="w-full max-h-64 object-contain bg-muted/30" />
             <div className="p-3 flex justify-center">
               <button
-                onClick={() => { setImagePreview(null); setAnswer(""); setError(""); fileInputRef.current?.click(); }}
+                onClick={() => { setImagePreview(null); setAnswer(""); setError(""); window.speechSynthesis.cancel(); setIsSpeaking(false); fileInputRef.current?.click(); }}
                 className="text-primary font-bold text-lg hover:underline"
               >
                 📸 التقاط صورة أخرى
@@ -107,7 +124,16 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
 
         {answer && (
           <div className="neu-card p-6 border-2 border-primary/20 animate-slide-up">
-            <h3 className="text-xl font-extrabold text-heading mb-4 flex items-center gap-2">💡 الإجابة والشرح</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-extrabold text-heading flex items-center gap-2">💡 الإجابة والشرح</h3>
+              <button
+                onClick={toggleSpeech}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-base transition-all active:scale-95 ${isSpeaking ? "gradient-gold text-gold-foreground shadow-gold" : "gradient-emerald text-primary-foreground shadow-emerald"}`}
+              >
+                {isSpeaking ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                {isSpeaking ? "إيقاف" : "استمع"}
+              </button>
+            </div>
             <div className="text-body-blue leading-9 whitespace-pre-line text-lg">{answer}</div>
           </div>
         )}

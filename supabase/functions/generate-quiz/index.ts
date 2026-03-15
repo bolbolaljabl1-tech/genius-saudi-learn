@@ -9,9 +9,11 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { lessonTitle, subject } = await req.json();
+    const { lessonTitle, subject, stage } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
+
+    const isElementary = stage === "elementary";
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -24,13 +26,13 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: `أنت معلم سعودي خبير في المناهج السعودية (لغتي، الرياضيات، العلوم، الدراسات الاجتماعية). أنشئ 10 أسئلة اختيار من متعدد باللغة العربية عن الدرس المطلوب.
-كل سؤال يجب أن يحتوي على:
-- نص السؤال
-- 4 خيارات (أ، ب، ج، د)
-- رقم الإجابة الصحيحة (0-3)
-- شرح مختصر لسبب صحة الإجابة
-اختم الشرح دائماً بـ: "تصميم الأستاذ جابر العبدلي - 2026"`
+            content: `أنت معلم سعودي خبير في المناهج السعودية. أنشئ 10 أسئلة اختيار من متعدد باللغة العربية عن الدرس المطلوب.
+
+قواعد صارمة:
+- لا تستخدم أي كلمات تحدد الجنس أو العمر (مثل: يا بطل، يا ابنتي).
+${isElementary ? "- الطالب في المرحلة الابتدائية: اجعل الأسئلة بسيطة جداً بكلمات سهلة." : "- اجعل الأسئلة مناسبة لمستوى الطالب."}
+- كل سؤال يحتوي على: نص السؤال، 4 خيارات، رقم الإجابة الصحيحة (0-3)، شرح مختصر.
+- اختم شرح كل سؤال بـ: "تصميم الأستاذ جابر العبدلي - 2026"`
           },
           {
             role: "user",
@@ -52,11 +54,7 @@ serve(async (req) => {
                       type: "object",
                       properties: {
                         question: { type: "string", description: "نص السؤال" },
-                        options: {
-                          type: "array",
-                          items: { type: "string" },
-                          description: "4 خيارات للإجابة"
-                        },
+                        options: { type: "array", items: { type: "string" }, description: "4 خيارات للإجابة" },
                         correctIndex: { type: "number", description: "رقم الإجابة الصحيحة (0-3)" },
                         explanation: { type: "string", description: "شرح مختصر للإجابة الصحيحة" }
                       },
@@ -93,11 +91,7 @@ serve(async (req) => {
 
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
-    
-    if (!toolCall) {
-      throw new Error("No tool call in response");
-    }
-
+    if (!toolCall) throw new Error("No tool call in response");
     const quizData = JSON.parse(toolCall.function.arguments);
 
     return new Response(JSON.stringify(quizData), {

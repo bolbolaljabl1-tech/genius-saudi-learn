@@ -57,8 +57,8 @@ const Index = () => {
       )}
       {screen === "subject" && <SubjectSelection stage={stage} onSelect={handleSubjectSelect} onBack={() => setScreen("stage")} />}
       {screen === "search" && <LessonSearch subject={subject} onSearch={handleLessonSearch} onBack={() => setScreen("subject")} />}
-      {screen === "lesson" && <LessonContent lessonTitle={lessonTitle} subject={subject} onStartQuiz={() => setScreen("quiz")} onBack={() => setScreen("search")} onVideoXP={() => addXP(10)} />}
-      {screen === "quiz" && <QuizModule lessonTitle={lessonTitle} subject={subject} onBack={() => setScreen("lesson")} onRestart={() => { setScreen("lesson"); setTimeout(() => setScreen("quiz"), 100); }} onQuizComplete={handleQuizComplete} />}
+      {screen === "lesson" && <LessonContent lessonTitle={lessonTitle} subject={subject} stage={stage} onStartQuiz={() => setScreen("quiz")} onBack={() => setScreen("search")} onVideoXP={() => addXP(10)} />}
+      {screen === "quiz" && <QuizModule lessonTitle={lessonTitle} subject={subject} stage={stage} onBack={() => setScreen("lesson")} onRestart={() => { setScreen("lesson"); setTimeout(() => setScreen("quiz"), 100); }} onQuizComplete={handleQuizComplete} />}
       {screen === "camera" && <CameraSolver onBack={() => setScreen("stage")} onXP={() => addXP(20)} />}
       {screen === "leaderboard" && <Leaderboard onBack={() => setScreen("stage")} currentName={studentName} currentXP={xp} />}
       {screen === "games" && <GamesHub onBack={() => setScreen("stage")} onXP={(amount) => addXP(amount)} onBadge={(badge) => awardBadge(badge)} />}

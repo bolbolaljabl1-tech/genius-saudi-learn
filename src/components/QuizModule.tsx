@@ -7,6 +7,7 @@ import appIcon from "@/assets/app-icon.png";
 interface QuizModuleProps {
   lessonTitle: string;
   subject: string;
+  stage?: string;
   onBack: () => void;
   onRestart: () => void;
   onQuizComplete?: (score: number, total: number) => void;
@@ -24,9 +25,16 @@ const subjectNames: Record<string, string> = {
   math: "الرياضيات",
   science: "العلوم",
   social: "الدراسات الاجتماعية",
+  islamic: "الدراسات الإسلامية",
+  digital: "المهارات الرقمية",
+  art: "التربية الفنية",
+  pe: "التربية البدنية",
+  life: "المهارات الحياتية",
+  english: "اللغة الإنجليزية",
+  quran: "القرآن الكريم",
 };
 
-const QuizModule = ({ lessonTitle, subject, onBack, onRestart, onQuizComplete }: QuizModuleProps) => {
+const QuizModule = ({ lessonTitle, subject, stage, onBack, onRestart, onQuizComplete }: QuizModuleProps) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -44,7 +52,7 @@ const QuizModule = ({ lessonTitle, subject, onBack, onRestart, onQuizComplete }:
     setError("");
     try {
       const { data, error: fnError } = await supabase.functions.invoke("generate-quiz", {
-        body: { lessonTitle, subject: subjectNames[subject] || subject },
+        body: { lessonTitle, subject: subjectNames[subject] || subject, stage },
       });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
