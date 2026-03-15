@@ -34,7 +34,7 @@ const subjectNames: Record<string, string> = {
   quran: "القرآن الكريم",
 };
 
-const QuizModule = ({ lessonTitle, subject, onBack, onRestart, onQuizComplete }: QuizModuleProps) => {
+const QuizModule = ({ lessonTitle, subject, stage, onBack, onRestart, onQuizComplete }: QuizModuleProps) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
