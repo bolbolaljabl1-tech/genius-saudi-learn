@@ -58,8 +58,8 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-emerald shadow-emerald-lg mb-4">
             <Camera className="w-10 h-10 text-primary-foreground" />
           </div>
-          <h2 className="text-3xl font-extrabold text-foreground mb-2">📸 صور سؤالك</h2>
-          <p className="text-muted-foreground text-xl">التقط صورة لأي سؤال من كتابك وسيشرحه لك الذكاء الاصطناعي</p>
+          <h2 className="text-3xl font-extrabold text-heading mb-2">📸 صور سؤالك</h2>
+          <p className="text-muted-foreground text-xl">التقط صورة لأي سؤال من أي مادة وسيشرحه لك الذكاء الاصطناعي</p>
         </div>
 
         <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleCapture} className="hidden" />
