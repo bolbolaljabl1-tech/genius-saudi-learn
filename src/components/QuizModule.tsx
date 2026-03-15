@@ -7,6 +7,7 @@ import appIcon from "@/assets/app-icon.png";
 interface QuizModuleProps {
   lessonTitle: string;
   subject: string;
+  stage?: string;
   onBack: () => void;
   onRestart: () => void;
   onQuizComplete?: (score: number, total: number) => void;
