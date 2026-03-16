@@ -65,6 +65,17 @@ const Index = () => {
       {screen === "camera" && <CameraSolver onBack={() => setScreen("stage")} onXP={() => addXP(20)} />}
       {screen === "leaderboard" && <Leaderboard onBack={() => setScreen("stage")} currentName={studentName} currentXP={xp} />}
       {screen === "games" && <GamesHub onBack={() => setScreen("stage")} onXP={(amount) => addXP(amount)} onBadge={(badge) => awardBadge(badge)} />}
+
+      {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}
+
+      <button
+        onClick={() => setShowWhisper(true)}
+        className="fixed bottom-16 left-4 z-50 gradient-emerald text-primary-foreground rounded-full p-3 shadow-emerald-lg flex items-center gap-2 text-sm font-bold animate-pulse-glow"
+      >
+        <MessageCircleHeart className="w-5 h-5" />
+        همسة للعبقري
+      </button>
+
       <AppFooter />
     </div>
   );
