@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MessageCircleHeart } from "lucide-react";
 import StageSelection from "@/components/StageSelection";
 import SubjectSelection from "@/components/SubjectSelection";
 import LessonSearch from "@/components/LessonSearch";
@@ -8,6 +9,7 @@ import CameraSolver from "@/components/CameraSolver";
 import Leaderboard from "@/components/Leaderboard";
 import GamesHub from "@/components/GamesHub";
 import StudentNameModal from "@/components/StudentNameModal";
+import WhisperModal from "@/components/WhisperModal";
 import AppFooter from "@/components/AppFooter";
 import { useXP } from "@/hooks/useXP";
 
