@@ -41,6 +41,27 @@ export type Database = {
         }
         Relationships: []
       }
+      messages: {
+        Row: {
+          created_at: string | null
+          id: string
+          message: string
+          student_name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          message: string
+          student_name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          message?: string
+          student_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

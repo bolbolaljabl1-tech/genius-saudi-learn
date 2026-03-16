@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MessageCircleHeart } from "lucide-react";
 import StageSelection from "@/components/StageSelection";
 import SubjectSelection from "@/components/SubjectSelection";
 import LessonSearch from "@/components/LessonSearch";
@@ -8,6 +9,7 @@ import CameraSolver from "@/components/CameraSolver";
 import Leaderboard from "@/components/Leaderboard";
 import GamesHub from "@/components/GamesHub";
 import StudentNameModal from "@/components/StudentNameModal";
+import WhisperModal from "@/components/WhisperModal";
 import AppFooter from "@/components/AppFooter";
 import { useXP } from "@/hooks/useXP";
 
@@ -20,6 +22,7 @@ const Index = () => {
   const [lessonTitle, setLessonTitle] = useState("");
   const { xp, studentName, badges, addXP, awardBadge, saveStudentName } = useXP();
   const [showNameModal, setShowNameModal] = useState(false);
+  const [showWhisper, setShowWhisper] = useState(false);
 
   const handleStageSelect = (s: string) => { setStage(s); setScreen("subject"); };
   const handleSubjectSelect = (s: string) => { setSubject(s); setScreen("search"); };
@@ -62,6 +65,17 @@ const Index = () => {
       {screen === "camera" && <CameraSolver onBack={() => setScreen("stage")} onXP={() => addXP(20)} />}
       {screen === "leaderboard" && <Leaderboard onBack={() => setScreen("stage")} currentName={studentName} currentXP={xp} />}
       {screen === "games" && <GamesHub onBack={() => setScreen("stage")} onXP={(amount) => addXP(amount)} onBadge={(badge) => awardBadge(badge)} />}
+
+      {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}
+
+      <button
+        onClick={() => setShowWhisper(true)}
+        className="fixed bottom-16 left-4 z-50 gradient-emerald text-primary-foreground rounded-full p-3 shadow-emerald-lg flex items-center gap-2 text-sm font-bold animate-pulse-glow"
+      >
+        <MessageCircleHeart className="w-5 h-5" />
+        همسة للعبقري
+      </button>
+
       <AppFooter />
     </div>
   );
