@@ -18,13 +18,22 @@ const WhisperModal = ({ onClose }: WhisperModalProps) => {
       return;
     }
     setSending(true);
-    const { error } = await supabase.from("messages" as any).insert({ student_name: name.trim(), message: message.trim() });
-    setSending(false);
-    if (error) {
-      toast({ title: "حدث خطأ، حاول مرة أخرى", variant: "destructive" });
-    } else {
+    try {
+      // Save to database
+      const { error } = await supabase.from("messages" as any).insert({ student_name: name.trim(), message: message.trim() });
+      if (error) throw error;
+
+      // Send to Telegram
+      await supabase.functions.invoke("send-telegram", {
+        body: { student_name: name.trim(), message: message.trim() },
+      });
+
       toast({ title: "تم إرسال رسالتك بنجاح! 💚" });
       onClose();
+    } catch {
+      toast({ title: "حدث خطأ، حاول مرة أخرى", variant: "destructive" });
+    } finally {
+      setSending(false);
     }
   };
 
