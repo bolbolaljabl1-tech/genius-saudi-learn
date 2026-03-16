@@ -18,7 +18,7 @@ const WhisperModal = ({ onClose }: WhisperModalProps) => {
       return;
     }
     setSending(true);
-    const { error } = await supabase.from("messages").insert({ student_name: name.trim(), message: message.trim() });
+    const { error } = await supabase.from("messages" as any).insert({ student_name: name.trim(), message: message.trim() });
     setSending(false);
     if (error) {
       toast({ title: "حدث خطأ، حاول مرة أخرى", variant: "destructive" });
