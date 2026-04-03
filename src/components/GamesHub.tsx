@@ -7,6 +7,7 @@ interface GamesHubProps {
   onBack: () => void;
   onXP: (amount: number) => void;
   onBadge: (badge: string) => void;
+  studentName: string;
 }
 
 type GameScreen = "subjects" | "menu" | "maze" | "letters" | "hunter";
