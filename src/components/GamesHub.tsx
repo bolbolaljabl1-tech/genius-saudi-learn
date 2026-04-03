@@ -358,18 +358,39 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
     </button>
   );
 
+  // ─── Hex Battle Game ───
+  if (gameScreen === "hexbattle") {
+    return <HexBattleGame onBack={() => setGameScreen("subjects")} onXP={onXP} onBadge={onBadge} studentName={studentName} />;
+  }
+
   // ─── Subject Selection Screen ───
   if (gameScreen === "subjects") {
     return (
       <div className="min-h-screen flex flex-col px-4 py-6">
         <BackButton onClick={onBack} />
-        <div className="text-center mb-8 animate-slide-up">
+        <div className="text-center mb-6 animate-slide-up">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-gold shadow-gold mb-4">
             <Gamepad2 className="w-10 h-10 text-gold-foreground" />
           </div>
           <h1 className="text-3xl font-extrabold text-heading mb-2">🎮 ركن العباقرة</h1>
           <p className="text-muted-foreground text-xl">اختر المادة للبدء في التحدي!</p>
         </div>
+
+        {/* Hex Battle featured card */}
+        <button
+          onClick={() => setGameScreen("hexbattle")}
+          className="w-full max-w-md mx-auto mb-5 neu-card p-5 flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] animate-scale-in cursor-pointer ring-2 ring-primary/30"
+        >
+          <div className="flex-shrink-0 w-16 h-16 rounded-2xl gradient-emerald shadow-emerald-lg flex items-center justify-center">
+            <Hexagon className="w-9 h-9 text-white" />
+          </div>
+          <div className="flex-1 text-right">
+            <h3 className="text-xl font-extrabold text-heading">⬡ شبكة التحدي الثنائي</h3>
+            <p className="text-muted-foreground text-sm mt-1">تحدَّ صديقك على الشبكة السداسية! 🔥</p>
+          </div>
+          <span className="px-2 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-bold">جديد</span>
+        </button>
+
         <div className="grid grid-cols-2 gap-4 max-w-md mx-auto w-full">
           {subjects.map((sub, i) => (
             <button
