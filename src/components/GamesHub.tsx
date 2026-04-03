@@ -188,7 +188,7 @@ const gameData: Record<string, { pairs: MatchPair[]; words: SpellingWord[]; ques
   },
 };
 
-const GamesHub = ({ onBack, onXP, onBadge }: GamesHubProps) => {
+const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
   const [gameScreen, setGameScreen] = useState<GameScreen>("subjects");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [celebrate, setCelebrate] = useState(false);
