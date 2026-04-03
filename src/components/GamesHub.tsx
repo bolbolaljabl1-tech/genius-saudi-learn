@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { ArrowRight, Gamepad2, Shuffle, Pencil, Trophy, BookOpen, Calculator, FlaskConical, BookOpenCheck, Landmark } from "lucide-react";
+import { ArrowRight, Gamepad2, Shuffle, Pencil, Trophy, BookOpen, Calculator, FlaskConical, BookOpenCheck, Landmark, Hexagon } from "lucide-react";
 import ConfettiCelebration from "./ConfettiCelebration";
+import HexBattleGame from "./HexBattleGame";
 import appIcon from "@/assets/app-icon.png";
 
 interface GamesHubProps {
