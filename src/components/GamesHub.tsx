@@ -10,7 +10,7 @@ interface GamesHubProps {
   studentName: string;
 }
 
-type GameScreen = "subjects" | "menu" | "maze" | "letters" | "hunter";
+type GameScreen = "subjects" | "menu" | "maze" | "letters" | "hunter" | "hexbattle";
 
 // ─── Subject definitions ───
 interface SubjectDef {
