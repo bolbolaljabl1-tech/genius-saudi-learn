@@ -35,7 +35,7 @@ const LessonContent = ({ lessonTitle, subject, stage, onStartQuiz, onBack, onVid
   const subjectDisplayName = subjectNames[subject] || subject;
   const ainSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(lessonTitle + " عين التعليمية")}`;
   const fahemSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(lessonTitle + " فاهم")}`;
-  const wordwallUrl = `https://wordwall.net/ar/community?term=${encodeURIComponent(subjectDisplayName + " " + lessonTitle)}`;
+  const wordwallUrl = `https://www.google.com/search?q=site:wordwall.net+${encodeURIComponent(subjectDisplayName + " " + lessonTitle)}`;
 
   useEffect(() => { generateSummary(); return () => { window.speechSynthesis.cancel(); }; }, [lessonTitle, subject]);
 
