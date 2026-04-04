@@ -3,6 +3,9 @@ const AppFooter = () => (
     <p className="font-amiri font-bold text-base" style={{ color: '#047857' }}>
       منصة الطالب العبقري - 2026
     </p>
+    <p className="text-xs font-bold mt-1" style={{ fontFamily: "'Courier New', monospace", color: '#b45309' }}>
+      تصميم وبرمجة: tchjaber@gmail.com
+    </p>
   </footer>
 );
 

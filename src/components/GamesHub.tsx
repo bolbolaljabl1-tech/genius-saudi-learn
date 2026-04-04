@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { ArrowRight, Gamepad2, Shuffle, Pencil, Trophy, BookOpen, Calculator, FlaskConical, BookOpenCheck, Landmark, Hexagon } from "lucide-react";
+import { ArrowRight, Gamepad2, Shuffle, Pencil, Trophy, BookOpen, Calculator, FlaskConical, BookOpenCheck, Landmark, Hexagon, Globe, Monitor, Palette, Dumbbell, Heart, Languages, Zap, Target } from "lucide-react";
 import ConfettiCelebration from "./ConfettiCelebration";
 import HexBattleGame from "./HexBattleGame";
 import appIcon from "@/assets/app-icon.png";
@@ -11,16 +11,16 @@ interface GamesHubProps {
   studentName: string;
 }
 
-type GameScreen = "subjects" | "menu" | "maze" | "letters" | "hunter" | "hexbattle";
+type GameScreen = "subjects" | "menu" | "maze" | "letters" | "hunter" | "hexbattle" | "challenge-mode";
 
 // ─── Subject definitions ───
 interface SubjectDef {
   id: string;
   title: string;
   icon: typeof BookOpen;
-  color: string;        // gradient class
-  accent: string;       // ring/shadow color
-  bgAccent: string;     // light bg
+  color: string;
+  accent: string;
+  bgAccent: string;
 }
 
 const subjects: SubjectDef[] = [
@@ -29,6 +29,12 @@ const subjects: SubjectDef[] = [
   { id: "math", title: "الرياضيات", icon: Calculator, color: "from-red-500 to-rose-600", accent: "ring-red-500 shadow-red-500/30", bgAccent: "bg-red-50" },
   { id: "science", title: "العلوم", icon: FlaskConical, color: "from-blue-500 to-indigo-600", accent: "ring-blue-500 shadow-blue-500/30", bgAccent: "bg-blue-50" },
   { id: "arabic", title: "لغتي الخالدة", icon: BookOpen, color: "from-amber-500 to-orange-600", accent: "ring-amber-500 shadow-amber-500/30", bgAccent: "bg-amber-50" },
+  { id: "social", title: "الدراسات الاجتماعية", icon: Globe, color: "from-sky-500 to-blue-600", accent: "ring-sky-500 shadow-sky-500/30", bgAccent: "bg-sky-50" },
+  { id: "digital", title: "المهارات الرقمية", icon: Monitor, color: "from-indigo-500 to-blue-600", accent: "ring-indigo-500 shadow-indigo-500/30", bgAccent: "bg-indigo-50" },
+  { id: "art", title: "التربية الفنية", icon: Palette, color: "from-pink-500 to-rose-600", accent: "ring-pink-500 shadow-pink-500/30", bgAccent: "bg-pink-50" },
+  { id: "pe", title: "التربية البدنية", icon: Dumbbell, color: "from-green-500 to-lime-600", accent: "ring-green-500 shadow-green-500/30", bgAccent: "bg-green-50" },
+  { id: "life", title: "المهارات الحياتية", icon: Heart, color: "from-red-400 to-pink-500", accent: "ring-red-400 shadow-red-400/30", bgAccent: "bg-red-50" },
+  { id: "english", title: "اللغة الإنجليزية", icon: Languages, color: "from-blue-500 to-indigo-600", accent: "ring-blue-500 shadow-blue-500/30", bgAccent: "bg-blue-50" },
 ];
 
 // ─── Game data per subject ───
@@ -187,12 +193,194 @@ const gameData: Record<string, { pairs: MatchPair[]; words: SpellingWord[]; ques
       { q: "ما أداة الاستفهام التي تسأل عن المكان؟", opts: ["متى", "كيف", "أين", "لماذا"], correct: 2 },
     ],
   },
+  social: {
+    pairs: [
+      { id: 1, term: "خط الاستواء", definition: "خط وهمي يقسم الأرض إلى نصفين شمالي وجنوبي" },
+      { id: 2, term: "القارة", definition: "مساحة واسعة من اليابسة تضم عدة دول" },
+      { id: 3, term: "المناخ", definition: "حالة الجو السائدة في منطقة لفترة طويلة" },
+      { id: 4, term: "الخريطة", definition: "تمثيل مصغر لسطح الأرض أو جزء منه" },
+      { id: 5, term: "السكان", definition: "عدد الأفراد الذين يعيشون في منطقة معينة" },
+      { id: 6, term: "الهجرة", definition: "انتقال الأفراد من مكان إلى آخر للإقامة" },
+    ],
+    words: [
+      { word: "خريطة", scrambled: "ةطيرخ" },
+      { word: "قارة", scrambled: "ةراق" },
+      { word: "مناخ", scrambled: "خانم" },
+      { word: "تضاريس", scrambled: "سيراضت" },
+      { word: "وطن", scrambled: "نطو" },
+      { word: "حدود", scrambled: "دودح" },
+    ],
+    questions: [
+      { q: "كم عدد قارات العالم؟", opts: ["5", "6", "7", "8"], correct: 2 },
+      { q: "ما أكبر قارة في العالم؟", opts: ["أفريقيا", "آسيا", "أوروبا", "أمريكا الشمالية"], correct: 1 },
+      { q: "ما عاصمة المملكة العربية السعودية؟", opts: ["جدة", "مكة", "الرياض", "المدينة"], correct: 2 },
+      { q: "ما أطول نهر في العالم؟", opts: ["الأمازون", "النيل", "المسيسيبي", "دجلة"], correct: 1 },
+      { q: "في أي قارة تقع مصر؟", opts: ["آسيا", "أوروبا", "أفريقيا", "أمريكا"], correct: 2 },
+      { q: "ما أكبر محيط في العالم؟", opts: ["الأطلسي", "الهندي", "الهادئ", "المتجمد"], correct: 2 },
+      { q: "ما الجهة التي تشرق منها الشمس؟", opts: ["الغرب", "الشمال", "الجنوب", "الشرق"], correct: 3 },
+      { q: "ما أصغر قارة في العالم؟", opts: ["أوروبا", "أستراليا", "أنتاركتيكا", "أمريكا الجنوبية"], correct: 1 },
+      { q: "كم عدد مناطق المملكة الإدارية؟", opts: ["10", "13", "15", "20"], correct: 1 },
+      { q: "ما البحر الذي يفصل بين آسيا وأفريقيا؟", opts: ["المتوسط", "الأحمر", "العربي", "قزوين"], correct: 1 },
+    ],
+  },
+  digital: {
+    pairs: [
+      { id: 1, term: "البرمجة", definition: "كتابة تعليمات يفهمها الحاسب لتنفيذ مهام محددة" },
+      { id: 2, term: "الخوارزمية", definition: "خطوات مرتبة لحل مشكلة أو إنجاز مهمة" },
+      { id: 3, term: "قاعدة البيانات", definition: "مجموعة منظمة من البيانات المخزنة إلكترونياً" },
+      { id: 4, term: "الشبكة", definition: "ربط أجهزة الحاسب ببعضها لتبادل البيانات" },
+      { id: 5, term: "نظام التشغيل", definition: "برنامج يدير موارد الحاسب وتطبيقاته" },
+      { id: 6, term: "الأمن السيبراني", definition: "حماية الأنظمة والشبكات من الهجمات الإلكترونية" },
+    ],
+    words: [
+      { word: "حاسوب", scrambled: "بوساح" },
+      { word: "برمجة", scrambled: "ةجمرب" },
+      { word: "شبكة", scrambled: "ةكبش" },
+      { word: "بيانات", scrambled: "تانايب" },
+      { word: "ملف", scrambled: "فلم" },
+      { word: "طابعة", scrambled: "ةعباط" },
+    ],
+    questions: [
+      { q: "ما وحدة قياس سعة التخزين الأساسية؟", opts: ["بت", "بايت", "هرتز", "بكسل"], correct: 1 },
+      { q: "كم بت في البايت الواحد؟", opts: ["4", "8", "16", "32"], correct: 1 },
+      { q: "ما اختصار RAM؟", opts: ["ذاكرة القراءة فقط", "ذاكرة الوصول العشوائي", "القرص الصلب", "المعالج"], correct: 1 },
+      { q: "أي مما يلي نظام تشغيل؟", opts: ["وورد", "ويندوز", "كروم", "فوتوشوب"], correct: 1 },
+      { q: "ما امتداد ملفات الصور الشائع؟", opts: [".doc", ".mp3", ".jpg", ".exe"], correct: 2 },
+      { q: "ما وظيفة المعالج (CPU)؟", opts: ["التخزين", "المعالجة والحساب", "العرض", "الطباعة"], correct: 1 },
+      { q: "أي من هذه لغة برمجة؟", opts: ["HTML", "Python", "PDF", "WiFi"], correct: 1 },
+      { q: "ما الجهاز المستخدم لإدخال النصوص؟", opts: ["الشاشة", "الطابعة", "لوحة المفاتيح", "السماعة"], correct: 2 },
+      { q: "ما وظيفة جدار الحماية (Firewall)؟", opts: ["تسريع الإنترنت", "حماية الشبكة", "تخزين الملفات", "طباعة المستندات"], correct: 1 },
+      { q: "ما هو الفيروس الحاسوبي؟", opts: ["برنامج مفيد", "برنامج ضار", "جهاز إدخال", "نظام تشغيل"], correct: 1 },
+    ],
+  },
+  art: {
+    pairs: [
+      { id: 1, term: "الألوان الأساسية", definition: "أحمر وأزرق وأصفر لا يمكن الحصول عليها بالمزج" },
+      { id: 2, term: "الألوان الثانوية", definition: "ألوان تنتج من مزج لونين أساسيين" },
+      { id: 3, term: "التكوين", definition: "ترتيب العناصر الفنية في العمل بشكل متناسق" },
+      { id: 4, term: "الظل والنور", definition: "تدرج الإضاءة على الأشكال لإعطاء بُعد ثلاثي" },
+      { id: 5, term: "النسيج", definition: "ملمس السطح الحقيقي أو الإيهامي في العمل الفني" },
+      { id: 6, term: "الزخرفة", definition: "تزيين الأسطح بوحدات هندسية أو نباتية متكررة" },
+    ],
+    words: [
+      { word: "رسم", scrambled: "مسر" },
+      { word: "لوحة", scrambled: "ةحول" },
+      { word: "فرشاة", scrambled: "ةاشرف" },
+      { word: "ألوان", scrambled: "ناولأ" },
+      { word: "نحت", scrambled: "تحن" },
+      { word: "زخرفة", scrambled: "ةفرخز" },
+    ],
+    questions: [
+      { q: "ما الألوان الأساسية الثلاث؟", opts: ["أحمر وأخضر وأزرق", "أحمر وأصفر وأزرق", "أصفر وبرتقالي وأخضر", "أبيض وأسود ورمادي"], correct: 1 },
+      { q: "ما اللون الناتج من مزج الأحمر والأصفر؟", opts: ["أخضر", "بنفسجي", "برتقالي", "بني"], correct: 2 },
+      { q: "ما اللون الناتج من مزج الأزرق والأصفر؟", opts: ["أخضر", "بنفسجي", "برتقالي", "رمادي"], correct: 0 },
+      { q: "ما نوع الخط المستقيم الأفقي؟", opts: ["يدل على الحركة", "يدل على الهدوء والاستقرار", "يدل على القوة", "يدل على الفوضى"], correct: 1 },
+      { q: "ما هو فن الزخرفة الإسلامية؟", opts: ["رسم الوجوه", "تكرار أشكال هندسية ونباتية", "النحت فقط", "التصوير الفوتوغرافي"], correct: 1 },
+      { q: "ما الأداة المستخدمة في الرسم بالألوان المائية؟", opts: ["قلم رصاص", "فرشاة ناعمة", "إزميل", "مسطرة"], correct: 1 },
+      { q: "ما العنصر الفني الذي يعبر عن الحركة؟", opts: ["اللون", "الخط", "النقطة", "الملمس"], correct: 1 },
+      { q: "ما الفرق بين الرسم والتلوين؟", opts: ["لا فرق", "الرسم بالخطوط والتلوين بالألوان", "التلوين أصعب", "الرسم بالألوان فقط"], correct: 1 },
+      { q: "ما هو فن الكولاج؟", opts: ["الرسم بالفحم", "لصق مواد مختلفة", "النحت على الخشب", "الطباعة"], correct: 1 },
+      { q: "ما نوع الفن الذي يستخدم الطين؟", opts: ["الرسم", "الخزف", "التصوير", "الطباعة"], correct: 1 },
+    ],
+  },
+  pe: {
+    pairs: [
+      { id: 1, term: "الإحماء", definition: "تمارين تحضيرية قبل النشاط الرياضي الرئيسي" },
+      { id: 2, term: "اللياقة البدنية", definition: "قدرة الجسم على أداء الأنشطة البدنية بكفاءة" },
+      { id: 3, term: "التحمل", definition: "قدرة الجسم على بذل جهد لفترة طويلة" },
+      { id: 4, term: "المرونة", definition: "قدرة المفاصل على الحركة في مدى واسع" },
+      { id: 5, term: "السرعة", definition: "القدرة على أداء حركات متتالية في أقل زمن" },
+      { id: 6, term: "التوازن", definition: "القدرة على الحفاظ على ثبات الجسم أثناء الحركة" },
+    ],
+    words: [
+      { word: "رياضة", scrambled: "ةضاير" },
+      { word: "جري", scrambled: "يرج" },
+      { word: "كرة", scrambled: "ةرك" },
+      { word: "سباحة", scrambled: "ةحابس" },
+      { word: "قفز", scrambled: "زفق" },
+      { word: "تمرين", scrambled: "نيرمت" },
+    ],
+    questions: [
+      { q: "ما أهمية الإحماء قبل التمرين؟", opts: ["لا فائدة منه", "تحضير العضلات ومنع الإصابات", "زيادة الوزن", "الراحة"], correct: 1 },
+      { q: "كم دقيقة يُنصح بالنشاط البدني يومياً للأطفال؟", opts: ["15 دقيقة", "30 دقيقة", "60 دقيقة", "120 دقيقة"], correct: 2 },
+      { q: "ما الرياضة التي تُلعب بالمضرب؟", opts: ["كرة القدم", "كرة الريشة", "السباحة", "الجري"], correct: 1 },
+      { q: "كم عدد لاعبي فريق كرة القدم؟", opts: ["9", "10", "11", "12"], correct: 2 },
+      { q: "ما العنصر الأهم للياقة القلبية؟", opts: ["رفع الأثقال", "الجري والسباحة", "تمارين الإطالة", "النوم"], correct: 1 },
+      { q: "ما فائدة تمارين الإطالة؟", opts: ["زيادة القوة", "زيادة المرونة", "زيادة الوزن", "لا فائدة"], correct: 1 },
+      { q: "أي رياضة تُمارس في الماء؟", opts: ["الكاراتيه", "كرة السلة", "السباحة", "ألعاب القوى"], correct: 2 },
+      { q: "ما الوضع الصحيح للجري؟", opts: ["الظهر منحني", "الرأس منخفض", "الظهر مستقيم والنظر للأمام", "الأذرع ثابتة"], correct: 2 },
+      { q: "ما أفضل وقت لشرب الماء أثناء الرياضة؟", opts: ["قبل فقط", "بعد فقط", "قبل وأثناء وبعد", "لا حاجة للماء"], correct: 2 },
+      { q: "ما الرياضة الوطنية في السعودية؟", opts: ["كرة السلة", "كرة القدم", "التنس", "السباحة"], correct: 1 },
+    ],
+  },
+  life: {
+    pairs: [
+      { id: 1, term: "إدارة الوقت", definition: "تنظيم الوقت وتوزيعه على المهام بفعالية" },
+      { id: 2, term: "التواصل الفعال", definition: "التعبير عن الأفكار والمشاعر بوضوح واحترام" },
+      { id: 3, term: "حل المشكلات", definition: "إيجاد حلول مناسبة للتحديات والعقبات" },
+      { id: 4, term: "التعاون", definition: "العمل مع الآخرين لتحقيق هدف مشترك" },
+      { id: 5, term: "النظافة الشخصية", definition: "العناية بنظافة الجسم والمظهر" },
+      { id: 6, term: "الادخار", definition: "توفير جزء من المال لاستخدامه مستقبلاً" },
+    ],
+    words: [
+      { word: "نظافة", scrambled: "ةفاظن" },
+      { word: "تعاون", scrambled: "نواعت" },
+      { word: "احترام", scrambled: "مارتحا" },
+      { word: "صحة", scrambled: "ةحص" },
+      { word: "أمان", scrambled: "ناما" },
+      { word: "غذاء", scrambled: "ءاذغ" },
+    ],
+    questions: [
+      { q: "ما أهمية غسل اليدين؟", opts: ["للتسلية", "لمنع انتشار الجراثيم", "لا فائدة", "لتبريد اليدين"], correct: 1 },
+      { q: "كم ساعة نوم يحتاج الطفل يومياً؟", opts: ["4-5", "6-7", "8-10", "12-14"], correct: 2 },
+      { q: "ما أفضل طريقة لحل الخلاف مع صديق؟", opts: ["الصراخ", "التجاهل", "الحوار الهادئ", "العنف"], correct: 2 },
+      { q: "ما الغذاء الصحي المتوازن؟", opts: ["حلويات فقط", "وجبات سريعة", "فواكه وخضروات وبروتين", "مشروبات غازية"], correct: 2 },
+      { q: "ما فائدة الادخار؟", opts: ["لا فائدة", "تأمين المستقبل", "إنفاق أكثر", "التباهي"], correct: 1 },
+      { q: "كيف نتعامل مع الغرباء على الإنترنت؟", opts: ["نشارك معلوماتنا", "نثق بهم", "نكون حذرين ولا نشارك بياناتنا", "نرسل صورنا"], correct: 2 },
+      { q: "ما أهمية الإفطار الصباحي؟", opts: ["غير مهم", "يمنح الطاقة والتركيز", "يسبب الكسل", "يزيد النوم"], correct: 1 },
+      { q: "ما التصرف الصحيح عند الحريق؟", opts: ["الاختباء", "فتح النوافذ", "الخروج بهدوء واتباع خطة الإخلاء", "عدم التحرك"], correct: 2 },
+      { q: "ما أهمية العمل الجماعي؟", opts: ["يبطئ العمل", "ينجز المهام بشكل أفضل", "غير مفيد", "يسبب المشاكل"], correct: 1 },
+      { q: "ما رقم الطوارئ في السعودية؟", opts: ["999", "911", "112", "100"], correct: 1 },
+    ],
+  },
+  english: {
+    pairs: [
+      { id: 1, term: "Noun", definition: "كلمة تدل على اسم شخص أو مكان أو شيء" },
+      { id: 2, term: "Verb", definition: "كلمة تدل على حدث أو فعل" },
+      { id: 3, term: "Adjective", definition: "كلمة تصف الاسم وتبين صفاته" },
+      { id: 4, term: "Pronoun", definition: "كلمة تحل محل الاسم مثل He, She, It" },
+      { id: 5, term: "Preposition", definition: "كلمة تبين العلاقة المكانية أو الزمانية مثل in, on, at" },
+      { id: 6, term: "Adverb", definition: "كلمة تصف الفعل وتبين كيفية وقوعه" },
+    ],
+    words: [
+      { word: "School", scrambled: "loohcS" },
+      { word: "Book", scrambled: "kooB" },
+      { word: "Teacher", scrambled: "rehcaeT" },
+      { word: "Apple", scrambled: "elppA" },
+      { word: "Water", scrambled: "retaW" },
+      { word: "Friend", scrambled: "dneirF" },
+    ],
+    questions: [
+      { q: "What is the meaning of 'Cat'?", opts: ["كلب", "قطة", "طائر", "سمكة"], correct: 1 },
+      { q: "What color is the sky?", opts: ["Red", "Green", "Blue", "Yellow"], correct: 2 },
+      { q: "Choose the correct: She ___ a student.", opts: ["am", "is", "are", "be"], correct: 1 },
+      { q: "What is the plural of 'child'?", opts: ["childs", "childen", "children", "childes"], correct: 2 },
+      { q: "What day comes after Monday?", opts: ["Wednesday", "Tuesday", "Sunday", "Thursday"], correct: 1 },
+      { q: "How many months in a year?", opts: ["10", "11", "12", "13"], correct: 2 },
+      { q: "What is the opposite of 'big'?", opts: ["tall", "small", "long", "wide"], correct: 1 },
+      { q: "Choose the correct: I ___ to school every day.", opts: ["goes", "going", "go", "gone"], correct: 2 },
+      { q: "What is 'شمس' in English?", opts: ["Moon", "Star", "Sun", "Cloud"], correct: 2 },
+      { q: "Which is a fruit?", opts: ["Carrot", "Potato", "Banana", "Onion"], correct: 2 },
+    ],
+  },
 };
 
 const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
   const [gameScreen, setGameScreen] = useState<GameScreen>("subjects");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [celebrate, setCelebrate] = useState(false);
+  const [challengeMode, setChallengeMode] = useState<"single" | "all" | null>(null);
+  const [activeLettersData, setActiveLettersData] = useState<SpellingWord[]>([]);
 
   const currentSubject = subjects.find(s => s.id === selectedSubject);
   const data = gameData[selectedSubject];
@@ -216,7 +404,6 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
   const [hunterSelected, setHunterSelected] = useState<number | null>(null);
   const [hunterDone, setHunterDone] = useState(false);
 
-  // Falling animation for hunter
   const [fallingItems, setFallingItems] = useState<{ id: number; x: number; delay: number }[]>([]);
 
   const triggerCelebrate = useCallback(() => {
@@ -244,7 +431,22 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
     setGameScreen("maze");
   };
 
-  const startLetters = () => {
+  const openChallengeMode = () => {
+    setChallengeMode(null);
+    setGameScreen("challenge-mode");
+  };
+
+  const startLettersWithMode = (mode: "single" | "all") => {
+    setChallengeMode(mode);
+    let words: SpellingWord[];
+    if (mode === "all") {
+      const allWords = Object.values(gameData).flatMap(d => d.words);
+      const shuffled = [...allWords].sort(() => Math.random() - 0.5);
+      words = shuffled.slice(0, 6);
+    } else {
+      words = data?.words || [];
+    }
+    setActiveLettersData(words);
     setSpellingIndex(0);
     setSpellingScore(0);
     setSpellingDone(false);
@@ -262,7 +464,6 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
     setGameScreen("hunter");
   };
 
-  // Generate falling animation items for hunter
   useEffect(() => {
     if (gameScreen === "hunter" && !hunterDone && data) {
       const items = data.questions[hunterQ]?.opts.map((_, i) => ({
@@ -296,8 +497,9 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
   };
 
   const checkSpelling = () => {
-    if (!data) return;
-    const isCorrect = spellingInput.trim() === data.words[spellingIndex].word;
+    const words = activeLettersData;
+    if (!words.length) return;
+    const isCorrect = spellingInput.trim() === words[spellingIndex].word;
     if (isCorrect) {
       setSpellingScore(s => s + 1);
       setSpellingFeedback("correct");
@@ -307,15 +509,15 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
     setTimeout(() => {
       setSpellingFeedback(null);
       setSpellingInput("");
-      if (spellingIndex + 1 >= data.words.length) {
+      if (spellingIndex + 1 >= words.length) {
         const finalScore = isCorrect ? spellingScore + 1 : spellingScore;
         setSpellingDone(true);
-        if (finalScore === data.words.length) {
+        if (finalScore === words.length) {
           onXP(100);
           onBadge("وسام العبقري");
           triggerCelebrate();
         } else {
-          onXP(Math.round((finalScore / data.words.length) * 50));
+          onXP(Math.round((finalScore / words.length) * 50));
         }
       } else {
         setSpellingIndex(i => i + 1);
@@ -391,20 +593,70 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
           <span className="px-2 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-bold">جديد</span>
         </button>
 
-        <div className="grid grid-cols-2 gap-4 max-w-md mx-auto w-full">
+        <div className="grid grid-cols-2 gap-4 max-w-md mx-auto w-full pb-20">
           {subjects.map((sub, i) => (
             <button
               key={sub.id}
               onClick={() => selectSubject(sub.id)}
               className="group neu-card p-5 text-center transition-all duration-300 hover:shadow-lg hover:scale-[1.03] active:scale-[0.98] animate-scale-in cursor-pointer"
-              style={{ animationDelay: `${i * 0.08}s` }}
+              style={{ animationDelay: `${i * 0.05}s` }}
             >
-              <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br ${sub.color} shadow-lg mb-3 transition-transform duration-300 group-hover:scale-110`}>
-                <sub.icon className="w-8 h-8 text-white" />
+              <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${sub.color} shadow-lg mb-3 transition-transform duration-300 group-hover:scale-110`}>
+                <sub.icon className="w-7 h-7 text-white" />
               </div>
-              <h3 className="text-base font-extrabold text-heading leading-tight">{sub.title}</h3>
+              <h3 className="text-sm font-extrabold text-heading leading-tight">{sub.title}</h3>
             </button>
           ))}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Challenge Mode Selection (Glassmorphism) ───
+  if (gameScreen === "challenge-mode") {
+    return (
+      <div className="min-h-screen flex flex-col px-4 py-6">
+        <BackButton onClick={() => setGameScreen("menu")} />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-full max-w-md bg-white/20 backdrop-blur-xl border border-white/30 rounded-3xl p-8 shadow-2xl animate-scale-in">
+            <div className="text-center mb-8">
+              <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br ${currentSubject?.color || "from-primary to-primary"} shadow-lg mb-4`}>
+                <Pencil className="w-10 h-10 text-white" />
+              </div>
+              <h2 className="text-2xl font-extrabold text-heading mb-2">🔤 خلية الحروف</h2>
+              <p className="text-muted-foreground text-lg">اختر نوع التحدي</p>
+            </div>
+
+            <div className="space-y-4">
+              {/* Single Subject Challenge */}
+              <button
+                onClick={() => startLettersWithMode("single")}
+                className="w-full bg-white/30 backdrop-blur-md border border-white/40 rounded-2xl p-5 text-right flex items-center gap-4 transition-all duration-300 hover:bg-white/50 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <div className={`flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br ${currentSubject?.color || "from-primary to-primary"} shadow-lg flex items-center justify-center`}>
+                  <Target className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-extrabold text-heading">🎯 تحدي المادة الواحدة</h3>
+                  <p className="text-muted-foreground text-sm mt-1">أسئلة من {currentSubject?.title} فقط</p>
+                </div>
+              </button>
+
+              {/* Global Challenge */}
+              <button
+                onClick={() => startLettersWithMode("all")}
+                className="w-full bg-white/30 backdrop-blur-md border border-white/40 rounded-2xl p-5 text-right flex items-center gap-4 transition-all duration-300 hover:bg-white/50 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <div className="flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg flex items-center justify-center">
+                  <Zap className="w-7 h-7 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-extrabold text-heading">⚡ تحدي العبقري الشامل</h3>
+                  <p className="text-muted-foreground text-sm mt-1">أسئلة عشوائية من جميع المواد</p>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -414,7 +666,7 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
   if (gameScreen === "menu") {
     const gamesMenu = [
       { id: "maze", title: "🧩 لغز المتاهة", description: "طابق المصطلح بتعريفه الصحيح لفتح الأبواب", icon: Shuffle, start: startMaze },
-      { id: "letters", title: "🔤 خلية الحروف", description: "أعد ترتيب الحروف لتكوين المصطلح الصحيح", icon: Pencil, start: startLetters },
+      { id: "letters", title: "🔤 خلية الحروف", description: "أعد ترتيب الحروف لتكوين المصطلح الصحيح", icon: Pencil, start: openChallengeMode },
       { id: "hunter", title: "🎯 صائد العباقرة", description: "اصطد الإجابات الصحيحة المتساقطة!", icon: Trophy, start: startHunter },
     ];
 
@@ -436,7 +688,7 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
             <button
               key={game.id}
               onClick={game.start}
-              className={`w-full neu-card p-5 text-right flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] animate-scale-in cursor-pointer`}
+              className="w-full neu-card p-5 text-right flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] animate-scale-in cursor-pointer"
               style={{ animationDelay: `${i * 0.1}s` }}
             >
               <div className={`flex-shrink-0 w-14 h-14 rounded-xl bg-gradient-to-br ${currentSubject?.color} shadow-lg flex items-center justify-center`}>
@@ -502,27 +754,29 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
   }
 
   // ─── Letters Game (Spelling) ───
-  if (gameScreen === "letters" && data) {
+  if (gameScreen === "letters" && activeLettersData.length > 0) {
+    const words = activeLettersData;
+    const modeLabel = challengeMode === "all" ? "تحدي شامل" : currentSubject?.title;
     return (
       <div className="min-h-screen flex flex-col px-4 py-6">
         <ConfettiCelebration trigger={celebrate} />
-        <BackButton onClick={() => setGameScreen("menu")} />
-        <h2 className="text-2xl font-extrabold text-heading text-center mb-2">🔤 خلية الحروف — {currentSubject?.title}</h2>
+        <BackButton onClick={() => setGameScreen("challenge-mode")} />
+        <h2 className="text-2xl font-extrabold text-heading text-center mb-2">🔤 خلية الحروف — {modeLabel}</h2>
 
         {spellingDone ? (
           <div className="text-center py-10 animate-bounce-in">
-            {spellingScore === data.words.length && <img src={appIcon} alt="وسام" className="w-24 h-24 mx-auto mb-4 rounded-2xl shadow-gold" />}
-            <p className="text-3xl font-extrabold text-foreground mb-2">النتيجة: {spellingScore}/{data.words.length}</p>
+            {spellingScore === words.length && <img src={appIcon} alt="وسام" className="w-24 h-24 mx-auto mb-4 rounded-2xl shadow-gold" />}
+            <p className="text-3xl font-extrabold text-foreground mb-2">النتيجة: {spellingScore}/{words.length}</p>
             <p className="text-gold text-xl font-bold mb-6">
-              {spellingScore === data.words.length ? "🏆 مبروك! وسام العبقري!" : `+${Math.round((spellingScore / data.words.length) * 50)} XP`}
+              {spellingScore === words.length ? "🏆 مبروك! وسام العبقري!" : `+${Math.round((spellingScore / words.length) * 50)} XP`}
             </p>
-            <button onClick={startLetters} className={`py-3 px-8 rounded-2xl bg-gradient-to-br ${currentSubject?.color} text-white font-bold text-lg shadow-lg active:scale-[0.98] transition-all`}>إعادة اللعبة</button>
+            <button onClick={() => startLettersWithMode(challengeMode || "single")} className={`py-3 px-8 rounded-2xl bg-gradient-to-br ${currentSubject?.color || "from-primary to-primary"} text-white font-bold text-lg shadow-lg active:scale-[0.98] transition-all`}>إعادة اللعبة</button>
           </div>
         ) : (
           <div className="max-w-md mx-auto w-full text-center space-y-6 mt-6">
-            <p className="text-muted-foreground text-lg">الكلمة {spellingIndex + 1} من {data.words.length}</p>
+            <p className="text-muted-foreground text-lg">الكلمة {spellingIndex + 1} من {words.length}</p>
             <div className={`neu-card p-8 animate-scale-in ${spellingFeedback === "correct" ? "ring-4 ring-success" : spellingFeedback === "wrong" ? "ring-4 ring-destructive" : ""}`}>
-              <p className="text-4xl font-extrabold text-gold tracking-widest mb-4">{data.words[spellingIndex].scrambled}</p>
+              <p className="text-4xl font-extrabold text-gold tracking-widest mb-4">{words[spellingIndex].scrambled}</p>
               <p className="text-muted-foreground text-lg">أعد ترتيب الحروف لتكوين المصطلح الصحيح</p>
             </div>
             <input
@@ -533,7 +787,7 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
               className="w-full px-6 py-4 rounded-2xl border-2 border-input bg-card text-foreground text-center text-2xl font-bold focus:outline-none focus:ring-2 focus:ring-primary"
               dir="rtl"
             />
-            <button onClick={checkSpelling} disabled={!spellingInput.trim()} className={`w-full py-4 rounded-2xl bg-gradient-to-br ${currentSubject?.color} text-white font-bold text-xl shadow-lg disabled:opacity-50 active:scale-[0.98] transition-all`}>
+            <button onClick={checkSpelling} disabled={!spellingInput.trim()} className={`w-full py-4 rounded-2xl bg-gradient-to-br ${currentSubject?.color || "from-primary to-primary"} text-white font-bold text-xl shadow-lg disabled:opacity-50 active:scale-[0.98] transition-all`}>
               تحقق ✓
             </button>
           </div>
@@ -581,7 +835,7 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
                   else if (i === hunterSelected) cls += " ring-3 ring-destructive bg-destructive/10";
                   else cls += " opacity-40";
                 } else {
-                  cls += ` hover:shadow-lg`;
+                  cls += " hover:shadow-lg";
                 }
                 return (
                   <button
@@ -593,7 +847,7 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
                       animation: !hunterAnswered ? `fallIn 0.6s ease-out ${falling?.delay || 0}s both` : undefined,
                     }}
                   >
-                    <span className={`font-extrabold ml-3`} style={{ color: currentSubject ? undefined : undefined }}>
+                    <span className="font-extrabold ml-3">
                       {["🅰️", "🅱️", "🅲", "🅳"][i]}
                     </span>{" "}
                     {opt}
