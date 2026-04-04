@@ -35,7 +35,7 @@ const LessonContent = ({ lessonTitle, subject, stage, onStartQuiz, onBack, onVid
   const subjectDisplayName = subjectNames[subject] || subject;
   const ainSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(lessonTitle + " عين التعليمية")}`;
   const fahemSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(lessonTitle + " فاهم")}`;
-  const wordwallUrl = `https://wordwall.net/ar/community?term=${encodeURIComponent(subjectDisplayName + " " + lessonTitle)}`;
+  const wordwallUrl = `https://www.google.com/search?q=site:wordwall.net+${encodeURIComponent(subjectDisplayName + " " + lessonTitle)}`;
 
   useEffect(() => { generateSummary(); return () => { window.speechSynthesis.cancel(); }; }, [lessonTitle, subject]);
 
@@ -143,7 +143,7 @@ const LessonContent = ({ lessonTitle, subject, stage, onStartQuiz, onBack, onVid
           href={wordwallUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full py-5 rounded-2xl gradient-gold text-gold-foreground font-extrabold text-2xl shadow-gold transition-all duration-300 hover:shadow-emerald-lg active:scale-[0.98] animate-scale-in flex items-center justify-center gap-3"
+          className="w-full py-5 rounded-2xl gradient-gold text-gold-foreground font-extrabold text-2xl shadow-gold transition-all duration-300 hover:shadow-emerald-lg hover:scale-[1.03] active:scale-[0.92] animate-scale-in flex items-center justify-center gap-3"
           style={{ animationDelay: "0.25s" }}
         >
           <Gamepad2 className="w-7 h-7" />
