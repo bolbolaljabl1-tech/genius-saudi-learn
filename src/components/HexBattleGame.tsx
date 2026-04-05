@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from "react";
-import { ArrowRight, Timer, Trophy, Zap } from "lucide-react";
+import { useState, useCallback } from "react";
+import { ArrowRight, Trophy } from "lucide-react";
 import ConfettiCelebration from "./ConfettiCelebration";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -8,14 +8,14 @@ interface HexBattleGameProps {
   onXP: (amount: number) => void;
   onBadge: (badge: string) => void;
   studentName: string;
+  subjectFilter?: string;
 }
 
-// Questions pool from multiple subjects
 interface Question {
   q: string;
   opts: string[];
   correct: number;
-  subject: "quran" | "science" | "arabic";
+  subject: string;
 }
 
 const allQuestions: Question[] = [
@@ -28,6 +28,29 @@ const allQuestions: Question[] = [
   { q: "كم عدد أجزاء القرآن؟", opts: ["20", "25", "30", "40"], correct: 2, subject: "quran" },
   { q: "ما السورة التي تعدل ثلث القرآن؟", opts: ["الفاتحة", "الإخلاص", "الكوثر", "النصر"], correct: 1, subject: "quran" },
   { q: "ما مقدار المد الطبيعي؟", opts: ["حركة", "حركتان", "أربع حركات", "ست حركات"], correct: 1, subject: "quran" },
+  { q: "من أول من جمع القرآن؟", opts: ["عمر", "أبو بكر", "عثمان", "علي"], correct: 1, subject: "quran" },
+  { q: "ما اسم السورة التي تبدأ بـ 'الحمد لله'؟", opts: ["البقرة", "الفاتحة", "الأنعام", "الكهف"], correct: 1, subject: "quran" },
+  // الدراسات الإسلامية
+  { q: "كم عدد أركان الإسلام؟", opts: ["3", "4", "5", "6"], correct: 2, subject: "islamic" },
+  { q: "كم عدد الصلوات المفروضة؟", opts: ["3", "4", "5", "7"], correct: 2, subject: "islamic" },
+  { q: "ما أول ما يُحاسب عليه العبد؟", opts: ["الزكاة", "الصلاة", "الصيام", "الحج"], correct: 1, subject: "islamic" },
+  { q: "في أي شهر يجب صيام رمضان؟", opts: ["شعبان", "رمضان", "شوال", "ذو الحجة"], correct: 1, subject: "islamic" },
+  { q: "أين يقع المسجد الحرام؟", opts: ["المدينة", "مكة", "القدس", "الطائف"], correct: 1, subject: "islamic" },
+  { q: "كم عدد أركان الإيمان؟", opts: ["5", "6", "7", "4"], correct: 1, subject: "islamic" },
+  { q: "من خاتم الأنبياء؟", opts: ["إبراهيم", "موسى", "عيسى", "محمد ﷺ"], correct: 3, subject: "islamic" },
+  { q: "كم ركعة في صلاة المغرب؟", opts: ["2", "3", "4", "5"], correct: 1, subject: "islamic" },
+  { q: "ما أول ركن من أركان الإسلام؟", opts: ["الصلاة", "الشهادتان", "الزكاة", "الصيام"], correct: 1, subject: "islamic" },
+  // الرياضيات
+  { q: "ما ناتج 7 × 8 ؟", opts: ["54", "56", "58", "64"], correct: 1, subject: "math" },
+  { q: "ما محيط مربع طول ضلعه 5 سم؟", opts: ["15", "20", "25", "10"], correct: 1, subject: "math" },
+  { q: "ما مساحة مستطيل طوله 6 وعرضه 4؟", opts: ["10", "20", "24", "30"], correct: 2, subject: "math" },
+  { q: "ما قيمة س في: س + 3 = 10؟", opts: ["5", "6", "7", "8"], correct: 2, subject: "math" },
+  { q: "كم يساوي ½ + ¼ ؟", opts: ["¾", "⅔", "½", "1"], correct: 0, subject: "math" },
+  { q: "ما ناتج 144 ÷ 12 ؟", opts: ["10", "11", "12", "13"], correct: 2, subject: "math" },
+  { q: "كم زاوية في المثلث؟", opts: ["2", "3", "4", "5"], correct: 1, subject: "math" },
+  { q: "ما مجموع زوايا المثلث؟", opts: ["90°", "180°", "270°", "360°"], correct: 1, subject: "math" },
+  { q: "ما العدد الأولي؟", opts: ["4", "6", "7", "9"], correct: 2, subject: "math" },
+  { q: "ما ناتج 25² ؟", opts: ["525", "625", "725", "425"], correct: 1, subject: "math" },
   // العلوم
   { q: "ما أقرب كوكب للشمس؟", opts: ["الزهرة", "عطارد", "الأرض", "المريخ"], correct: 1, subject: "science" },
   { q: "ما الغاز الذي نتنفسه؟", opts: ["النيتروجين", "CO₂", "الأكسجين", "الهيدروجين"], correct: 2, subject: "science" },
@@ -36,6 +59,7 @@ const allQuestions: Question[] = [
   { q: "ما العضو المسؤول عن ضخ الدم؟", opts: ["الرئة", "الكبد", "القلب", "الكلية"], correct: 2, subject: "science" },
   { q: "ما أكبر كوكب في المجموعة الشمسية؟", opts: ["زحل", "المشتري", "أورانوس", "نبتون"], correct: 1, subject: "science" },
   { q: "ما سرعة الضوء تقريباً؟", opts: ["300 كم/ث", "300,000 كم/ث", "30,000 كم/ث", "3,000 كم/ث"], correct: 1, subject: "science" },
+  { q: "ما العملية التي يصنع بها النبات غذاءه؟", opts: ["التنفس", "البناء الضوئي", "الإخراج", "الامتصاص"], correct: 1, subject: "science" },
   // لغتي الخالدة
   { q: "ما إعراب 'الطالبُ' في: الطالبُ مجتهدٌ؟", opts: ["مبتدأ مرفوع", "فاعل", "خبر", "بدل"], correct: 0, subject: "arabic" },
   { q: "ما نوع الجملة: 'يلعب الأطفالُ'؟", opts: ["اسمية", "فعلية", "شرطية", "شبه جملة"], correct: 1, subject: "arabic" },
@@ -45,12 +69,61 @@ const allQuestions: Question[] = [
   { q: "ما جمع كلمة 'كتاب'؟", opts: ["كتب", "كتابات", "كُتّاب", "أكتبة"], correct: 0, subject: "arabic" },
   { q: "ما إعراب 'سعيداً' في: جاء الطالبُ سعيداً؟", opts: ["مفعول به", "حال", "تمييز", "خبر"], correct: 1, subject: "arabic" },
   { q: "أداة الاستفهام عن المكان؟", opts: ["متى", "كيف", "أين", "لماذا"], correct: 2, subject: "arabic" },
+  // الدراسات الاجتماعية
+  { q: "كم عدد قارات العالم؟", opts: ["5", "6", "7", "8"], correct: 2, subject: "social" },
+  { q: "ما أكبر قارة في العالم؟", opts: ["أفريقيا", "آسيا", "أوروبا", "أمريكا"], correct: 1, subject: "social" },
+  { q: "ما عاصمة المملكة العربية السعودية؟", opts: ["جدة", "مكة", "الرياض", "المدينة"], correct: 2, subject: "social" },
+  { q: "ما أطول نهر في العالم؟", opts: ["الأمازون", "النيل", "المسيسيبي", "دجلة"], correct: 1, subject: "social" },
+  { q: "ما أكبر محيط في العالم؟", opts: ["الأطلسي", "الهندي", "الهادئ", "المتجمد"], correct: 2, subject: "social" },
+  { q: "ما الجهة التي تشرق منها الشمس؟", opts: ["الغرب", "الشمال", "الجنوب", "الشرق"], correct: 3, subject: "social" },
+  { q: "ما أصغر قارة في العالم؟", opts: ["أوروبا", "أستراليا", "أنتاركتيكا", "أمريكا الجنوبية"], correct: 1, subject: "social" },
+  { q: "كم عدد مناطق المملكة الإدارية؟", opts: ["10", "13", "15", "20"], correct: 1, subject: "social" },
+  // المهارات الرقمية
+  { q: "ما وحدة قياس سعة التخزين؟", opts: ["هرتز", "بايت", "واط", "بكسل"], correct: 1, subject: "digital" },
+  { q: "ما هي لغة HTML؟", opts: ["لغة برمجة", "لغة ترميز", "نظام تشغيل", "متصفح"], correct: 1, subject: "digital" },
+  { q: "ما وظيفة RAM؟", opts: ["تخزين دائم", "تخزين مؤقت", "معالجة", "عرض"], correct: 1, subject: "digital" },
+  { q: "ما أكبر وحدة تخزين؟", opts: ["كيلوبايت", "ميغابايت", "غيغابايت", "تيرابايت"], correct: 3, subject: "digital" },
+  { q: "ما وظيفة المعالج (CPU)؟", opts: ["التخزين", "المعالجة", "العرض", "الطباعة"], correct: 1, subject: "digital" },
+  { q: "ما نظام التشغيل الأكثر استخداماً للحواسيب؟", opts: ["Linux", "macOS", "Windows", "Chrome OS"], correct: 2, subject: "digital" },
+  // التربية الفنية
+  { q: "ما الألوان الأساسية؟", opts: ["أحمر وأزرق وأصفر", "أخضر وبرتقالي وبنفسجي", "أبيض وأسود ورمادي", "وردي وبني وذهبي"], correct: 0, subject: "art" },
+  { q: "ماذا ينتج عن خلط الأحمر والأصفر؟", opts: ["أخضر", "برتقالي", "بنفسجي", "بني"], correct: 1, subject: "art" },
+  { q: "ما الألوان الثانوية؟", opts: ["أحمر وأزرق وأصفر", "برتقالي وأخضر وبنفسجي", "أبيض وأسود", "ذهبي وفضي"], correct: 1, subject: "art" },
+  { q: "ماذا ينتج عن خلط الأزرق والأصفر؟", opts: ["برتقالي", "بنفسجي", "أخضر", "بني"], correct: 2, subject: "art" },
+  { q: "ما الفن الذي يستخدم الطين؟", opts: ["الرسم", "الخزف", "النسيج", "الطباعة"], correct: 1, subject: "art" },
+  // التربية البدنية
+  { q: "كم عدد لاعبي كرة القدم في الفريق؟", opts: ["9", "10", "11", "12"], correct: 2, subject: "pe" },
+  { q: "ما أهم تمرين قبل الرياضة؟", opts: ["النوم", "الإحماء", "الأكل", "الشرب"], correct: 1, subject: "pe" },
+  { q: "كم شوط في مباراة كرة القدم؟", opts: ["1", "2", "3", "4"], correct: 1, subject: "pe" },
+  { q: "ما الرياضة التي تستخدم المضرب؟", opts: ["كرة القدم", "السباحة", "التنس", "الجري"], correct: 2, subject: "pe" },
+  { q: "ما فائدة الرياضة للجسم؟", opts: ["تقوية العضلات", "زيادة الوزن", "الكسل", "لا فائدة"], correct: 0, subject: "pe" },
+  // المهارات الحياتية
+  { q: "ما أهم وجبة في اليوم؟", opts: ["الغداء", "العشاء", "الإفطار", "الوجبة الخفيفة"], correct: 2, subject: "life" },
+  { q: "كم ساعة نوم يحتاجها الطالب؟", opts: ["4-5", "6-7", "8-10", "12-14"], correct: 2, subject: "life" },
+  { q: "ما أفضل طريقة لتنظيم الوقت؟", opts: ["الجدول", "العشوائية", "السهر", "اللعب فقط"], correct: 0, subject: "life" },
+  { q: "ما أهمية غسل اليدين؟", opts: ["النظافة", "اللعب", "الأكل", "النوم"], correct: 0, subject: "life" },
+  { q: "ما السلوك الصحيح عند العطس؟", opts: ["فتح الفم", "تغطية الفم", "العطس بقوة", "لا شيء"], correct: 1, subject: "life" },
+  // اللغة الإنجليزية
+  { q: "What is the past tense of 'go'?", opts: ["goed", "went", "gone", "going"], correct: 1, subject: "english" },
+  { q: "What is the plural of 'child'?", opts: ["childs", "children", "childes", "childern"], correct: 1, subject: "english" },
+  { q: "Choose the correct: She ___ a student.", opts: ["am", "is", "are", "be"], correct: 1, subject: "english" },
+  { q: "What color is the sky?", opts: ["Red", "Green", "Blue", "Yellow"], correct: 2, subject: "english" },
+  { q: "What is the opposite of 'hot'?", opts: ["warm", "cool", "cold", "freezing"], correct: 2, subject: "english" },
 ];
 
-const BOARD_SIZE = 5;
-const TOTAL_TIME = 120; // seconds
+const subjectNames: Record<string, string> = {
+  quran: "القرآن", islamic: "الإسلامية", math: "الرياضيات", science: "العلوم",
+  arabic: "لغتي", social: "الاجتماعيات", digital: "المهارات الرقمية", art: "الفنية",
+  pe: "البدنية", life: "الحياتية", english: "الإنجليزية",
+};
 
-// Generate hex grid positions for a 5x5 board
+const subjectEmoji: Record<string, string> = {
+  quran: "📖", islamic: "🕌", math: "🔢", science: "🔬", arabic: "✍️",
+  social: "🌍", digital: "💻", art: "🎨", pe: "⚽", life: "💡", english: "🇬🇧",
+};
+
+const BOARD_SIZE = 5;
+
 const generateGrid = () => {
   const cells: { row: number; col: number; id: string }[] = [];
   for (let r = 0; r < BOARD_SIZE; r++) {
@@ -61,11 +134,9 @@ const generateGrid = () => {
   return cells;
 };
 
-// Check if two cells are hex neighbors
 const areNeighbors = (r1: number, c1: number, r2: number, c2: number) => {
   const dr = r2 - r1;
   const dc = c2 - c1;
-  // Even row neighbors
   if (r1 % 2 === 0) {
     return (
       (dr === 0 && Math.abs(dc) === 1) ||
@@ -73,7 +144,6 @@ const areNeighbors = (r1: number, c1: number, r2: number, c2: number) => {
       (dr === 1 && (dc === 0 || dc === -1))
     );
   }
-  // Odd row neighbors
   return (
     (dr === 0 && Math.abs(dc) === 1) ||
     (dr === -1 && (dc === 0 || dc === 1)) ||
@@ -81,19 +151,15 @@ const areNeighbors = (r1: number, c1: number, r2: number, c2: number) => {
   );
 };
 
-// Check win: green wins by connecting left-to-right, red wins by connecting top-to-bottom
 const checkWin = (cells: Map<string, "green" | "red">, color: "green" | "red"): boolean => {
   const colorCells = Array.from(cells.entries()).filter(([, c]) => c === color);
   if (colorCells.length === 0) return false;
 
   const visited = new Set<string>();
-
   const dfs = (r: number, c: number) => {
     const key = `${r}-${c}`;
     if (visited.has(key)) return;
     visited.add(key);
-
-    // Check all neighbors
     for (let nr = 0; nr < BOARD_SIZE; nr++) {
       for (let nc = 0; nc < BOARD_SIZE; nc++) {
         const nk = `${nr}-${nc}`;
@@ -105,27 +171,23 @@ const checkWin = (cells: Map<string, "green" | "red">, color: "green" | "red"): 
   };
 
   if (color === "green") {
-    // Green: connect left column (col=0) to right column (col=BOARD_SIZE-1)
     const starts = colorCells.filter(([k]) => k.endsWith("-0"));
     for (const [k] of starts) {
-      const [r, c] = k.split("-").map(Number);
-      dfs(r, c);
+      const [r] = k.split("-").map(Number);
+      dfs(r, 0);
     }
     return Array.from(visited).some(k => k.endsWith(`-${BOARD_SIZE - 1}`));
   } else {
-    // Red: connect top row (row=0) to bottom row (row=BOARD_SIZE-1)
     const starts = colorCells.filter(([k]) => k.startsWith("0-"));
     for (const [k] of starts) {
-      const [r, c] = k.split("-").map(Number);
-      dfs(r, c);
+      const [, c] = k.split("-").map(Number);
+      dfs(0, c);
     }
     return Array.from(visited).some(k => k.startsWith(`${BOARD_SIZE - 1}-`));
   }
 };
 
-const subjectEmoji: Record<string, string> = { quran: "📖", science: "🔬", arabic: "✍️" };
-
-const HexBattleGame = ({ onBack, onXP, onBadge, studentName }: HexBattleGameProps) => {
+const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: HexBattleGameProps) => {
   const [grid] = useState(generateGrid);
   const [cellOwners, setCellOwners] = useState<Map<string, "green" | "red">>(new Map());
   const [currentPlayer, setCurrentPlayer] = useState<"green" | "red">("green");
@@ -135,41 +197,21 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName }: HexBattleGameProp
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [winner, setWinner] = useState<"green" | "red" | null>(null);
   const [celebrate, setCelebrate] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
   const [usedQuestions, setUsedQuestions] = useState<Set<number>>(new Set());
   const [sendingTelegram, setSendingTelegram] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Timer
-  useEffect(() => {
-    if (winner) return;
-    timerRef.current = setInterval(() => {
-      setTimeLeft(t => {
-        if (t <= 1) {
-          clearInterval(timerRef.current!);
-          return 0;
-        }
-        return t - 1;
-      });
-    }, 1000);
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
-  }, [winner]);
-
-  // Time's up = current player loses
-  useEffect(() => {
-    if (timeLeft === 0 && !winner) {
-      setWinner(currentPlayer === "green" ? "red" : "green");
-    }
-  }, [timeLeft, winner, currentPlayer]);
+  const filteredQuestions = subjectFilter && subjectFilter !== "all"
+    ? allQuestions.filter(q => q.subject === subjectFilter)
+    : allQuestions;
 
   const getRandomQuestion = useCallback((): Question => {
-    const available = allQuestions.filter((_, i) => !usedQuestions.has(i));
-    const pool = available.length > 0 ? available : allQuestions;
+    const available = filteredQuestions.filter((_, i) => !usedQuestions.has(allQuestions.indexOf(filteredQuestions[i])));
+    const pool = available.length > 0 ? available : filteredQuestions;
     const idx = Math.floor(Math.random() * pool.length);
     const realIdx = allQuestions.indexOf(pool[idx]);
     setUsedQuestions(prev => new Set(prev).add(realIdx));
     return pool[idx];
-  }, [usedQuestions]);
+  }, [usedQuestions, filteredQuestions]);
 
   const handleCellClick = (id: string) => {
     if (winner || cellOwners.has(id) || selectedCell) return;
@@ -185,12 +227,10 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName }: HexBattleGameProp
     setAnswered(true);
 
     if (idx === currentQuestion.correct) {
-      // Correct: claim the cell
       const newOwners = new Map(cellOwners);
       newOwners.set(selectedCell!, currentPlayer);
       setCellOwners(newOwners);
 
-      // Check win
       if (checkWin(newOwners, currentPlayer)) {
         setWinner(currentPlayer);
         setCelebrate(true);
@@ -235,14 +275,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName }: HexBattleGameProp
     setSelectedCell(null);
     setCurrentQuestion(null);
     setWinner(null);
-    setTimeLeft(TOTAL_TIME);
     setUsedQuestions(new Set());
-  };
-
-  const formatTime = (s: number) => {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${m}:${sec.toString().padStart(2, "0")}`;
   };
 
   const getCellColor = (id: string) => {
@@ -252,6 +285,8 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName }: HexBattleGameProp
     if (selectedCell === id) return "bg-amber-400 border-amber-500 ring-4 ring-amber-300";
     return "bg-card border-border hover:bg-muted hover:border-primary/40";
   };
+
+  const subjectTitle = subjectFilter && subjectFilter !== "all" ? subjectNames[subjectFilter] || "" : "شامل";
 
   return (
     <div className="min-h-screen flex flex-col px-3 py-4">
@@ -264,19 +299,15 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName }: HexBattleGameProp
       </button>
 
       <div className="text-center mb-3 animate-slide-up">
-        <h1 className="text-2xl font-extrabold" style={{ color: 'hsl(var(--heading))' }}>⬡ شبكة مسابقة الحروف</h1>
+        <h1 className="text-2xl font-extrabold" style={{ color: 'hsl(var(--heading))' }}>⬡ شبكة التحدي — {subjectTitle}</h1>
         <p className="text-muted-foreground text-sm mt-1">صِل مسارك قبل خصمك!</p>
       </div>
 
-      {/* Timer + Turn indicator */}
+      {/* Turn indicator */}
       <div className="flex items-center justify-between max-w-sm mx-auto w-full mb-3">
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${currentPlayer === "green" ? "bg-emerald-100 text-emerald-700 ring-2 ring-emerald-400" : "bg-emerald-50 text-emerald-400"}`}>
           <div className="w-3 h-3 rounded-full bg-emerald-500" />
           أخضر ↔
-        </div>
-        <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-bold text-sm ${timeLeft <= 20 ? "bg-red-100 text-red-600 animate-pulse" : "bg-muted text-foreground"}`}>
-          <Timer className="w-4 h-4" />
-          {formatTime(timeLeft)}
         </div>
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${currentPlayer === "red" ? "bg-red-100 text-red-700 ring-2 ring-red-400" : "bg-red-50 text-red-400"}`}>
           أحمر ↕
@@ -309,15 +340,10 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName }: HexBattleGameProp
 
       {/* Hex Grid */}
       <div className="flex-1 flex flex-col items-center justify-center">
-        {/* Green borders left/right */}
         <div className="relative">
-          {/* Left green border indicator */}
           <div className="absolute -left-3 top-0 bottom-0 w-1.5 rounded-full bg-emerald-500" />
-          {/* Right green border indicator */}
           <div className="absolute -right-3 top-0 bottom-0 w-1.5 rounded-full bg-emerald-500" />
-          {/* Top red border indicator */}
           <div className="absolute top-[-8px] left-0 right-0 h-1.5 rounded-full bg-red-500" />
-          {/* Bottom red border indicator */}
           <div className="absolute bottom-[-8px] left-0 right-0 h-1.5 rounded-full bg-red-500" />
 
           <div className="py-2 px-2">
@@ -361,7 +387,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName }: HexBattleGameProp
           <div className="w-full max-w-md bg-card rounded-3xl p-5 shadow-2xl animate-slide-up border border-border">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold px-2 py-1 rounded-full bg-muted text-muted-foreground">
-                {subjectEmoji[currentQuestion.subject]} {currentQuestion.subject === "quran" ? "القرآن" : currentQuestion.subject === "science" ? "العلوم" : "لغتي"}
+                {subjectEmoji[currentQuestion.subject] || "📚"} {subjectNames[currentQuestion.subject] || currentQuestion.subject}
               </span>
               <span className={`text-sm font-bold ${currentPlayer === "green" ? "text-emerald-600" : "text-red-600"}`}>
                 دور {currentPlayer === "green" ? "الأخضر" : "الأحمر"}
