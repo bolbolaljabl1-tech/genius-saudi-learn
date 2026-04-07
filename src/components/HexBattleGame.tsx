@@ -1,6 +1,7 @@
-import { useState, useCallback } from "react";
-import { ArrowRight, Trophy } from "lucide-react";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { ArrowRight, Trophy, Bot, Users } from "lucide-react";
 import ConfettiCelebration from "./ConfettiCelebration";
+import ShareButton from "./ShareButton";
 import { supabase } from "@/integrations/supabase/client";
 
 interface HexBattleGameProps {
@@ -187,7 +188,10 @@ const checkWin = (cells: Map<string, "green" | "red">, color: "green" | "red"): 
   }
 };
 
+type GameMode = "select" | "pvp" | "ai";
+
 const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: HexBattleGameProps) => {
+  const [gameMode, setGameMode] = useState<GameMode>("select");
   const [grid] = useState(generateGrid);
   const [cellOwners, setCellOwners] = useState<Map<string, "green" | "red">>(new Map());
   const [currentPlayer, setCurrentPlayer] = useState<"green" | "red">("green");
@@ -199,6 +203,8 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   const [celebrate, setCelebrate] = useState(false);
   const [usedQuestions, setUsedQuestions] = useState<Set<number>>(new Set());
   const [sendingTelegram, setSendingTelegram] = useState(false);
+  const [aiThinking, setAiThinking] = useState(false);
+  const winnerRef = useRef<HTMLDivElement>(null);
 
   const filteredQuestions = subjectFilter && subjectFilter !== "all"
     ? allQuestions.filter(q => q.subject === subjectFilter)
@@ -214,30 +220,33 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   }, [usedQuestions, filteredQuestions]);
 
   const handleCellClick = (id: string) => {
-    if (winner || cellOwners.has(id) || selectedCell) return;
+    if (winner || cellOwners.has(id) || selectedCell || aiThinking) return;
+    if (gameMode === "ai" && currentPlayer === "red") return;
     setSelectedCell(id);
     setCurrentQuestion(getRandomQuestion());
     setAnswered(false);
     setSelectedAnswer(null);
   };
 
-  const handleAnswer = (idx: number) => {
-    if (answered || !currentQuestion) return;
-    setSelectedAnswer(idx);
-    setAnswered(true);
-
-    if (idx === currentQuestion.correct) {
-      const newOwners = new Map(cellOwners);
-      newOwners.set(selectedCell!, currentPlayer);
+  const processAnswer = useCallback((idx: number, question: Question, cell: string, player: "green" | "red") => {
+    const newOwners = new Map(cellOwners);
+    if (idx === question.correct) {
+      newOwners.set(cell, player);
       setCellOwners(newOwners);
 
-      if (checkWin(newOwners, currentPlayer)) {
-        setWinner(currentPlayer);
+      if (checkWin(newOwners, player)) {
+        setWinner(player);
         setCelebrate(true);
         setTimeout(() => setCelebrate(false), 4000);
-        onXP(150);
-        onBadge("وسام بطل الشبكة");
-        sendTelegramNotification(currentPlayer);
+        if (gameMode === "ai" && player === "green") {
+          onXP(150);
+          onBadge("وسام بطل الشبكة");
+        } else if (gameMode === "pvp") {
+          onXP(150);
+          onBadge("وسام بطل الشبكة");
+        }
+        sendTelegramNotification(player);
+        return;
       }
     }
 
@@ -246,11 +255,91 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       setCurrentQuestion(null);
       setAnswered(false);
       setSelectedAnswer(null);
-      if (!winner) {
-        setCurrentPlayer(p => p === "green" ? "red" : "green");
-      }
+      setCurrentPlayer(p => p === "green" ? "red" : "green");
     }, 1500);
+  }, [cellOwners, gameMode, onXP, onBadge, winner]);
+
+  const handleAnswer = (idx: number) => {
+    if (answered || !currentQuestion) return;
+    setSelectedAnswer(idx);
+    setAnswered(true);
+    processAnswer(idx, currentQuestion, selectedCell!, currentPlayer);
   };
+
+  // AI turn
+  useEffect(() => {
+    if (gameMode !== "ai" || currentPlayer !== "red" || winner || selectedCell) return;
+
+    setAiThinking(true);
+    const timeout = setTimeout(() => {
+      // Find empty cells
+      const emptyCells = [];
+      for (let r = 0; r < BOARD_SIZE; r++) {
+        for (let c = 0; c < BOARD_SIZE; c++) {
+          const id = `${r}-${c}`;
+          if (!cellOwners.has(id)) emptyCells.push(id);
+        }
+      }
+      if (emptyCells.length === 0) { setAiThinking(false); return; }
+
+      // Pick strategic cell (prefer cells adjacent to existing red cells, or top row)
+      const redCells = Array.from(cellOwners.entries()).filter(([, c]) => c === "red");
+      let chosen: string;
+      if (redCells.length === 0) {
+        // Start from top row
+        const topEmpty = emptyCells.filter(id => id.startsWith("0-"));
+        chosen = topEmpty.length > 0 ? topEmpty[Math.floor(Math.random() * topEmpty.length)] : emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      } else {
+        // Find neighbors of red cells
+        const adjacent = emptyCells.filter(id => {
+          const [r, c] = id.split("-").map(Number);
+          return redCells.some(([k]) => {
+            const [rr, rc] = k.split("-").map(Number);
+            return areNeighbors(r, c, rr, rc);
+          });
+        });
+        chosen = adjacent.length > 0 ? adjacent[Math.floor(Math.random() * adjacent.length)] : emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      }
+
+      const question = getRandomQuestion();
+      setSelectedCell(chosen);
+      setCurrentQuestion(question);
+      setAnswered(false);
+      setSelectedAnswer(null);
+
+      // AI answers after delay (70% correct rate)
+      setTimeout(() => {
+        const aiCorrect = Math.random() < 0.7;
+        const aiAnswer = aiCorrect ? question.correct : ((question.correct + 1 + Math.floor(Math.random() * 3)) % 4);
+        setSelectedAnswer(aiAnswer);
+        setAnswered(true);
+
+        const newOwners = new Map(cellOwners);
+        if (aiAnswer === question.correct) {
+          newOwners.set(chosen, "red");
+          setCellOwners(newOwners);
+          if (checkWin(newOwners, "red")) {
+            setWinner("red");
+            setCelebrate(true);
+            setTimeout(() => setCelebrate(false), 4000);
+          }
+        }
+
+        setTimeout(() => {
+          setSelectedCell(null);
+          setCurrentQuestion(null);
+          setAnswered(false);
+          setSelectedAnswer(null);
+          setAiThinking(false);
+          if (!checkWin(newOwners, "red")) {
+            setCurrentPlayer("green");
+          }
+        }, 1500);
+      }, 1200);
+    }, 800);
+
+    return () => clearTimeout(timeout);
+  }, [currentPlayer, gameMode, winner, selectedCell, cellOwners]);
 
   const sendTelegramNotification = async (winnerColor: "green" | "red") => {
     setSendingTelegram(true);
@@ -259,7 +348,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       await supabase.functions.invoke("send-telegram", {
         body: {
           student_name: winnerName,
-          message: `🏆 بطل جديد يسيطر على ساحة العباقرة!\n👤 الفائز: ${winnerName}\n🔥 هل تجرؤ على تحديه؟ اضغط على الرابط أدناه وانتقم لزملائك!\n🔗 https://genius-saudi-learn.lovable.app`,
+          message: `🏆 بطل جديد يسيطر على ساحة العباقرة!\n👤 الفائز: ${winnerName}\n🔥 هل تجرؤ على تحديه؟\n🔗 https://genius-saudi-learn.lovable.app`,
         },
       });
     } catch {
@@ -276,6 +365,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     setCurrentQuestion(null);
     setWinner(null);
     setUsedQuestions(new Set());
+    setAiThinking(false);
   };
 
   const getCellColor = (id: string) => {
@@ -288,55 +378,107 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
 
   const subjectTitle = subjectFilter && subjectFilter !== "all" ? subjectNames[subjectFilter] || "" : "شامل";
 
+  // Mode selection screen
+  if (gameMode === "select") {
+    return (
+      <div className="min-h-screen flex flex-col px-4 py-6">
+        <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6 self-start">
+          <ArrowRight className="w-5 h-5" />
+          <span className="font-bold text-lg">رجوع</span>
+        </button>
+
+        <div className="flex-1 flex flex-col items-center justify-center max-w-md mx-auto w-full gap-6">
+          <h1 className="text-3xl font-extrabold text-heading mb-2 text-center">⬡ شبكة التحدي — {subjectTitle}</h1>
+          <p className="text-muted-foreground text-lg text-center mb-4">اختر نوع التحدي</p>
+
+          <button
+            onClick={() => setGameMode("pvp")}
+            className="w-full bg-white/20 backdrop-blur-xl border border-white/30 rounded-3xl p-6 flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] animate-scale-in"
+          >
+            <div className="flex-shrink-0 w-16 h-16 rounded-2xl gradient-emerald shadow-emerald flex items-center justify-center">
+              <Users className="w-8 h-8 text-white" />
+            </div>
+            <div className="flex-1 text-right">
+              <h3 className="text-xl font-extrabold text-heading">👥 لاعب ضد لاعب</h3>
+              <p className="text-muted-foreground text-sm mt-1">تحدَّ صديقك على نفس الجهاز!</p>
+            </div>
+          </button>
+
+          <button
+            onClick={() => setGameMode("ai")}
+            className="w-full bg-white/20 backdrop-blur-xl border border-white/30 rounded-3xl p-6 flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] animate-scale-in"
+            style={{ animationDelay: "0.1s" }}
+          >
+            <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-royal-blue shadow-lg flex items-center justify-center">
+              <Bot className="w-8 h-8 text-matte-gold" />
+            </div>
+            <div className="flex-1 text-right">
+              <h3 className="text-xl font-extrabold text-heading">🤖 ضد الذكاء الاصطناعي</h3>
+              <p className="text-muted-foreground text-sm mt-1">هل تستطيع هزيمة العبقري الآلي؟</p>
+            </div>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex flex-col px-3 py-4">
       <ConfettiCelebration trigger={celebrate} />
 
       {/* Header */}
-      <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3 self-start">
+      <button onClick={() => { resetGame(); setGameMode("select"); }} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3 self-start">
         <ArrowRight className="w-5 h-5" />
         <span className="font-bold text-lg">رجوع</span>
       </button>
 
       <div className="text-center mb-3 animate-slide-up">
-        <h1 className="text-2xl font-extrabold" style={{ color: 'hsl(var(--heading))' }}>⬡ شبكة التحدي — {subjectTitle}</h1>
-        <p className="text-muted-foreground text-sm mt-1">صِل مسارك قبل خصمك!</p>
+        <h1 className="text-2xl font-extrabold text-heading">
+          ⬡ شبكة التحدي — {subjectTitle} {gameMode === "ai" ? "🤖" : "👥"}
+        </h1>
+        <p className="text-muted-foreground text-sm mt-1">
+          {gameMode === "ai" ? "أنت (أخضر) ضد الذكاء الاصطناعي (أحمر)" : "صِل مسارك قبل خصمك!"}
+        </p>
       </div>
 
       {/* Turn indicator */}
       <div className="flex items-center justify-between max-w-sm mx-auto w-full mb-3">
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${currentPlayer === "green" ? "bg-emerald-100 text-emerald-700 ring-2 ring-emerald-400" : "bg-emerald-50 text-emerald-400"}`}>
           <div className="w-3 h-3 rounded-full bg-emerald-500" />
-          أخضر ↔
+          {gameMode === "ai" ? "أنت ↔" : "أخضر ↔"}
         </div>
+        {aiThinking && <span className="text-sm text-muted-foreground animate-pulse font-bold">🤖 يفكر...</span>}
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${currentPlayer === "red" ? "bg-red-100 text-red-700 ring-2 ring-red-400" : "bg-red-50 text-red-400"}`}>
-          أحمر ↕
+          {gameMode === "ai" ? "🤖 ↕" : "أحمر ↕"}
           <div className="w-3 h-3 rounded-full bg-red-500" />
         </div>
       </div>
 
       {/* Legend */}
       <div className="flex justify-center gap-4 mb-3 text-xs text-muted-foreground">
-        <span>🟢 أخضر: يسار ← يمين</span>
-        <span>🔴 أحمر: أعلى ← أسفل</span>
+        <span>🟢 {gameMode === "ai" ? "أنت" : "أخضر"}: يسار ← يمين</span>
+        <span>🔴 {gameMode === "ai" ? "الذكاء" : "أحمر"}: أعلى ← أسفل</span>
       </div>
 
       {/* Winner */}
       {winner && (
-        <div className="text-center py-6 animate-bounce-in mb-4">
+        <div ref={winnerRef} className="text-center py-6 animate-bounce-in mb-4 bg-card rounded-3xl p-6">
           <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-3 ${winner === "green" ? "bg-emerald-500" : "bg-red-500"} shadow-lg`}>
             <Trophy className="w-10 h-10 text-white" />
           </div>
-          <p className="text-3xl font-extrabold mb-2" style={{ color: 'hsl(var(--foreground))' }}>
-            🏆 فاز {winner === "green" ? "الأخضر" : "الأحمر"}!
+          <p className="text-3xl font-extrabold mb-2 text-foreground">
+            🏆 {gameMode === "ai" ? (winner === "green" ? "فزت!" : "فاز الذكاء الاصطناعي!") : `فاز ${winner === "green" ? "الأخضر" : "الأحمر"}!`}
           </p>
-          <p className="text-lg font-bold" style={{ color: 'hsl(var(--gold))' }}>+150 XP + وسام بطل الشبكة</p>
-          {sendingTelegram && <p className="text-sm text-muted-foreground mt-2">جارٍ إرسال التحدي لتيليجرام...</p>}
+          <p className="text-lg font-bold text-gold">+150 XP + وسام بطل الشبكة</p>
+          <p className="font-ruqaa text-matte-gold text-sm mt-1">منصة الطالب العبقري</p>
+          {sendingTelegram && <p className="text-sm text-muted-foreground mt-2">جارٍ إرسال التحدي...</p>}
           <button onClick={resetGame} className="mt-4 py-3 px-8 rounded-2xl gradient-emerald text-white font-bold text-lg shadow-emerald-lg active:scale-[0.97] transition-all">
             جولة جديدة ⬡
           </button>
         </div>
       )}
+
+      {winner && <ShareButton context="win" resultContainerRef={winnerRef} />}
 
       {/* Hex Grid */}
       <div className="flex-1 flex flex-col items-center justify-center">
@@ -355,7 +497,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
               >
                 {Array.from({ length: BOARD_SIZE }, (_, c) => {
                   const id = `${r}-${c}`;
-                  const isDisabled = winner !== null || cellOwners.has(id) || selectedCell !== null;
+                  const isDisabled = winner !== null || cellOwners.has(id) || selectedCell !== null || aiThinking || (gameMode === "ai" && currentPlayer === "red");
                   return (
                     <button
                       key={id}
@@ -390,10 +532,10 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                 {subjectEmoji[currentQuestion.subject] || "📚"} {subjectNames[currentQuestion.subject] || currentQuestion.subject}
               </span>
               <span className={`text-sm font-bold ${currentPlayer === "green" ? "text-emerald-600" : "text-red-600"}`}>
-                دور {currentPlayer === "green" ? "الأخضر" : "الأحمر"}
+                {gameMode === "ai" && currentPlayer === "red" ? "🤖 دور الذكاء" : `دور ${currentPlayer === "green" ? (gameMode === "ai" ? "أنت" : "الأخضر") : "الأحمر"}`}
               </span>
             </div>
-            <p className="text-lg font-extrabold mb-4 leading-8" style={{ color: 'hsl(var(--foreground))' }}>{currentQuestion.q}</p>
+            <p className="text-lg font-extrabold mb-4 leading-8 text-foreground">{currentQuestion.q}</p>
             <div className="grid grid-cols-1 gap-2">
               {currentQuestion.opts.map((opt, i) => {
                 let cls = "w-full py-3 px-4 rounded-xl border-2 text-right font-bold text-base transition-all active:scale-[0.97]";
@@ -404,8 +546,9 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                 } else {
                   cls += " border-border bg-card hover:border-primary/50";
                 }
+                const isAiTurn = gameMode === "ai" && currentPlayer === "red";
                 return (
-                  <button key={i} onClick={() => handleAnswer(i)} disabled={answered} className={cls}>
+                  <button key={i} onClick={() => handleAnswer(i)} disabled={answered || isAiTurn} className={cls}>
                     <span className="ml-2">{["🅰️", "🅱️", "🅲", "🅳"][i]}</span> {opt}
                   </button>
                 );
