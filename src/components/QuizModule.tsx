@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ArrowRight, Loader2, CheckCircle2, XCircle, RotateCcw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ConfettiCelebration from "./ConfettiCelebration";
+import ShareButton from "./ShareButton";
 import appIcon from "@/assets/app-icon.png";
 
 interface QuizModuleProps {
@@ -44,6 +45,7 @@ const QuizModule = ({ lessonTitle, subject, stage, onBack, onRestart, onQuizComp
   const [answered, setAnswered] = useState(false);
   const [finished, setFinished] = useState(false);
   const [celebrate, setCelebrate] = useState(false);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { fetchQuestions(); }, [lessonTitle, subject]);
 
@@ -131,7 +133,7 @@ const QuizModule = ({ lessonTitle, subject, stage, onBack, onRestart, onQuizComp
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
         <ConfettiCelebration trigger={celebrate} />
-        <div className="neu-card p-8 max-w-md w-full text-center animate-bounce-in">
+        <div ref={resultRef} className="neu-card p-8 max-w-md w-full text-center animate-bounce-in">
           {score === questions.length && <img src={appIcon} alt="وسام العبقري" className="w-24 h-24 mx-auto mb-4 rounded-2xl shadow-gold" />}
           <div className="text-6xl mb-4">{motivation.emoji}</div>
           <h2 className="text-3xl font-extrabold text-heading mb-2">نتيجة الاختبار</h2>
@@ -150,6 +152,7 @@ const QuizModule = ({ lessonTitle, subject, stage, onBack, onRestart, onQuizComp
 
           <p className="text-foreground font-extrabold text-xl mb-6">{motivation.text}</p>
           {score === questions.length && <p className="text-gold font-extrabold text-lg mb-4">🏅 +100 XP + وسام العبقري</p>}
+          <p className="font-ruqaa text-matte-gold text-sm mb-4">منصة الطالب العبقري</p>
 
           <div className="flex flex-col gap-3">
             <button onClick={onRestart} className="w-full py-4 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-xl shadow-emerald active:scale-[0.98] transition-all flex items-center justify-center gap-2">
@@ -158,6 +161,7 @@ const QuizModule = ({ lessonTitle, subject, stage, onBack, onRestart, onQuizComp
             <button onClick={onBack} className="w-full py-4 rounded-2xl neu-btn text-foreground font-extrabold text-xl active:scale-[0.98]">العودة للدرس</button>
           </div>
         </div>
+        <ShareButton context="win" resultContainerRef={resultRef} />
       </div>
     );
   }
