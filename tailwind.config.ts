@@ -16,6 +16,7 @@ export default {
       fontFamily: {
         tajawal: ["Tajawal", "sans-serif"],
         amiri: ["Amiri", "serif"],
+        ruqaa: ["Aref Ruqaa", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -70,6 +71,14 @@ export default {
         },
         heading: "hsl(var(--heading))",
         "body-blue": "hsl(var(--body-blue))",
+        "royal-blue": {
+          DEFAULT: "hsl(var(--royal-blue))",
+          foreground: "hsl(var(--royal-blue-foreground))",
+        },
+        "matte-gold": {
+          DEFAULT: "hsl(var(--matte-gold))",
+          foreground: "hsl(var(--matte-gold-foreground))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

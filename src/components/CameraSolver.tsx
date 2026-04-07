@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { Camera, Loader2, ArrowRight, ImageIcon, Volume2, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import ShareButton from "./ShareButton";
 
 interface CameraSolverProps {
   onBack: () => void;
@@ -14,6 +15,7 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
   const [error, setError] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   const handleCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -123,7 +125,7 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
         )}
 
         {answer && (
-          <div className="neu-card p-6 border-2 border-primary/20 animate-slide-up">
+          <div ref={resultRef} className="neu-card p-6 border-2 border-primary/20 animate-slide-up">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-extrabold text-heading flex items-center gap-2">💡 الإجابة والشرح</h3>
               <button
@@ -135,8 +137,11 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
               </button>
             </div>
             <div className="text-body-blue leading-9 whitespace-pre-line text-lg">{answer}</div>
+            <p className="font-ruqaa text-matte-gold text-xs mt-3 text-center">منصة الطالب العبقري</p>
           </div>
         )}
+
+        {answer && <ShareButton context="camera" resultContainerRef={resultRef} />}
       </div>
     </div>
   );

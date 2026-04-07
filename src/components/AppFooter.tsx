@@ -1,10 +1,13 @@
+import { Mail } from "lucide-react";
+
 const AppFooter = () => (
-  <footer className="fixed bottom-0 inset-x-0 py-3 text-center bg-background/90 backdrop-blur-sm border-t border-border z-50">
-    <p className="font-amiri font-bold text-base" style={{ color: '#047857' }}>
-      منصة الطالب العبقري - 2026
+  <footer className="fixed bottom-0 inset-x-0 py-3 text-center bg-royal-blue border-t border-matte-gold/30 z-50">
+    <p className="font-ruqaa font-bold text-lg text-matte-gold">
+      منصة الطالب العبقري - 2026 🎓
     </p>
-    <p className="text-xs font-bold mt-1" style={{ fontFamily: "'Courier New', monospace", color: '#b45309' }}>
-      تصميم وبرمجة: tchjaber@gmail.com
+    <p className="text-xs font-bold mt-1 flex items-center justify-center gap-1 text-matte-gold/70">
+      <Mail className="w-3 h-3" />
+      <span style={{ fontFamily: "'Courier New', monospace" }}>tchjaber@gmail.com</span>
     </p>
   </footer>
 );
