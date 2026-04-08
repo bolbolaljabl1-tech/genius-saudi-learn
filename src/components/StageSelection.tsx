@@ -9,11 +9,12 @@ interface StageSelectionProps {
   onLeaderboard: () => void;
   onGames: () => void;
   onQuizzes: () => void;
+  onGallery: () => void;
   xp: number;
   studentName: string;
 }
 
-const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onQuizzes, xp, studentName }: StageSelectionProps) => {
+const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onQuizzes, onGallery, xp, studentName }: StageSelectionProps) => {
   const stages = [
     { id: "elementary", title: "المرحلة الابتدائية", description: "من الصف الأول إلى السادس", icon: BookOpen, delay: "0.1s" },
     { id: "middle", title: "المرحلة المتوسطة", description: "من الصف الأول إلى الثالث", icon: GraduationCap, delay: "0.3s" },
@@ -81,6 +82,10 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onQuizzes,
         <button onClick={onLeaderboard} className="w-full max-w-xl mt-6 py-4 rounded-2xl neu-btn text-foreground font-extrabold text-xl hover:shadow-gold transition-all active:scale-[0.98] flex items-center justify-center gap-3 animate-scale-in" style={{ animationDelay: "0.4s" }}>
           <Trophy className="w-6 h-6 text-gold" />
           🏆 لوحة المتصدرين
+        </button>
+
+        <button onClick={onGallery} className="w-full max-w-xl mt-3 py-4 rounded-2xl bg-gradient-to-r from-yellow-500 to-amber-600 text-white font-extrabold text-xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in" style={{ animationDelay: "0.45s" }}>
+          🏅 معرض العباقرة
         </button>
       </div>
     </div>
