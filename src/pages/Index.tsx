@@ -9,6 +9,7 @@ import CameraSolver from "@/components/CameraSolver";
 import Leaderboard from "@/components/Leaderboard";
 import GamesHub from "@/components/GamesHub";
 import GeniusQuizzes from "@/components/GeniusQuizzes";
+import GeniusGallery from "@/components/GeniusGallery";
 import StudentNameModal from "@/components/StudentNameModal";
 import WhisperModal from "@/components/WhisperModal";
 import AppFooter from "@/components/AppFooter";
