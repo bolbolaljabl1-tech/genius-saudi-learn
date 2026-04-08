@@ -57,6 +57,7 @@ const Index = () => {
           onLeaderboard={openLeaderboard}
           onGames={() => setScreen("games")}
           onQuizzes={() => setScreen("quizzes")}
+          onGallery={() => setScreen("gallery")}
           xp={xp}
           studentName={studentName}
         />
@@ -69,6 +70,7 @@ const Index = () => {
       {screen === "leaderboard" && <Leaderboard onBack={() => setScreen("stage")} currentName={studentName} currentXP={xp} />}
       {screen === "games" && <GamesHub onBack={() => setScreen("stage")} onXP={(amount) => addXP(amount)} onBadge={(badge) => awardBadge(badge)} studentName={studentName} />}
       {screen === "quizzes" && <GeniusQuizzes onBack={() => setScreen("stage")} />}
+      {screen === "gallery" && <GeniusGallery onBack={() => setScreen("stage")} />}
 
       {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}
 
