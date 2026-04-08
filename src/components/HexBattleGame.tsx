@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { ArrowRight, Trophy, Bot, Users } from "lucide-react";
+import { ArrowRight, Trophy, Bot, Users, Clock } from "lucide-react";
 import ConfettiCelebration from "./ConfettiCelebration";
 import ShareButton from "./ShareButton";
 import { supabase } from "@/integrations/supabase/client";
@@ -112,6 +112,16 @@ const allQuestions: Question[] = [
   { q: "What is the opposite of 'hot'?", opts: ["warm", "cool", "cold", "freezing"], correct: 2, subject: "english" },
 ];
 
+// Fisher-Yates shuffle
+const shuffleArray = <T,>(arr: T[]): T[] => {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+};
+
 const subjectNames: Record<string, string> = {
   quran: "القرآن", islamic: "الإسلامية", math: "الرياضيات", science: "العلوم",
   arabic: "لغتي", social: "الاجتماعيات", digital: "المهارات الرقمية", art: "الفنية",
@@ -188,6 +198,12 @@ const checkWin = (cells: Map<string, "green" | "red">, color: "green" | "red"): 
   }
 };
 
+const getMedalInfo = (seconds: number) => {
+  if (seconds <= 30) return { medal: "🥇", label: "الوسام الذهبي", color: "text-yellow-500", bg: "bg-yellow-100", key: "gold" };
+  if (seconds <= 60) return { medal: "🥈", label: "الوسام الفضي", color: "text-gray-400", bg: "bg-gray-100", key: "silver" };
+  return { medal: "🥉", label: "الوسام البرونزي", color: "text-amber-700", bg: "bg-amber-100", key: "bronze" };
+};
+
 type GameMode = "select" | "pvp" | "ai";
 
 const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: HexBattleGameProps) => {
@@ -201,31 +217,88 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
   const [winner, setWinner] = useState<"green" | "red" | null>(null);
   const [celebrate, setCelebrate] = useState(false);
-  const [usedQuestions, setUsedQuestions] = useState<Set<number>>(new Set());
   const [sendingTelegram, setSendingTelegram] = useState(false);
   const [aiThinking, setAiThinking] = useState(false);
   const winnerRef = useRef<HTMLDivElement>(null);
 
-  const filteredQuestions = subjectFilter && subjectFilter !== "all"
-    ? allQuestions.filter(q => q.subject === subjectFilter)
-    : allQuestions;
+  // Shuffle-based question system (no repeats)
+  const [shuffledQuestions, setShuffledQuestions] = useState<Question[]>([]);
+  const [questionIndex, setQuestionIndex] = useState(0);
 
-  const getRandomQuestion = useCallback((): Question => {
-    const available = filteredQuestions.filter((_, i) => !usedQuestions.has(allQuestions.indexOf(filteredQuestions[i])));
-    const pool = available.length > 0 ? available : filteredQuestions;
-    const idx = Math.floor(Math.random() * pool.length);
-    const realIdx = allQuestions.indexOf(pool[idx]);
-    setUsedQuestions(prev => new Set(prev).add(realIdx));
-    return pool[idx];
-  }, [usedQuestions, filteredQuestions]);
+  // Timer state
+  const [timerStarted, setTimerStarted] = useState(false);
+  const [startTime, setStartTime] = useState<number>(0);
+  const [elapsed, setElapsed] = useState(0);
+  const [finalTime, setFinalTime] = useState<number | null>(null);
+
+  // Win modal with name input
+  const [showWinModal, setShowWinModal] = useState(false);
+  const [winnerName, setWinnerName] = useState(studentName || "");
+
+  // Initialize shuffled questions
+  useEffect(() => {
+    const filtered = subjectFilter && subjectFilter !== "all"
+      ? allQuestions.filter(q => q.subject === subjectFilter)
+      : allQuestions;
+    setShuffledQuestions(shuffleArray(filtered));
+    setQuestionIndex(0);
+  }, [subjectFilter]);
+
+  const getNextQuestion = useCallback((): Question => {
+    if (questionIndex >= shuffledQuestions.length) {
+      // Re-shuffle when exhausted
+      const newShuffle = shuffleArray(shuffledQuestions);
+      setShuffledQuestions(newShuffle);
+      setQuestionIndex(1);
+      return newShuffle[0];
+    }
+    const q = shuffledQuestions[questionIndex];
+    setQuestionIndex(prev => prev + 1);
+    return q;
+  }, [questionIndex, shuffledQuestions]);
+
+  // Timer tick
+  useEffect(() => {
+    if (!timerStarted || winner) return;
+    const interval = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startTime) / 1000));
+    }, 200);
+    return () => clearInterval(interval);
+  }, [timerStarted, startTime, winner]);
 
   const handleCellClick = (id: string) => {
     if (winner || cellOwners.has(id) || selectedCell || aiThinking) return;
     if (gameMode === "ai" && currentPlayer === "red") return;
+
+    // Start timer on first move
+    if (!timerStarted) {
+      setTimerStarted(true);
+      setStartTime(Date.now());
+    }
+
     setSelectedCell(id);
-    setCurrentQuestion(getRandomQuestion());
+    setCurrentQuestion(getNextQuestion());
     setAnswered(false);
     setSelectedAnswer(null);
+  };
+
+  const handleWin = (player: "green" | "red") => {
+    const time = Math.floor((Date.now() - startTime) / 1000);
+    setFinalTime(time);
+    setWinner(player);
+    setCelebrate(true);
+    setTimeout(() => setCelebrate(false), 4000);
+
+    if (gameMode === "ai" && player === "green") {
+      onXP(150);
+      onBadge("وسام بطل الشبكة");
+    } else if (gameMode === "pvp") {
+      onXP(150);
+      onBadge("وسام بطل الشبكة");
+    }
+
+    setShowWinModal(true);
+    sendTelegramNotification(player);
   };
 
   const processAnswer = useCallback((idx: number, question: Question, cell: string, player: "green" | "red") => {
@@ -235,17 +308,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       setCellOwners(newOwners);
 
       if (checkWin(newOwners, player)) {
-        setWinner(player);
-        setCelebrate(true);
-        setTimeout(() => setCelebrate(false), 4000);
-        if (gameMode === "ai" && player === "green") {
-          onXP(150);
-          onBadge("وسام بطل الشبكة");
-        } else if (gameMode === "pvp") {
-          onXP(150);
-          onBadge("وسام بطل الشبكة");
-        }
-        sendTelegramNotification(player);
+        handleWin(player);
         return;
       }
     }
@@ -257,7 +320,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       setSelectedAnswer(null);
       setCurrentPlayer(p => p === "green" ? "red" : "green");
     }, 1500);
-  }, [cellOwners, gameMode, onXP, onBadge, winner]);
+  }, [cellOwners, gameMode, onXP, onBadge, startTime, timerStarted]);
 
   const handleAnswer = (idx: number) => {
     if (answered || !currentQuestion) return;
@@ -272,7 +335,6 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
 
     setAiThinking(true);
     const timeout = setTimeout(() => {
-      // Find empty cells
       const emptyCells = [];
       for (let r = 0; r < BOARD_SIZE; r++) {
         for (let c = 0; c < BOARD_SIZE; c++) {
@@ -282,15 +344,12 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       }
       if (emptyCells.length === 0) { setAiThinking(false); return; }
 
-      // Pick strategic cell (prefer cells adjacent to existing red cells, or top row)
       const redCells = Array.from(cellOwners.entries()).filter(([, c]) => c === "red");
       let chosen: string;
       if (redCells.length === 0) {
-        // Start from top row
         const topEmpty = emptyCells.filter(id => id.startsWith("0-"));
         chosen = topEmpty.length > 0 ? topEmpty[Math.floor(Math.random() * topEmpty.length)] : emptyCells[Math.floor(Math.random() * emptyCells.length)];
       } else {
-        // Find neighbors of red cells
         const adjacent = emptyCells.filter(id => {
           const [r, c] = id.split("-").map(Number);
           return redCells.some(([k]) => {
@@ -301,13 +360,18 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
         chosen = adjacent.length > 0 ? adjacent[Math.floor(Math.random() * adjacent.length)] : emptyCells[Math.floor(Math.random() * emptyCells.length)];
       }
 
-      const question = getRandomQuestion();
+      // Start timer on AI first move too
+      if (!timerStarted) {
+        setTimerStarted(true);
+        setStartTime(Date.now());
+      }
+
+      const question = getNextQuestion();
       setSelectedCell(chosen);
       setCurrentQuestion(question);
       setAnswered(false);
       setSelectedAnswer(null);
 
-      // AI answers after delay (70% correct rate)
       setTimeout(() => {
         const aiCorrect = Math.random() < 0.7;
         const aiAnswer = aiCorrect ? question.correct : ((question.correct + 1 + Math.floor(Math.random() * 3)) % 4);
@@ -319,9 +383,12 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
           newOwners.set(chosen, "red");
           setCellOwners(newOwners);
           if (checkWin(newOwners, "red")) {
+            const time = Math.floor((Date.now() - startTime) / 1000);
+            setFinalTime(time);
             setWinner("red");
             setCelebrate(true);
             setTimeout(() => setCelebrate(false), 4000);
+            setShowWinModal(true);
           }
         }
 
@@ -344,11 +411,11 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   const sendTelegramNotification = async (winnerColor: "green" | "red") => {
     setSendingTelegram(true);
     try {
-      const winnerName = studentName || (winnerColor === "green" ? "اللاعب الأخضر" : "اللاعب الأحمر");
+      const name = winnerName || studentName || (winnerColor === "green" ? "اللاعب الأخضر" : "اللاعب الأحمر");
       await supabase.functions.invoke("send-telegram", {
         body: {
-          student_name: winnerName,
-          message: `🏆 بطل جديد يسيطر على ساحة العباقرة!\n👤 الفائز: ${winnerName}\n🔥 هل تجرؤ على تحديه؟\n🔗 https://genius-saudi-learn.lovable.app`,
+          student_name: name,
+          message: `🏆 بطل جديد يسيطر على ساحة العباقرة!\n👤 الفائز: ${name}\n🔥 هل تجرؤ على تحديه؟\n🔗 https://genius-saudi-learn.lovable.app`,
         },
       });
     } catch {
@@ -358,14 +425,42 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     }
   };
 
+  const saveToGallery = async () => {
+    if (!winnerName.trim() || finalTime === null) return;
+    const medal = getMedalInfo(finalTime);
+    try {
+      await (supabase as any).from("genius_gallery").insert({
+        student_name: winnerName.trim(),
+        medal: medal.key,
+        time_seconds: finalTime,
+        subject: subjectFilter || "all",
+        game_mode: gameMode,
+      });
+    } catch {
+      // silent
+    }
+    setShowWinModal(false);
+  };
+
   const resetGame = () => {
     setCellOwners(new Map());
     setCurrentPlayer("green");
     setSelectedCell(null);
     setCurrentQuestion(null);
     setWinner(null);
-    setUsedQuestions(new Set());
     setAiThinking(false);
+    setTimerStarted(false);
+    setStartTime(0);
+    setElapsed(0);
+    setFinalTime(null);
+    setShowWinModal(false);
+    setWinnerName(studentName || "");
+    // Re-shuffle questions
+    const filtered = subjectFilter && subjectFilter !== "all"
+      ? allQuestions.filter(q => q.subject === subjectFilter)
+      : allQuestions;
+    setShuffledQuestions(shuffleArray(filtered));
+    setQuestionIndex(0);
   };
 
   const getCellColor = (id: string) => {
@@ -377,6 +472,12 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   };
 
   const subjectTitle = subjectFilter && subjectFilter !== "all" ? subjectNames[subjectFilter] || "" : "شامل";
+
+  const formatTime = (s: number) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return m > 0 ? `${m}:${sec.toString().padStart(2, "0")}` : `${sec} ث`;
+  };
 
   // Mode selection screen
   if (gameMode === "select") {
@@ -423,8 +524,55 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   }
 
   return (
-    <div className="min-h-screen flex flex-col px-3 py-4">
+    <div className="min-h-screen flex flex-col px-3 py-4 pb-24">
       <ConfettiCelebration trigger={celebrate} />
+
+      {/* Win Modal with name input & medal */}
+      {showWinModal && finalTime !== null && (
+        <div className="fixed inset-0 bg-foreground/60 backdrop-blur-sm flex items-center justify-center z-[100] px-4">
+          <div ref={winnerRef} className="neu-card p-8 max-w-sm w-full animate-bounce-in text-center">
+            <div className="text-6xl mb-3">{getMedalInfo(finalTime).medal}</div>
+            <h2 className="text-2xl font-extrabold text-foreground mb-1">
+              🏆 {gameMode === "ai" ? (winner === "green" ? "فزت!" : "فاز الذكاء الاصطناعي!") : `فاز ${winner === "green" ? "الأخضر" : "الأحمر"}!`}
+            </h2>
+            <p className={`text-xl font-bold mb-1 ${getMedalInfo(finalTime).color}`}>
+              {getMedalInfo(finalTime).label}
+            </p>
+            <div className="flex items-center justify-center gap-2 mb-4 text-muted-foreground">
+              <Clock className="w-4 h-4" />
+              <span className="font-bold">{formatTime(finalTime)}</span>
+            </div>
+            <p className="text-lg font-bold text-primary mb-2">+150 XP + وسام بطل الشبكة</p>
+            <input
+              type="text"
+              value={winnerName}
+              onChange={(e) => setWinnerName(e.target.value)}
+              placeholder="اسم الفائز"
+              className="w-full px-5 py-4 rounded-2xl border-2 border-input bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-center text-2xl font-bold mb-4"
+              dir="rtl"
+            />
+            <p className="font-ruqaa text-matte-gold text-sm mb-4">منصة الطالب العبقري</p>
+            {sendingTelegram && <p className="text-sm text-muted-foreground mb-2">جارٍ إرسال التحدي...</p>}
+            <div className="flex gap-3">
+              <button
+                onClick={saveToGallery}
+                disabled={!winnerName.trim()}
+                className="flex-1 py-3 rounded-2xl gradient-emerald text-white font-bold text-lg shadow-emerald-lg active:scale-[0.97] transition-all disabled:opacity-50"
+              >
+                حفظ في المعرض ✨
+              </button>
+              <button
+                onClick={() => { setShowWinModal(false); resetGame(); }}
+                className="py-3 px-6 rounded-2xl bg-muted text-foreground font-bold text-lg active:scale-[0.97] transition-all"
+              >
+                جديد ⬡
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {winner && !showWinModal && <ShareButton context="win" resultContainerRef={winnerRef} />}
 
       {/* Header */}
       <button onClick={() => { resetGame(); setGameMode("select"); }} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-3 self-start">
@@ -432,13 +580,18 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
         <span className="font-bold text-lg">رجوع</span>
       </button>
 
-      <div className="text-center mb-3 animate-slide-up">
+      <div className="text-center mb-2 animate-slide-up">
         <h1 className="text-2xl font-extrabold text-heading">
           ⬡ شبكة التحدي — {subjectTitle} {gameMode === "ai" ? "🤖" : "👥"}
         </h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          {gameMode === "ai" ? "أنت (أخضر) ضد الذكاء الاصطناعي (أحمر)" : "صِل مسارك قبل خصمك!"}
-        </p>
+      </div>
+
+      {/* Timer display */}
+      <div className="flex items-center justify-center gap-2 mb-2 text-lg font-bold">
+        <Clock className="w-5 h-5 text-primary" />
+        <span className={`${timerStarted ? "text-primary" : "text-muted-foreground"}`}>
+          {timerStarted ? formatTime(elapsed) : "0 ث"}
+        </span>
       </div>
 
       {/* Turn indicator */}
@@ -459,26 +612,6 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
         <span>🟢 {gameMode === "ai" ? "أنت" : "أخضر"}: يسار ← يمين</span>
         <span>🔴 {gameMode === "ai" ? "الذكاء" : "أحمر"}: أعلى ← أسفل</span>
       </div>
-
-      {/* Winner */}
-      {winner && (
-        <div ref={winnerRef} className="text-center py-6 animate-bounce-in mb-4 bg-card rounded-3xl p-6">
-          <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-3 ${winner === "green" ? "bg-emerald-500" : "bg-red-500"} shadow-lg`}>
-            <Trophy className="w-10 h-10 text-white" />
-          </div>
-          <p className="text-3xl font-extrabold mb-2 text-foreground">
-            🏆 {gameMode === "ai" ? (winner === "green" ? "فزت!" : "فاز الذكاء الاصطناعي!") : `فاز ${winner === "green" ? "الأخضر" : "الأحمر"}!`}
-          </p>
-          <p className="text-lg font-bold text-gold">+150 XP + وسام بطل الشبكة</p>
-          <p className="font-ruqaa text-matte-gold text-sm mt-1">منصة الطالب العبقري</p>
-          {sendingTelegram && <p className="text-sm text-muted-foreground mt-2">جارٍ إرسال التحدي...</p>}
-          <button onClick={resetGame} className="mt-4 py-3 px-8 rounded-2xl gradient-emerald text-white font-bold text-lg shadow-emerald-lg active:scale-[0.97] transition-all">
-            جولة جديدة ⬡
-          </button>
-        </div>
-      )}
-
-      {winner && <ShareButton context="win" resultContainerRef={winnerRef} />}
 
       {/* Hex Grid */}
       <div className="flex-1 flex flex-col items-center justify-center">
@@ -525,8 +658,8 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
 
       {/* Question Modal */}
       {currentQuestion && selectedCell && !winner && (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center p-3" onClick={e => e.stopPropagation()}>
-          <div className="w-full max-w-md bg-card rounded-3xl p-5 shadow-2xl animate-slide-up border border-border">
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center p-3 pb-20" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-md bg-card rounded-3xl p-5 shadow-2xl animate-slide-up border border-border mb-4">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold px-2 py-1 rounded-full bg-muted text-muted-foreground">
                 {subjectEmoji[currentQuestion.subject] || "📚"} {subjectNames[currentQuestion.subject] || currentQuestion.subject}
@@ -536,7 +669,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
               </span>
             </div>
             <p className="text-lg font-extrabold mb-4 leading-8 text-foreground">{currentQuestion.q}</p>
-            <div className="grid grid-cols-1 gap-2">
+            <div className="grid grid-cols-1 gap-2 pb-2">
               {currentQuestion.opts.map((opt, i) => {
                 let cls = "w-full py-3 px-4 rounded-xl border-2 text-right font-bold text-base transition-all active:scale-[0.97]";
                 if (answered) {

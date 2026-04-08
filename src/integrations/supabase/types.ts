@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      genius_gallery: {
+        Row: {
+          created_at: string
+          game_mode: string
+          id: string
+          medal: string
+          student_name: string
+          subject: string
+          time_seconds: number
+        }
+        Insert: {
+          created_at?: string
+          game_mode?: string
+          id?: string
+          medal?: string
+          student_name: string
+          subject?: string
+          time_seconds?: number
+        }
+        Update: {
+          created_at?: string
+          game_mode?: string
+          id?: string
+          medal?: string
+          student_name?: string
+          subject?: string
+          time_seconds?: number
+        }
+        Relationships: []
+      }
       leaderboard: {
         Row: {
           badges: string[] | null

@@ -9,12 +9,13 @@ import CameraSolver from "@/components/CameraSolver";
 import Leaderboard from "@/components/Leaderboard";
 import GamesHub from "@/components/GamesHub";
 import GeniusQuizzes from "@/components/GeniusQuizzes";
+import GeniusGallery from "@/components/GeniusGallery";
 import StudentNameModal from "@/components/StudentNameModal";
 import WhisperModal from "@/components/WhisperModal";
 import AppFooter from "@/components/AppFooter";
 import { useXP } from "@/hooks/useXP";
 
-type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "quizzes";
+type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "quizzes" | "gallery";
 
 const Index = () => {
   const [screen, setScreen] = useState<Screen>("stage");
@@ -56,6 +57,7 @@ const Index = () => {
           onLeaderboard={openLeaderboard}
           onGames={() => setScreen("games")}
           onQuizzes={() => setScreen("quizzes")}
+          onGallery={() => setScreen("gallery")}
           xp={xp}
           studentName={studentName}
         />
@@ -68,6 +70,7 @@ const Index = () => {
       {screen === "leaderboard" && <Leaderboard onBack={() => setScreen("stage")} currentName={studentName} currentXP={xp} />}
       {screen === "games" && <GamesHub onBack={() => setScreen("stage")} onXP={(amount) => addXP(amount)} onBadge={(badge) => awardBadge(badge)} studentName={studentName} />}
       {screen === "quizzes" && <GeniusQuizzes onBack={() => setScreen("stage")} />}
+      {screen === "gallery" && <GeniusGallery onBack={() => setScreen("stage")} />}
 
       {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}
 
