@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { ArrowRight, Gamepad2, Hexagon, BookOpen, Calculator, FlaskConical, BookOpenCheck, Landmark, Globe, Monitor, Palette, Dumbbell, Heart, Languages } from "lucide-react";
+import { ArrowRight, Gamepad2, Hexagon, BookOpen, Calculator, FlaskConical, BookOpenCheck, Landmark, Globe, Monitor, Palette, Dumbbell, Heart, Languages, Wifi } from "lucide-react";
 import HexBattleGame from "./HexBattleGame";
+import OnlineChallenge from "./OnlineChallenge";
 
 interface GamesHubProps {
   onBack: () => void;
@@ -32,6 +33,11 @@ const subjects: SubjectDef[] = [
 
 const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
   const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
+  const [showOnline, setShowOnline] = useState(false);
+
+  if (showOnline) {
+    return <OnlineChallenge onBack={() => setShowOnline(false)} onXP={onXP} studentName={studentName} />;
+  }
 
   if (selectedSubject) {
     return (
@@ -60,6 +66,21 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
         <p className="text-muted-foreground text-xl">اختر المادة للبدء في التحدي!</p>
       </div>
 
+      {/* Online Challenge */}
+      <button
+        onClick={() => setShowOnline(true)}
+        className="w-full max-w-md mx-auto mb-3 bg-white/20 backdrop-blur-xl border border-white/30 rounded-3xl p-5 flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] animate-scale-in cursor-pointer ring-2 ring-matte-gold/40"
+      >
+        <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-royal-blue shadow-lg flex items-center justify-center">
+          <Wifi className="w-9 h-9 text-matte-gold" />
+        </div>
+        <div className="flex-1 text-right">
+          <h3 className="text-xl font-extrabold text-foreground">🌐 تحدي صديقك أونلاين</h3>
+          <p className="text-muted-foreground text-sm mt-1">العب مع صديق عن بُعد! 🔥</p>
+        </div>
+        <span className="px-2 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-bold">جديد</span>
+      </button>
+
       {/* All subjects hex battle */}
       <button
         onClick={() => setSelectedSubject("all")}
@@ -69,10 +90,9 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
           <Hexagon className="w-9 h-9 text-white" />
         </div>
         <div className="flex-1 text-right">
-          <h3 className="text-xl font-extrabold text-heading">⬡ تحدي العبقري الشامل</h3>
+          <h3 className="text-xl font-extrabold text-foreground">⬡ تحدي العبقري الشامل</h3>
           <p className="text-muted-foreground text-sm mt-1">أسئلة من جميع المواد! 🔥</p>
         </div>
-        <span className="px-2 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-bold">جديد</span>
       </button>
 
       <div className="grid grid-cols-2 gap-4 max-w-md mx-auto w-full pb-20">
