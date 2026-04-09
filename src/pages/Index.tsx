@@ -6,6 +6,7 @@ import LessonSearch from "@/components/LessonSearch";
 import LessonContent from "@/components/LessonContent";
 import QuizModule from "@/components/QuizModule";
 import CameraSolver from "@/components/CameraSolver";
+import ShareButton from "@/components/ShareButton";
 import Leaderboard from "@/components/Leaderboard";
 import GamesHub from "@/components/GamesHub";
 import GeniusQuizzes from "@/components/GeniusQuizzes";
@@ -73,6 +74,8 @@ const Index = () => {
       {screen === "gallery" && <GeniusGallery onBack={() => setScreen("stage")} />}
 
       {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}
+
+      <ShareButton />
 
       <button
         onClick={() => setShowWhisper(true)}

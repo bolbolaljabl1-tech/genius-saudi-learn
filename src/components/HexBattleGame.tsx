@@ -1,8 +1,9 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { ArrowRight, Trophy, Bot, Users, Clock } from "lucide-react";
+import { ArrowRight, Trophy, Bot, Users, Clock, Volume2 } from "lucide-react";
 import ConfettiCelebration from "./ConfettiCelebration";
 import ShareButton from "./ShareButton";
 import { supabase } from "@/integrations/supabase/client";
+import { useTTS } from "@/hooks/useTTS";
 
 interface HexBattleGameProps {
   onBack: () => void;
@@ -234,6 +235,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   // Win modal with name input
   const [showWinModal, setShowWinModal] = useState(false);
   const [winnerName, setWinnerName] = useState(studentName || "");
+  const { speak } = useTTS();
 
   // Initialize shuffled questions
   useEffect(() => {
@@ -277,9 +279,12 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     }
 
     setSelectedCell(id);
-    setCurrentQuestion(getNextQuestion());
+    const q = getNextQuestion();
+    setCurrentQuestion(q);
     setAnswered(false);
     setSelectedAnswer(null);
+    // Auto-read question aloud
+    speak(q.q);
   };
 
   const handleWin = (player: "green" | "red") => {
@@ -668,7 +673,12 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                 {gameMode === "ai" && currentPlayer === "red" ? "🤖 دور الذكاء" : `دور ${currentPlayer === "green" ? (gameMode === "ai" ? "أنت" : "الأخضر") : "الأحمر"}`}
               </span>
             </div>
-            <p className="text-lg font-extrabold mb-4 leading-8 text-foreground">{currentQuestion.q}</p>
+            <div className="flex items-center gap-2 mb-4">
+              <p className="text-lg font-extrabold leading-8 text-foreground flex-1">{currentQuestion.q}</p>
+              <button onClick={() => speak(currentQuestion.q)} className="flex-shrink-0 p-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+                <Volume2 className="w-5 h-5" />
+              </button>
+            </div>
             <div className="grid grid-cols-1 gap-2 pb-2">
               {currentQuestion.opts.map((opt, i) => {
                 let cls = "w-full py-3 px-4 rounded-xl border-2 text-right font-bold text-base transition-all active:scale-[0.97]";

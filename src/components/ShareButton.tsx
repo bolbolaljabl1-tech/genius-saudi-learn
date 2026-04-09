@@ -3,7 +3,7 @@ import { toPng } from "html-to-image";
 import { toast } from "@/hooks/use-toast";
 
 interface ShareButtonProps {
-  context: "camera" | "video" | "win";
+  context?: "camera" | "video" | "win" | "global";
   resultContainerRef?: React.RefObject<HTMLDivElement>;
 }
 
@@ -20,9 +20,13 @@ const shareMessages: Record<string, { text: string; title: string }> = {
     text: "حققتُ الفوز في تحدي العباقرة! هل تجرؤ على منافستي؟ 🏆",
     title: "تحدي العباقرة",
   },
+  global: {
+    text: "جرّب منصة الطالب العبقري 🎓 - تعلّم وتحدَّ والعب! 🧠🏆",
+    title: "منصة الطالب العبقري",
+  },
 };
 
-const ShareButton = ({ context, resultContainerRef }: ShareButtonProps) => {
+const ShareButton = ({ context = "global", resultContainerRef }: ShareButtonProps) => {
   const handleShare = async () => {
     const msg = shareMessages[context];
     const url = "https://genius-saudi-learn.lovable.app";
@@ -61,7 +65,7 @@ const ShareButton = ({ context, resultContainerRef }: ShareButtonProps) => {
   return (
     <button
       onClick={handleShare}
-      className="fixed bottom-20 left-4 z-40 bg-royal-blue text-matte-gold rounded-full p-3.5 shadow-lg hover:scale-110 active:scale-95 transition-all duration-200 animate-pulse-glow"
+      className="fixed bottom-20 left-4 z-[9999] bg-matte-gold text-matte-gold-foreground rounded-full p-3.5 shadow-gold hover:scale-110 active:scale-95 transition-all duration-200 animate-pulse-glow"
       aria-label="مشاركة"
     >
       <Share2 className="w-6 h-6" />

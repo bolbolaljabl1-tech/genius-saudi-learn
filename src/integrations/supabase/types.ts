@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      challenge_rooms: {
+        Row: {
+          cell_owners: Json
+          created_at: string
+          creator_name: string
+          current_player: string
+          current_question: Json | null
+          game_state: Json
+          id: string
+          joiner_name: string | null
+          room_code: string
+          selected_cell: string | null
+          status: string
+          subject: string
+          winner: string | null
+        }
+        Insert: {
+          cell_owners?: Json
+          created_at?: string
+          creator_name: string
+          current_player?: string
+          current_question?: Json | null
+          game_state?: Json
+          id?: string
+          joiner_name?: string | null
+          room_code: string
+          selected_cell?: string | null
+          status?: string
+          subject?: string
+          winner?: string | null
+        }
+        Update: {
+          cell_owners?: Json
+          created_at?: string
+          creator_name?: string
+          current_player?: string
+          current_question?: Json | null
+          game_state?: Json
+          id?: string
+          joiner_name?: string | null
+          room_code?: string
+          selected_cell?: string | null
+          status?: string
+          subject?: string
+          winner?: string | null
+        }
+        Relationships: []
+      }
       genius_gallery: {
         Row: {
           created_at: string
