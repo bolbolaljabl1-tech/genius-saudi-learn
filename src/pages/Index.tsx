@@ -9,7 +9,7 @@ import CameraSolver from "@/components/CameraSolver";
 import ShareButton from "@/components/ShareButton";
 import Leaderboard from "@/components/Leaderboard";
 import GamesHub from "@/components/GamesHub";
-import GeniusQuizzes from "@/components/GeniusQuizzes";
+import TeacherQuiz from "@/components/TeacherQuiz";
 import GeniusGallery from "@/components/GeniusGallery";
 import StudentNameModal from "@/components/StudentNameModal";
 import WhisperModal from "@/components/WhisperModal";
@@ -70,7 +70,7 @@ const Index = () => {
       {screen === "camera" && <CameraSolver onBack={() => setScreen("stage")} onXP={() => addXP(20)} />}
       {screen === "leaderboard" && <Leaderboard onBack={() => setScreen("stage")} currentName={studentName} currentXP={xp} />}
       {screen === "games" && <GamesHub onBack={() => setScreen("stage")} onXP={(amount) => addXP(amount)} onBadge={(badge) => awardBadge(badge)} studentName={studentName} />}
-      {screen === "quizzes" && <GeniusQuizzes onBack={() => setScreen("stage")} />}
+      {screen === "quizzes" && <TeacherQuiz onBack={() => setScreen("stage")} />}
       {screen === "gallery" && <GeniusGallery onBack={() => setScreen("stage")} />}
 
       {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}

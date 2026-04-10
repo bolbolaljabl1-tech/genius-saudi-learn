@@ -1,4 +1,4 @@
-import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, FlaskConical } from "lucide-react";
+import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, School } from "lucide-react";
 import PlatformHeader from "./PlatformHeader";
 import appIcon from "@/assets/app-icon.png";
 import heroBanner from "@/assets/hero-banner.png";
@@ -56,8 +56,8 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onQuizzes,
 
         {/* Quizzes Button */}
         <button onClick={onQuizzes} className="w-full max-w-xl mb-6 py-5 rounded-2xl bg-royal-blue text-matte-gold font-extrabold text-2xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in hover:opacity-90" style={{ animationDelay: "0.15s" }}>
-          <FlaskConical className="w-7 h-7" />
-          🧪 اختبارات العباقرة
+          <School className="w-7 h-7" />
+          📝 اختبارات المعلم
         </button>
 
         {/* Stage Label */}
