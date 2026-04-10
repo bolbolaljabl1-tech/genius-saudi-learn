@@ -17,6 +17,7 @@ export default {
         tajawal: ["Tajawal", "sans-serif"],
         amiri: ["Amiri", "serif"],
         ruqaa: ["Aref Ruqaa", "serif"],
+        naskh: ["Noto Naskh Arabic", "serif"],
       },
       colors: {
         border: "hsl(var(--border))",
