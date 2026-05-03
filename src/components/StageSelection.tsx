@@ -53,11 +53,6 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery,
           🎮 ألعاب العباقرة
         </button>
 
-        {/* Quizzes Button */}
-        <button onClick={onQuizzes} className="w-full max-w-xl mb-6 py-5 rounded-2xl bg-royal-blue text-matte-gold font-extrabold text-2xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in hover:opacity-90" style={{ animationDelay: "0.15s" }}>
-          <School className="w-7 h-7" />
-          📝 اختبارات المعلم
-        </button>
 
         {/* Stage Label */}
         <div className="text-center mb-6 animate-slide-up" style={{ animationDelay: "0.2s" }}>
