@@ -56,7 +56,6 @@ const Index = () => {
           onCamera={() => setScreen("camera")}
           onLeaderboard={openLeaderboard}
           onGames={() => setScreen("games")}
-          onQuizzes={() => setScreen("quizzes")}
           onGallery={() => setScreen("gallery")}
           xp={xp}
           studentName={studentName}
