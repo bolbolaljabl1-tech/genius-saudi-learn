@@ -15,7 +15,7 @@ import WhisperModal from "@/components/WhisperModal";
 import AppFooter from "@/components/AppFooter";
 import { useXP } from "@/hooks/useXP";
 
-type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "quizzes" | "gallery";
+type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery";
 
 const Index = () => {
   const [screen, setScreen] = useState<Screen>("stage");
