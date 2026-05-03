@@ -1,4 +1,4 @@
-import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, School } from "lucide-react";
+import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2 } from "lucide-react";
 import PlatformHeader from "./PlatformHeader";
 import appIcon from "@/assets/app-icon.png";
 import heroBanner from "@/assets/hero-banner.png";
@@ -8,13 +8,12 @@ interface StageSelectionProps {
   onCamera: () => void;
   onLeaderboard: () => void;
   onGames: () => void;
-  onQuizzes: () => void;
   onGallery: () => void;
   xp: number;
   studentName: string;
 }
 
-const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onQuizzes, onGallery, xp, studentName }: StageSelectionProps) => {
+const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery, xp, studentName }: StageSelectionProps) => {
   const stages = [
     { id: "elementary", title: "المرحلة الابتدائية", description: "من الصف الأول إلى السادس", icon: BookOpen, delay: "0.1s" },
     { id: "middle", title: "المرحلة المتوسطة", description: "من الصف الأول إلى الثالث", icon: GraduationCap, delay: "0.3s" },
@@ -54,11 +53,6 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onQuizzes,
           🎮 ألعاب العباقرة
         </button>
 
-        {/* Quizzes Button */}
-        <button onClick={onQuizzes} className="w-full max-w-xl mb-6 py-5 rounded-2xl bg-royal-blue text-matte-gold font-extrabold text-2xl shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in hover:opacity-90" style={{ animationDelay: "0.15s" }}>
-          <School className="w-7 h-7" />
-          📝 اختبارات المعلم
-        </button>
 
         {/* Stage Label */}
         <div className="text-center mb-6 animate-slide-up" style={{ animationDelay: "0.2s" }}>
