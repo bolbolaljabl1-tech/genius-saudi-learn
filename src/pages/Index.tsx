@@ -73,6 +73,7 @@ const Index = () => {
       {screen === "gallery" && <GeniusGallery onBack={() => setScreen("stage")} />}
 
       {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}
+      {showSupport && <SupportModal onClose={() => setShowSupport(false)} />}
 
       <ShareButton />
 
@@ -82,6 +83,15 @@ const Index = () => {
       >
         <MessageCircleHeart className="w-5 h-5" />
         همسة للعبقري
+      </button>
+
+      <button
+        onClick={() => setShowSupport(true)}
+        className="fixed bottom-32 left-4 z-50 bg-royal-blue text-matte-gold rounded-full p-3 shadow-lg border border-matte-gold/40 flex items-center gap-2 text-sm font-bold"
+        aria-label="الدعم الفني"
+      >
+        <LifeBuoy className="w-5 h-5" />
+        الدعم الفني
       </button>
 
       <AppFooter />
