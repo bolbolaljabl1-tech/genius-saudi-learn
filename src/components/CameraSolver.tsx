@@ -171,6 +171,15 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
               </button>
             </div>
             <div className="text-body-blue leading-9 whitespace-pre-line text-lg">{answer}</div>
+            <a
+              href={`https://www.youtube.com/results?search_query=${encodeURIComponent("عين دروس " + (hint || "شرح الدرس"))}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 w-full py-3 rounded-xl bg-red-600 text-white font-extrabold text-lg shadow-lg active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+            >
+              <Youtube className="w-6 h-6" />
+              شاهد شرح الدرس من قناة عين
+            </a>
             <p className="font-ruqaa text-matte-gold text-xs mt-3 text-center">منصة الطالب العبقري</p>
           </div>
         )}
