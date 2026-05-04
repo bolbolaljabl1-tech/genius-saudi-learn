@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Camera, Loader2, ArrowRight, ImageIcon, Volume2, VolumeX } from "lucide-react";
+import { Camera, Loader2, ArrowRight, ImageIcon, Volume2, VolumeX, Youtube, Lightbulb } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ShareButton from "./ShareButton";
 
@@ -10,6 +10,9 @@ interface CameraSolverProps {
 
 const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
+  const [hint, setHint] = useState("");
+  const [showHintTip, setShowHintTip] = useState(false);
   const [answer, setAnswer] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
