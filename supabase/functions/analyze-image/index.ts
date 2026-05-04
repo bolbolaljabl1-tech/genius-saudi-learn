@@ -38,7 +38,7 @@ serve(async (req) => {
           {
             role: "user",
             content: [
-              { type: "text", text: "حلل هذا السؤال وقدم الحل بشكل مختصر ومباشر:" },
+              { type: "text", text: `حلل هذا السؤال وقدم الحل بشكل مختصر ومباشر.${hint ? `\nتوضيح من الطالب: ${hint}` : ""}` },
               { type: "image_url", image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }
             ]
           }
