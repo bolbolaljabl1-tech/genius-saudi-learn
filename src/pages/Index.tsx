@@ -12,6 +12,7 @@ import GamesHub from "@/components/GamesHub";
 import GeniusGallery from "@/components/GeniusGallery";
 import StudentNameModal from "@/components/StudentNameModal";
 import WhisperModal from "@/components/WhisperModal";
+import SupportModal from "@/components/SupportModal";
 import AppFooter from "@/components/AppFooter";
 import { useXP } from "@/hooks/useXP";
 
