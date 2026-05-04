@@ -1,7 +1,7 @@
 import { Mail } from "lucide-react";
 
 const AppFooter = () => (
-  <footer className="fixed bottom-0 inset-x-0 py-3 text-center bg-royal-blue border-t border-matte-gold/30 z-50">
+  <footer className="fixed bottom-0 inset-x-0 py-3 text-center bg-royal-blue/70 backdrop-blur-xl border-t border-matte-gold/40 z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.25)]">
     <p className="font-amiri font-bold text-lg text-matte-gold" style={{ textShadow: "0 0 10px hsl(43 72% 55% / 0.4), 0 2px 4px rgba(0,0,0,0.3)" }}>
       منصة الطالب العبقري - 2026 🎓
     </p>
