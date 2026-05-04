@@ -9,7 +9,7 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { imageBase64 } = await req.json();
+    const { imageBase64, hint } = await req.json();
     if (!imageBase64) throw new Error("No image provided");
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
