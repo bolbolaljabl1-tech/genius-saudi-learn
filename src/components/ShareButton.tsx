@@ -82,7 +82,7 @@ const ShareButton = ({ context = "global", resultContainerRef }: ShareButtonProp
   return (
     <button
       onClick={handleShare}
-      className="fixed bottom-20 right-4 z-[9999] bg-matte-gold text-matte-gold-foreground rounded-full p-3.5 shadow-gold hover:scale-110 active:scale-95 transition-all duration-200 animate-pulse-glow"
+      className={`fixed bottom-20 right-4 z-[9999] bg-matte-gold text-matte-gold-foreground rounded-full p-3.5 shadow-gold hover:scale-110 active:scale-95 transition-all duration-300 animate-pulse-glow ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}
       aria-label="مشاركة"
     >
       <Share2 className="w-6 h-6" />
