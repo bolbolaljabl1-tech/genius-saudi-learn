@@ -109,12 +109,38 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
             <img src={imagePreview} alt="صورة السؤال" className="w-full max-h-64 object-contain bg-muted/30" />
             <div className="p-3 flex justify-center">
               <button
-                onClick={() => { setImagePreview(null); setAnswer(""); setError(""); window.speechSynthesis.cancel(); setIsSpeaking(false); fileInputRef.current?.click(); }}
+                onClick={() => { setImagePreview(null); setImageBase64(null); setHint(""); setAnswer(""); setError(""); setShowHintTip(false); window.speechSynthesis.cancel(); setIsSpeaking(false); fileInputRef.current?.click(); }}
                 className="text-primary font-bold text-lg hover:underline"
               >
                 📸 التقاط صورة أخرى
               </button>
             </div>
+          </div>
+        )}
+
+        {imagePreview && !answer && !loading && (
+          <div className="space-y-3 animate-slide-up">
+            {showHintTip && (
+              <div className="neu-card p-4 border-2 border-matte-gold/40 bg-matte-gold/5 flex items-start gap-3">
+                <Lightbulb className="w-6 h-6 text-matte-gold flex-shrink-0 mt-0.5" />
+                <p className="text-foreground font-bold text-base leading-7">
+                  يا عبقري، لكي تكون الإجابة محكمة، يمكنك إضافة بضع كلمات تشرح فيها سؤالك.. فالإيضاح مفتاح الفلاح! 🌟
+                </p>
+              </div>
+            )}
+            <textarea
+              value={hint}
+              onChange={(e) => setHint(e.target.value)}
+              placeholder="اكتب توضيحاً اختيارياً للسؤال (المادة، الموضوع، ما تريد معرفته)..."
+              rows={3}
+              className="w-full rounded-2xl border-2 border-input bg-background px-4 py-3 text-base font-bold focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+            />
+            <button
+              onClick={() => imageBase64 && analyzeImage(imageBase64, hint.trim())}
+              className="w-full py-4 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-xl shadow-emerald-lg active:scale-[0.98] transition-all"
+            >
+              ✨ حلل السؤال الآن
+            </button>
           </div>
         )}
 
