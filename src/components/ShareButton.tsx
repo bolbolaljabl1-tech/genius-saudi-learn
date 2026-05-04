@@ -1,4 +1,5 @@
 import { Share2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import { toast } from "@/hooks/use-toast";
 
@@ -27,6 +28,22 @@ const shareMessages: Record<string, { text: string; title: string }> = {
 };
 
 const ShareButton = ({ context = "global", resultContainerRef }: ShareButtonProps) => {
+  const [visible, setVisible] = useState(true);
+  const idleTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setVisible(false);
+      if (idleTimer.current) window.clearTimeout(idleTimer.current);
+      idleTimer.current = window.setTimeout(() => setVisible(true), 350);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (idleTimer.current) window.clearTimeout(idleTimer.current);
+    };
+  }, []);
+
   const handleShare = async () => {
     const msg = shareMessages[context];
     const url = "https://genius-saudi-learn.lovable.app";
@@ -65,7 +82,7 @@ const ShareButton = ({ context = "global", resultContainerRef }: ShareButtonProp
   return (
     <button
       onClick={handleShare}
-      className="fixed bottom-20 right-4 z-[9999] bg-matte-gold text-matte-gold-foreground rounded-full p-3.5 shadow-gold hover:scale-110 active:scale-95 transition-all duration-200 animate-pulse-glow"
+      className={`fixed bottom-20 right-4 z-[9999] bg-matte-gold text-matte-gold-foreground rounded-full p-3.5 shadow-gold hover:scale-110 active:scale-95 transition-all duration-300 animate-pulse-glow ${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}
       aria-label="مشاركة"
     >
       <Share2 className="w-6 h-6" />

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageCircleHeart } from "lucide-react";
+import { MessageCircleHeart, LifeBuoy } from "lucide-react";
 import StageSelection from "@/components/StageSelection";
 import SubjectSelection from "@/components/SubjectSelection";
 import LessonSearch from "@/components/LessonSearch";
@@ -12,6 +12,7 @@ import GamesHub from "@/components/GamesHub";
 import GeniusGallery from "@/components/GeniusGallery";
 import StudentNameModal from "@/components/StudentNameModal";
 import WhisperModal from "@/components/WhisperModal";
+import SupportModal from "@/components/SupportModal";
 import AppFooter from "@/components/AppFooter";
 import { useXP } from "@/hooks/useXP";
 
@@ -25,6 +26,7 @@ const Index = () => {
   const { xp, studentName, badges, addXP, awardBadge, saveStudentName } = useXP();
   const [showNameModal, setShowNameModal] = useState(false);
   const [showWhisper, setShowWhisper] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
 
   const handleStageSelect = (s: string) => { setStage(s); setScreen("subject"); };
   const handleSubjectSelect = (s: string) => { setSubject(s); setScreen("search"); };
@@ -71,6 +73,7 @@ const Index = () => {
       {screen === "gallery" && <GeniusGallery onBack={() => setScreen("stage")} />}
 
       {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}
+      {showSupport && <SupportModal onClose={() => setShowSupport(false)} />}
 
       <ShareButton />
 
@@ -80,6 +83,15 @@ const Index = () => {
       >
         <MessageCircleHeart className="w-5 h-5" />
         همسة للعبقري
+      </button>
+
+      <button
+        onClick={() => setShowSupport(true)}
+        className="fixed bottom-32 left-4 z-50 bg-royal-blue text-matte-gold rounded-full p-3 shadow-lg border border-matte-gold/40 flex items-center gap-2 text-sm font-bold"
+        aria-label="الدعم الفني"
+      >
+        <LifeBuoy className="w-5 h-5" />
+        الدعم الفني
       </button>
 
       <AppFooter />
