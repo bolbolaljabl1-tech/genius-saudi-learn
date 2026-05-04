@@ -1,4 +1,5 @@
 import { Share2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import { toast } from "@/hooks/use-toast";
 
