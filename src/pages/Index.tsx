@@ -26,6 +26,7 @@ const Index = () => {
   const { xp, studentName, badges, addXP, awardBadge, saveStudentName } = useXP();
   const [showNameModal, setShowNameModal] = useState(false);
   const [showWhisper, setShowWhisper] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
 
   const handleStageSelect = (s: string) => { setStage(s); setScreen("subject"); };
   const handleSubjectSelect = (s: string) => { setSubject(s); setScreen("search"); };
