@@ -27,18 +27,23 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
     reader.onloadend = () => {
       const result = reader.result as string;
       setImagePreview(result);
-      analyzeImage(result.split(",")[1]);
+      const base64 = result.split(",")[1];
+      setImageBase64(base64);
+      setShowHintTip(true);
+      setAnswer("");
+      setError("");
     };
     reader.readAsDataURL(file);
   };
 
-  const analyzeImage = async (base64: string) => {
+  const analyzeImage = async (base64: string, userHint = "") => {
     setLoading(true);
     setError("");
     setAnswer("");
+    setShowHintTip(false);
     try {
       const { data, error: fnError } = await supabase.functions.invoke("analyze-image", {
-        body: { imageBase64: base64 },
+        body: { imageBase64: base64, hint: userHint },
       });
       if (fnError) throw new Error(fnError.message);
       if (data?.error) throw new Error(data.error);
