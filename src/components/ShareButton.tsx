@@ -28,6 +28,22 @@ const shareMessages: Record<string, { text: string; title: string }> = {
 };
 
 const ShareButton = ({ context = "global", resultContainerRef }: ShareButtonProps) => {
+  const [visible, setVisible] = useState(true);
+  const idleTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setVisible(false);
+      if (idleTimer.current) window.clearTimeout(idleTimer.current);
+      idleTimer.current = window.setTimeout(() => setVisible(true), 350);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (idleTimer.current) window.clearTimeout(idleTimer.current);
+    };
+  }, []);
+
   const handleShare = async () => {
     const msg = shareMessages[context];
     const url = "https://genius-saudi-learn.lovable.app";
