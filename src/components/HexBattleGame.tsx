@@ -474,12 +474,24 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     setQuestionIndex(0);
   };
 
+  const rainbowPalette = [
+    "bg-pink-400 border-pink-500",
+    "bg-orange-400 border-orange-500",
+    "bg-yellow-400 border-yellow-500",
+    "bg-lime-400 border-lime-500",
+    "bg-cyan-400 border-cyan-500",
+    "bg-indigo-400 border-indigo-500",
+    "bg-fuchsia-400 border-fuchsia-500",
+  ];
+
   const getCellColor = (id: string) => {
     const owner = cellOwners.get(id);
-    if (owner === "green") return "bg-emerald-500 border-emerald-600 shadow-emerald-500/40";
-    if (owner === "red") return "bg-red-500 border-red-600 shadow-red-500/40";
-    if (selectedCell === id) return "bg-amber-400 border-amber-500 ring-4 ring-amber-300";
-    return "bg-card border-border hover:bg-muted hover:border-primary/40";
+    if (owner === "green") return "bg-emerald-500 border-emerald-600 shadow-emerald-500/40 text-white";
+    if (owner === "red") return "bg-red-500 border-red-600 shadow-red-500/40 text-white";
+    if (selectedCell === id) return "bg-amber-300 border-amber-500 ring-4 ring-amber-300 text-amber-900";
+    const [r, c] = id.split("-").map(Number);
+    const idx = (r * BOARD_SIZE + c) % rainbowPalette.length;
+    return `${rainbowPalette[idx]} hover:brightness-110 text-white/90`;
   };
 
   const subjectTitle = subjectFilter && subjectFilter !== "all" ? subjectNames[subjectFilter] || "" : "شامل";
