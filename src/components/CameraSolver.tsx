@@ -124,7 +124,7 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
               <div className="neu-card p-4 border-2 border-matte-gold/40 bg-matte-gold/5 flex items-start gap-3">
                 <Lightbulb className="w-6 h-6 text-matte-gold flex-shrink-0 mt-0.5" />
                 <p className="text-foreground font-bold text-base leading-7">
-                  يا عبقري، لكي تكون الإجابة محكمة، يمكنك إضافة بضع كلمات تشرح فيها سؤالك.. فالإيضاح مفتاح الفلاح! 🌟
+                  يا عبقري، لكي تكون الإجابة محكمة وأكثر دقة، يمكنك (اختيارياً) إضافة بضع كلمات تشرح فيها سؤالك.. فالإيضاح مفتاح الفلاح! 🌟
                 </p>
               </div>
             )}
