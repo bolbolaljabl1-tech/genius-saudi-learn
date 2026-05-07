@@ -605,23 +605,17 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
         </span>
       </div>
 
-      {/* Turn indicator */}
-      <div className="flex items-center justify-between max-w-sm mx-auto w-full mb-3">
+      {/* Turn indicator (no direction hints) */}
+      <div className="flex items-center justify-center gap-3 max-w-sm mx-auto w-full mb-3">
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${currentPlayer === "green" ? "bg-emerald-100 text-emerald-700 ring-2 ring-emerald-400" : "bg-emerald-50 text-emerald-400"}`}>
           <div className="w-3 h-3 rounded-full bg-emerald-500" />
-          {gameMode === "ai" ? "أنت ↔" : "أخضر ↔"}
+          {gameMode === "ai" ? "أنت" : "أخضر"}
         </div>
         {aiThinking && <span className="text-sm text-muted-foreground animate-pulse font-bold">🤖 يفكر...</span>}
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${currentPlayer === "red" ? "bg-red-100 text-red-700 ring-2 ring-red-400" : "bg-red-50 text-red-400"}`}>
-          {gameMode === "ai" ? "🤖 ↕" : "أحمر ↕"}
+          {gameMode === "ai" ? "🤖" : "أحمر"}
           <div className="w-3 h-3 rounded-full bg-red-500" />
         </div>
-      </div>
-
-      {/* Legend */}
-      <div className="flex justify-center gap-4 mb-3 text-xs text-muted-foreground">
-        <span>🟢 {gameMode === "ai" ? "أنت" : "أخضر"}: يسار ← يمين</span>
-        <span>🔴 {gameMode === "ai" ? "الذكاء" : "أحمر"}: أعلى ← أسفل</span>
       </div>
 
       {/* Hex Grid */}
