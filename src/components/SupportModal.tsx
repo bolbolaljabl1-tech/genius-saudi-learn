@@ -94,6 +94,15 @@ const SupportModal = ({ onClose }: SupportModalProps) => {
           ))}
         </div>
 
+        <a
+          href="https://wa.me/966500000000"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full mb-3 py-3 rounded-2xl bg-green-600 text-white font-extrabold flex items-center justify-center gap-2 active:scale-95 transition-all"
+        >
+          💬 فتح المحادثة عبر واتساب
+        </a>
+
         <button
           onClick={() => {
             if ("Notification" in window) {
@@ -107,7 +116,7 @@ const SupportModal = ({ onClose }: SupportModalProps) => {
               });
             }
           }}
-          className="w-full mb-5 py-3 rounded-2xl bg-royal-blue text-matte-gold font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+          className="w-full mb-5 py-3 rounded-2xl bg-royal-blue text-matte-gold font-extrabold flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
           <Bell className="w-5 h-5" />
           تفعيل الإشعارات
