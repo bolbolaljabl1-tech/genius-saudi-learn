@@ -182,21 +182,27 @@ const checkWin = (cells: Map<string, "green" | "red">, color: "green" | "red"): 
     }
   };
 
-  if (color === "green") {
-    const starts = colorCells.filter(([k]) => k.endsWith("-0"));
-    for (const [k] of starts) {
-      const [r] = k.split("-").map(Number);
-      dfs(r, 0);
+  // Flexible win: any color wins by connecting either left↔right OR top↔bottom
+  const checkDirection = (direction: "horizontal" | "vertical") => {
+    visited.clear();
+    if (direction === "horizontal") {
+      const starts = colorCells.filter(([k]) => k.endsWith("-0"));
+      for (const [k] of starts) {
+        const [r] = k.split("-").map(Number);
+        dfs(r, 0);
+      }
+      return Array.from(visited).some(k => k.endsWith(`-${BOARD_SIZE - 1}`));
+    } else {
+      const starts = colorCells.filter(([k]) => k.startsWith("0-"));
+      for (const [k] of starts) {
+        const [, c] = k.split("-").map(Number);
+        dfs(0, c);
+      }
+      return Array.from(visited).some(k => k.startsWith(`${BOARD_SIZE - 1}-`));
     }
-    return Array.from(visited).some(k => k.endsWith(`-${BOARD_SIZE - 1}`));
-  } else {
-    const starts = colorCells.filter(([k]) => k.startsWith("0-"));
-    for (const [k] of starts) {
-      const [, c] = k.split("-").map(Number);
-      dfs(0, c);
-    }
-    return Array.from(visited).some(k => k.startsWith(`${BOARD_SIZE - 1}-`));
-  }
+  };
+
+  return checkDirection("horizontal") || checkDirection("vertical");
 };
 
 const getMedalInfo = (seconds: number) => {
