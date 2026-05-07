@@ -19,9 +19,7 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery,
   ];
 
   return (
-    <div className="min-h-screen flex flex-col items-center">
-      <PlatformHeader />
-
+    <div className="min-h-screen flex flex-col items-center pt-4">
       <div className="w-full px-4 flex flex-col items-center">
         {/* Top bar with XP */}
         <div className="w-full max-w-xl flex items-center justify-between mb-4 animate-slide-up">
