@@ -31,13 +31,16 @@ const SupportModal = ({ onClose }: SupportModalProps) => {
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
       const t = setTimeout(() => {
-        Notification.requestPermission().then((perm) => {
-          if (perm === "granted") {
-            new Notification("منصة الطالب العبقري", {
-              body: "تم تفعيل الإشعارات بنجاح! 🎓",
-            });
-          }
-        });
+        toast({ title: "هل تريد السماح لتطبيق منصة الطالب العبقري بإرسال إشعارات إليك؟" });
+        setTimeout(() => {
+          Notification.requestPermission().then((perm) => {
+            if (perm === "granted") {
+              new Notification("منصة الطالب العبقري", {
+                body: "تم تفعيل الإشعارات بنجاح! 🎓",
+              });
+            }
+          });
+        }, 800);
       }, 600);
       return () => clearTimeout(t);
     }
