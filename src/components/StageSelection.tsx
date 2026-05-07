@@ -1,5 +1,4 @@
 import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2 } from "lucide-react";
-import PlatformHeader from "./PlatformHeader";
 import appIcon from "@/assets/app-icon.png";
 import heroBanner from "@/assets/hero-banner.png";
 
