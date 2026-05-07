@@ -145,9 +145,12 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
         )}
 
         {loading && (
-          <div className="flex items-center justify-center py-10 animate-slide-up">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" />
-            <span className="mr-3 text-muted-foreground font-bold text-xl">جاري تحليل السؤال...</span>
+          <div className="flex flex-col items-center justify-center py-10 animate-slide-up gap-4">
+            <div className="w-24 h-24 rounded-full gradient-emerald shadow-emerald-lg flex items-center justify-center animate-pulse-glow">
+              <Camera className="w-12 h-12 text-primary-foreground animate-pulse" />
+            </div>
+            <p className="text-foreground font-extrabold text-xl text-center">يتم الآن استخراج الكنز.. انتظر قليلاً يا عبقري ✨</p>
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         )}
 
