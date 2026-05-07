@@ -31,13 +31,16 @@ const SupportModal = ({ onClose }: SupportModalProps) => {
   useEffect(() => {
     if ("Notification" in window && Notification.permission === "default") {
       const t = setTimeout(() => {
-        Notification.requestPermission().then((perm) => {
-          if (perm === "granted") {
-            new Notification("منصة الطالب العبقري", {
-              body: "تم تفعيل الإشعارات بنجاح! 🎓",
-            });
-          }
-        });
+        toast({ title: "هل تريد السماح لتطبيق منصة الطالب العبقري بإرسال إشعارات إليك؟" });
+        setTimeout(() => {
+          Notification.requestPermission().then((perm) => {
+            if (perm === "granted") {
+              new Notification("منصة الطالب العبقري", {
+                body: "تم تفعيل الإشعارات بنجاح! 🎓",
+              });
+            }
+          });
+        }, 800);
       }, 600);
       return () => clearTimeout(t);
     }
@@ -91,6 +94,15 @@ const SupportModal = ({ onClose }: SupportModalProps) => {
           ))}
         </div>
 
+        <a
+          href="https://wa.me/966500000000"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full mb-3 py-3 rounded-2xl bg-green-600 text-white font-extrabold flex items-center justify-center gap-2 active:scale-95 transition-all"
+        >
+          💬 فتح المحادثة عبر واتساب
+        </a>
+
         <button
           onClick={() => {
             if ("Notification" in window) {
@@ -104,7 +116,7 @@ const SupportModal = ({ onClose }: SupportModalProps) => {
               });
             }
           }}
-          className="w-full mb-5 py-3 rounded-2xl bg-royal-blue text-matte-gold font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition-all"
+          className="w-full mb-5 py-3 rounded-2xl bg-royal-blue text-matte-gold font-extrabold flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
           <Bell className="w-5 h-5" />
           تفعيل الإشعارات

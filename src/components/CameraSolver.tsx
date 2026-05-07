@@ -124,7 +124,7 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
               <div className="neu-card p-4 border-2 border-matte-gold/40 bg-matte-gold/5 flex items-start gap-3">
                 <Lightbulb className="w-6 h-6 text-matte-gold flex-shrink-0 mt-0.5" />
                 <p className="text-foreground font-bold text-base leading-7">
-                  يا عبقري، لكي تكون الإجابة محكمة، يمكنك إضافة بضع كلمات تشرح فيها سؤالك.. فالإيضاح مفتاح الفلاح! 🌟
+                  يا عبقري، لكي تكون الإجابة محكمة وأكثر دقة، يمكنك (اختيارياً) إضافة بضع كلمات تشرح فيها سؤالك.. فالإيضاح مفتاح الفلاح! 🌟
                 </p>
               </div>
             )}
@@ -145,9 +145,12 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
         )}
 
         {loading && (
-          <div className="flex items-center justify-center py-10 animate-slide-up">
-            <Loader2 className="w-10 h-10 text-primary animate-spin" />
-            <span className="mr-3 text-muted-foreground font-bold text-xl">جاري تحليل السؤال...</span>
+          <div className="flex flex-col items-center justify-center py-10 animate-slide-up gap-4">
+            <div className="w-24 h-24 rounded-full gradient-emerald shadow-emerald-lg flex items-center justify-center animate-pulse-glow">
+              <Camera className="w-12 h-12 text-primary-foreground animate-pulse" />
+            </div>
+            <p className="text-foreground font-extrabold text-xl text-center">يتم الآن استخراج الكنز.. انتظر قليلاً يا عبقري ✨</p>
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
           </div>
         )}
 

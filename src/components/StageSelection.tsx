@@ -1,5 +1,4 @@
 import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2 } from "lucide-react";
-import PlatformHeader from "./PlatformHeader";
 import appIcon from "@/assets/app-icon.png";
 import heroBanner from "@/assets/hero-banner.png";
 
@@ -20,9 +19,7 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery,
   ];
 
   return (
-    <div className="min-h-screen flex flex-col items-center">
-      <PlatformHeader />
-
+    <div className="min-h-screen flex flex-col items-center pt-4">
       <div className="w-full px-4 flex flex-col items-center">
         {/* Top bar with XP */}
         <div className="w-full max-w-xl flex items-center justify-between mb-4 animate-slide-up">
@@ -36,9 +33,9 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery,
           <img src={appIcon} alt="منصة الطالب العبقري" className="w-12 h-12 rounded-xl shadow-emerald" />
         </div>
 
-        {/* Hero Banner */}
-        <div className="w-full max-w-xl mb-6 animate-scale-in">
-          <img src={heroBanner} alt="منصة الطالب العبقري" className="w-full rounded-2xl shadow-emerald-lg" />
+        {/* Hero Banner - main identity */}
+        <div className="w-full max-w-2xl mb-8 animate-scale-in px-2">
+          <img src={heroBanner} alt="منصة الطالب العبقري" className="w-full rounded-3xl shadow-emerald-lg" />
         </div>
 
         {/* Camera Solver Button */}
