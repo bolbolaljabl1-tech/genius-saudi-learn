@@ -33,9 +33,9 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery,
           <img src={appIcon} alt="منصة الطالب العبقري" className="w-12 h-12 rounded-xl shadow-emerald" />
         </div>
 
-        {/* Hero Banner */}
-        <div className="w-full max-w-xl mb-6 animate-scale-in">
-          <img src={heroBanner} alt="منصة الطالب العبقري" className="w-full rounded-2xl shadow-emerald-lg" />
+        {/* Hero Banner - main identity */}
+        <div className="w-full max-w-2xl mb-8 animate-scale-in px-2">
+          <img src={heroBanner} alt="منصة الطالب العبقري" className="w-full rounded-3xl shadow-emerald-lg" />
         </div>
 
         {/* Camera Solver Button */}
