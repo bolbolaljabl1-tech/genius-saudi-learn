@@ -205,6 +205,24 @@ const checkWin = (cells: Map<string, "green" | "red">, color: "green" | "red"): 
   return checkDirection("horizontal") || checkDirection("vertical");
 };
 
+// Returns set of player cells if player is one move from winning, else null
+const detectNearWin = (cells: Map<string, "green" | "red">, color: "green" | "red"): Set<string> | null => {
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const id = `${r}-${c}`;
+      if (cells.has(id)) continue;
+      const test = new Map(cells);
+      test.set(id, color);
+      if (checkWin(test, color)) {
+        const path = new Set<string>();
+        for (const [k, v] of test.entries()) if (v === color) path.add(k);
+        return path;
+      }
+    }
+  }
+  return null;
+};
+
 const getMedalInfo = (seconds: number) => {
   if (seconds <= 30) return { medal: "🥇", label: "الوسام الذهبي", color: "text-yellow-500", bg: "bg-yellow-100", key: "gold" };
   if (seconds <= 60) return { medal: "🥈", label: "الوسام الفضي", color: "text-gray-400", bg: "bg-gray-100", key: "silver" };
