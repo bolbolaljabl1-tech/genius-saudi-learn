@@ -770,7 +770,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                         height: 48,
                       }}
                     >
-                      {cellOwners.has(id) ? (cellOwners.get(id) === "green" ? "🟢" : "🔴") : "⬡"}
+                      {cellOwners.has(id) ? (cellOwners.get(id) === "green" ? "🟢" : "🔴") : ""}
                     </button>
                   );
                 })}
