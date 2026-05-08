@@ -300,6 +300,71 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     return () => clearInterval(interval);
   }, [timerStarted, startTime, winner]);
 
+  // Near-win detection (gold pulse + red flash for explosion availability)
+  useEffect(() => {
+    if (winner) { setNearWin(null); return; }
+    const greenNear = detectNearWin(cellOwners, "green");
+    if (greenNear) { setNearWin({ player: "green", pathCells: greenNear }); return; }
+    const redNear = detectNearWin(cellOwners, "red");
+    if (redNear) { setNearWin({ player: "red", pathCells: redNear }); return; }
+    setNearWin(null);
+  }, [cellOwners, winner]);
+
+  // Trigger explosion question for opponent
+  const triggerExplosion = (forPlayer: "green" | "red") => {
+    if (explosionUses[forPlayer] <= 0 || !nearWin || nearWin.player === forPlayer) return;
+    const q = getNextQuestion();
+    setExplosionQuestion(q);
+    setExplosionAnswer("");
+    setExplosionFor(forPlayer);
+    setExplosionFeedback("");
+    speak(q.q);
+  };
+
+  const submitExplosion = () => {
+    if (!explosionQuestion || !explosionFor || !nearWin) return;
+    const correctText = explosionQuestion.opts[explosionQuestion.correct].trim().toLowerCase();
+    const userText = explosionAnswer.trim().toLowerCase();
+    const isCorrect = userText.length > 0 && (correctText === userText || correctText.includes(userText) || userText.includes(correctText));
+    if (isCorrect) {
+      setExplosionFeedback("ok");
+      // Strip a strategic cell from opponent: pick one in the near-win path
+      const opponent: "green" | "red" = explosionFor === "green" ? "red" : "green";
+      const newOwners = new Map(cellOwners);
+      const pathArr = Array.from(nearWin.pathCells).filter(k => newOwners.get(k) === opponent);
+      if (pathArr.length > 0) {
+        const strip = pathArr[Math.floor(Math.random() * pathArr.length)];
+        newOwners.delete(strip);
+      }
+      // Award an empty cell to attacker
+      const empties: string[] = [];
+      for (let r = 0; r < BOARD_SIZE; r++)
+        for (let c = 0; c < BOARD_SIZE; c++) {
+          const id = `${r}-${c}`;
+          if (!newOwners.has(id)) empties.push(id);
+        }
+      if (empties.length > 0) {
+        newOwners.set(empties[Math.floor(Math.random() * empties.length)], explosionFor);
+      }
+      setCellOwners(newOwners);
+      setExplosionUses(u => ({ ...u, [explosionFor]: u[explosionFor] - 1 }));
+      setTimeout(() => {
+        setExplosionQuestion(null);
+        setExplosionFor(null);
+        setExplosionFeedback("");
+      }, 1400);
+    } else {
+      setExplosionFeedback("fail");
+      setExplosionUses(u => ({ ...u, [explosionFor]: u[explosionFor] - 1 }));
+      setTimeout(() => {
+        setExplosionQuestion(null);
+        setExplosionFor(null);
+        setExplosionFeedback("");
+      }, 1400);
+    }
+  };
+
+
   const handleCellClick = (id: string) => {
     if (winner || cellOwners.has(id) || selectedCell || aiThinking) return;
     if (gameMode === "ai" && currentPlayer === "red") return;
