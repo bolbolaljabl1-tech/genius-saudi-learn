@@ -706,18 +706,36 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
         </span>
       </div>
 
-      {/* Turn indicator (no direction hints) */}
-      <div className="flex items-center justify-center gap-3 max-w-sm mx-auto w-full mb-3">
+      {/* Turn indicator + explosion counters */}
+      <div className="flex items-center justify-center gap-3 max-w-sm mx-auto w-full mb-2">
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${currentPlayer === "green" ? "bg-emerald-100 text-emerald-700 ring-2 ring-emerald-400" : "bg-emerald-50 text-emerald-400"}`}>
           <div className="w-3 h-3 rounded-full bg-emerald-500" />
           {gameMode === "ai" ? "أنت" : "أخضر"}
+          <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-200 text-amber-800">💣 {explosionUses.green}/3</span>
         </div>
         {aiThinking && <span className="text-sm text-muted-foreground animate-pulse font-bold">🤖 يفكر...</span>}
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${currentPlayer === "red" ? "bg-red-100 text-red-700 ring-2 ring-red-400" : "bg-red-50 text-red-400"}`}>
           {gameMode === "ai" ? "🤖" : "أحمر"}
+          <span className="mr-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-200 text-amber-800">💣 {explosionUses.red}/3</span>
           <div className="w-3 h-3 rounded-full bg-red-500" />
         </div>
       </div>
+
+      {/* Explosion alert: opponent is about to win */}
+      {nearWin && !winner && !explosionQuestion && (() => {
+        const opponent: "green" | "red" = nearWin.player === "green" ? "red" : "green";
+        const canUse = explosionUses[opponent] > 0;
+        const isHumanOpp = !(gameMode === "ai" && opponent === "red");
+        if (!canUse || !isHumanOpp) return null;
+        return (
+          <button
+            onClick={() => triggerExplosion(opponent)}
+            className="mx-auto mb-2 px-4 py-2 rounded-2xl border-2 border-red-500 text-red-700 font-extrabold text-sm animate-red-flash active:scale-95 transition-all"
+          >
+            💥 السؤال الانفجاري — أوقف فوز {nearWin.player === "green" ? "الأخضر" : "الأحمر"}! ({explosionUses[opponent]}/3)
+          </button>
+        );
+      })()}
 
       {/* Hex Grid */}
       <div className="flex-1 flex flex-col items-center justify-center">
