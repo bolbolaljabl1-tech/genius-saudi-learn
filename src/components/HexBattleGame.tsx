@@ -205,6 +205,24 @@ const checkWin = (cells: Map<string, "green" | "red">, color: "green" | "red"): 
   return checkDirection("horizontal") || checkDirection("vertical");
 };
 
+// Returns set of player cells if player is one move from winning, else null
+const detectNearWin = (cells: Map<string, "green" | "red">, color: "green" | "red"): Set<string> | null => {
+  for (let r = 0; r < BOARD_SIZE; r++) {
+    for (let c = 0; c < BOARD_SIZE; c++) {
+      const id = `${r}-${c}`;
+      if (cells.has(id)) continue;
+      const test = new Map(cells);
+      test.set(id, color);
+      if (checkWin(test, color)) {
+        const path = new Set<string>();
+        for (const [k, v] of test.entries()) if (v === color) path.add(k);
+        return path;
+      }
+    }
+  }
+  return null;
+};
+
 const getMedalInfo = (seconds: number) => {
   if (seconds <= 30) return { medal: "🥇", label: "الوسام الذهبي", color: "text-yellow-500", bg: "bg-yellow-100", key: "gold" };
   if (seconds <= 60) return { medal: "🥈", label: "الوسام الفضي", color: "text-gray-400", bg: "bg-gray-100", key: "silver" };
@@ -227,6 +245,14 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   const [sendingTelegram, setSendingTelegram] = useState(false);
   const [aiThinking, setAiThinking] = useState(false);
   const winnerRef = useRef<HTMLDivElement>(null);
+
+  // Explosion mechanic
+  const [explosionUses, setExplosionUses] = useState<{ green: number; red: number }>({ green: 3, red: 3 });
+  const [nearWin, setNearWin] = useState<{ player: "green" | "red"; pathCells: Set<string> } | null>(null);
+  const [explosionQuestion, setExplosionQuestion] = useState<Question | null>(null);
+  const [explosionAnswer, setExplosionAnswer] = useState("");
+  const [explosionFor, setExplosionFor] = useState<"green" | "red" | null>(null);
+  const [explosionFeedback, setExplosionFeedback] = useState<"" | "ok" | "fail">("");
 
   // Shuffle-based question system (no repeats)
   const [shuffledQuestions, setShuffledQuestions] = useState<Question[]>([]);
@@ -273,6 +299,71 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     }, 200);
     return () => clearInterval(interval);
   }, [timerStarted, startTime, winner]);
+
+  // Near-win detection (gold pulse + red flash for explosion availability)
+  useEffect(() => {
+    if (winner) { setNearWin(null); return; }
+    const greenNear = detectNearWin(cellOwners, "green");
+    if (greenNear) { setNearWin({ player: "green", pathCells: greenNear }); return; }
+    const redNear = detectNearWin(cellOwners, "red");
+    if (redNear) { setNearWin({ player: "red", pathCells: redNear }); return; }
+    setNearWin(null);
+  }, [cellOwners, winner]);
+
+  // Trigger explosion question for opponent
+  const triggerExplosion = (forPlayer: "green" | "red") => {
+    if (explosionUses[forPlayer] <= 0 || !nearWin || nearWin.player === forPlayer) return;
+    const q = getNextQuestion();
+    setExplosionQuestion(q);
+    setExplosionAnswer("");
+    setExplosionFor(forPlayer);
+    setExplosionFeedback("");
+    speak(q.q);
+  };
+
+  const submitExplosion = () => {
+    if (!explosionQuestion || !explosionFor || !nearWin) return;
+    const correctText = explosionQuestion.opts[explosionQuestion.correct].trim().toLowerCase();
+    const userText = explosionAnswer.trim().toLowerCase();
+    const isCorrect = userText.length > 0 && (correctText === userText || correctText.includes(userText) || userText.includes(correctText));
+    if (isCorrect) {
+      setExplosionFeedback("ok");
+      // Strip a strategic cell from opponent: pick one in the near-win path
+      const opponent: "green" | "red" = explosionFor === "green" ? "red" : "green";
+      const newOwners = new Map(cellOwners);
+      const pathArr = Array.from(nearWin.pathCells).filter(k => newOwners.get(k) === opponent);
+      if (pathArr.length > 0) {
+        const strip = pathArr[Math.floor(Math.random() * pathArr.length)];
+        newOwners.delete(strip);
+      }
+      // Award an empty cell to attacker
+      const empties: string[] = [];
+      for (let r = 0; r < BOARD_SIZE; r++)
+        for (let c = 0; c < BOARD_SIZE; c++) {
+          const id = `${r}-${c}`;
+          if (!newOwners.has(id)) empties.push(id);
+        }
+      if (empties.length > 0) {
+        newOwners.set(empties[Math.floor(Math.random() * empties.length)], explosionFor);
+      }
+      setCellOwners(newOwners);
+      setExplosionUses(u => ({ ...u, [explosionFor]: u[explosionFor] - 1 }));
+      setTimeout(() => {
+        setExplosionQuestion(null);
+        setExplosionFor(null);
+        setExplosionFeedback("");
+      }, 1400);
+    } else {
+      setExplosionFeedback("fail");
+      setExplosionUses(u => ({ ...u, [explosionFor]: u[explosionFor] - 1 }));
+      setTimeout(() => {
+        setExplosionQuestion(null);
+        setExplosionFor(null);
+        setExplosionFeedback("");
+      }, 1400);
+    }
+  };
+
 
   const handleCellClick = (id: string) => {
     if (winner || cellOwners.has(id) || selectedCell || aiThinking) return;
@@ -466,6 +557,11 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     setFinalTime(null);
     setShowWinModal(false);
     setWinnerName(studentName || "");
+    setExplosionUses({ green: 3, red: 3 });
+    setNearWin(null);
+    setExplosionQuestion(null);
+    setExplosionFor(null);
+    setExplosionFeedback("");
     // Re-shuffle questions
     const filtered = subjectFilter && subjectFilter !== "all"
       ? allQuestions.filter(q => q.subject === subjectFilter)
@@ -474,24 +570,17 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     setQuestionIndex(0);
   };
 
-  const rainbowPalette = [
-    "bg-pink-400 border-pink-500",
-    "bg-orange-400 border-orange-500",
-    "bg-yellow-400 border-yellow-500",
-    "bg-lime-400 border-lime-500",
-    "bg-cyan-400 border-cyan-500",
-    "bg-indigo-400 border-indigo-500",
-    "bg-fuchsia-400 border-fuchsia-500",
-  ];
-
   const getCellColor = (id: string) => {
     const owner = cellOwners.get(id);
-    if (owner === "green") return "bg-emerald-500 border-emerald-600 shadow-emerald-500/40 text-white";
-    if (owner === "red") return "bg-red-500 border-red-600 shadow-red-500/40 text-white";
-    if (selectedCell === id) return "bg-amber-300 border-amber-500 ring-4 ring-amber-300 text-amber-900";
-    const [r, c] = id.split("-").map(Number);
-    const idx = (r * BOARD_SIZE + c) % rainbowPalette.length;
-    return `${rainbowPalette[idx]} hover:brightness-110 text-white/90`;
+    const inNearPath = nearWin?.pathCells.has(id);
+    if (owner === "green") {
+      return `bg-emerald-500 border-emerald-700 text-white ${inNearPath && nearWin?.player === "green" ? "animate-gold-pulse" : ""}`;
+    }
+    if (owner === "red") {
+      return `bg-red-500 border-red-700 text-white ${inNearPath && nearWin?.player === "red" ? "animate-gold-pulse" : ""}`;
+    }
+    if (selectedCell === id) return "bg-amber-200 border-amber-500 ring-4 ring-amber-300 text-amber-900";
+    return "bg-white border-blue-500 text-blue-700 hover:bg-blue-50";
   };
 
   const subjectTitle = subjectFilter && subjectFilter !== "all" ? subjectNames[subjectFilter] || "" : "شامل";
@@ -617,27 +706,41 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
         </span>
       </div>
 
-      {/* Turn indicator (no direction hints) */}
-      <div className="flex items-center justify-center gap-3 max-w-sm mx-auto w-full mb-3">
+      {/* Turn indicator + explosion counters */}
+      <div className="flex items-center justify-center gap-3 max-w-sm mx-auto w-full mb-2">
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${currentPlayer === "green" ? "bg-emerald-100 text-emerald-700 ring-2 ring-emerald-400" : "bg-emerald-50 text-emerald-400"}`}>
           <div className="w-3 h-3 rounded-full bg-emerald-500" />
           {gameMode === "ai" ? "أنت" : "أخضر"}
+          <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-200 text-amber-800">💣 {explosionUses.green}/3</span>
         </div>
         {aiThinking && <span className="text-sm text-muted-foreground animate-pulse font-bold">🤖 يفكر...</span>}
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${currentPlayer === "red" ? "bg-red-100 text-red-700 ring-2 ring-red-400" : "bg-red-50 text-red-400"}`}>
           {gameMode === "ai" ? "🤖" : "أحمر"}
+          <span className="mr-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-200 text-amber-800">💣 {explosionUses.red}/3</span>
           <div className="w-3 h-3 rounded-full bg-red-500" />
         </div>
       </div>
 
+      {/* Explosion alert: opponent is about to win */}
+      {nearWin && !winner && !explosionQuestion && (() => {
+        const opponent: "green" | "red" = nearWin.player === "green" ? "red" : "green";
+        const canUse = explosionUses[opponent] > 0;
+        const isHumanOpp = !(gameMode === "ai" && opponent === "red");
+        if (!canUse || !isHumanOpp) return null;
+        return (
+          <button
+            onClick={() => triggerExplosion(opponent)}
+            className="mx-auto mb-2 px-4 py-2 rounded-2xl border-2 border-red-500 text-red-700 font-extrabold text-sm animate-red-flash active:scale-95 transition-all"
+          >
+            💥 السؤال الانفجاري — أوقف فوز {nearWin.player === "green" ? "الأخضر" : "الأحمر"}! ({explosionUses[opponent]}/3)
+          </button>
+        );
+      })()}
+
       {/* Hex Grid */}
       <div className="flex-1 flex flex-col items-center justify-center">
         <div className="relative">
-          <div className="absolute -left-3 top-0 bottom-0 w-1.5 rounded-full bg-emerald-500" />
-          <div className="absolute -right-3 top-0 bottom-0 w-1.5 rounded-full bg-emerald-500" />
-          <div className="absolute top-[-8px] left-0 right-0 h-1.5 rounded-full bg-red-500" />
-          <div className="absolute bottom-[-8px] left-0 right-0 h-1.5 rounded-full bg-red-500" />
-
+          {/* Clean board: no border guides — flexible win in any direction */}
           <div className="py-2 px-2">
             {Array.from({ length: BOARD_SIZE }, (_, r) => (
               <div
@@ -663,7 +766,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                         height: 48,
                       }}
                     >
-                      {cellOwners.has(id) ? (cellOwners.get(id) === "green" ? "🟢" : "🔴") : "⬡"}
+                      {cellOwners.has(id) ? (cellOwners.get(id) === "green" ? "🟢" : "🔴") : ""}
                     </button>
                   );
                 })}
@@ -714,6 +817,61 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                 {selectedAnswer === currentQuestion.correct ? "✅ إجابة صحيحة! تم احتلال الخلية" : "❌ إجابة خاطئة! انتقل الدور"}
               </p>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Explosion Question Modal — free text input, no options */}
+      {explosionQuestion && explosionFor && !winner && (
+        <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-card rounded-3xl p-6 shadow-2xl border-4 border-amber-500 animate-bounce-in">
+            <div className="text-center mb-3">
+              <div className="text-4xl mb-1">💥</div>
+              <h3 className="text-xl font-extrabold text-amber-600">السؤال الانفجاري</h3>
+              <p className="text-xs text-muted-foreground mt-1">أجب نصياً بلا خيارات — النجاح يكسر خط فوز الخصم</p>
+            </div>
+            <div className="flex items-center gap-2 mb-3">
+              <p className="text-lg font-extrabold leading-7 text-foreground flex-1">{explosionQuestion.q}</p>
+              <button onClick={() => speak(explosionQuestion.q)} className="flex-shrink-0 p-2 rounded-full bg-primary/10 text-primary">
+                <Volume2 className="w-5 h-5" />
+              </button>
+            </div>
+            <input
+              type="text"
+              value={explosionAnswer}
+              onChange={(e) => setExplosionAnswer(e.target.value)}
+              placeholder="اكتب إجابتك هنا..."
+              disabled={explosionFeedback !== ""}
+              className="w-full px-4 py-3 rounded-2xl border-2 border-input bg-background text-foreground text-lg font-bold text-center mb-3 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              dir="rtl"
+              autoFocus
+            />
+            {explosionFeedback === "ok" && (
+              <p className="text-center font-extrabold text-emerald-600 mb-2">✅ نجح الانفجار! تم خصم مربع استراتيجي من الخصم.</p>
+            )}
+            {explosionFeedback === "fail" && (
+              <p className="text-center font-extrabold text-red-600 mb-2">❌ فشل الانفجار! خسرت محاولة.</p>
+            )}
+            {explosionFeedback === "" && (
+              <div className="flex gap-2">
+                <button
+                  onClick={submitExplosion}
+                  disabled={!explosionAnswer.trim()}
+                  className="flex-1 py-3 rounded-2xl bg-amber-500 text-white font-extrabold text-lg active:scale-95 transition-all disabled:opacity-50"
+                >
+                  💥 فجّر الآن
+                </button>
+                <button
+                  onClick={() => { setExplosionQuestion(null); setExplosionFor(null); setExplosionAnswer(""); }}
+                  className="px-4 py-3 rounded-2xl bg-muted text-foreground font-bold active:scale-95"
+                >
+                  إلغاء
+                </button>
+              </div>
+            )}
+            <p className="text-[10px] text-center text-muted-foreground mt-2">
+              المحاولات المتبقية: {explosionFor === "green" ? explosionUses.green : explosionUses.red}/3
+            </p>
           </div>
         </div>
       )}
