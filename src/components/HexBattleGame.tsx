@@ -820,6 +820,61 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
           </div>
         </div>
       )}
+
+      {/* Explosion Question Modal — free text input, no options */}
+      {explosionQuestion && explosionFor && !winner && (
+        <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-card rounded-3xl p-6 shadow-2xl border-4 border-amber-500 animate-bounce-in">
+            <div className="text-center mb-3">
+              <div className="text-4xl mb-1">💥</div>
+              <h3 className="text-xl font-extrabold text-amber-600">السؤال الانفجاري</h3>
+              <p className="text-xs text-muted-foreground mt-1">أجب نصياً بلا خيارات — النجاح يكسر خط فوز الخصم</p>
+            </div>
+            <div className="flex items-center gap-2 mb-3">
+              <p className="text-lg font-extrabold leading-7 text-foreground flex-1">{explosionQuestion.q}</p>
+              <button onClick={() => speak(explosionQuestion.q)} className="flex-shrink-0 p-2 rounded-full bg-primary/10 text-primary">
+                <Volume2 className="w-5 h-5" />
+              </button>
+            </div>
+            <input
+              type="text"
+              value={explosionAnswer}
+              onChange={(e) => setExplosionAnswer(e.target.value)}
+              placeholder="اكتب إجابتك هنا..."
+              disabled={explosionFeedback !== ""}
+              className="w-full px-4 py-3 rounded-2xl border-2 border-input bg-background text-foreground text-lg font-bold text-center mb-3 focus:outline-none focus:ring-2 focus:ring-amber-500"
+              dir="rtl"
+              autoFocus
+            />
+            {explosionFeedback === "ok" && (
+              <p className="text-center font-extrabold text-emerald-600 mb-2">✅ نجح الانفجار! تم خصم مربع استراتيجي من الخصم.</p>
+            )}
+            {explosionFeedback === "fail" && (
+              <p className="text-center font-extrabold text-red-600 mb-2">❌ فشل الانفجار! خسرت محاولة.</p>
+            )}
+            {explosionFeedback === "" && (
+              <div className="flex gap-2">
+                <button
+                  onClick={submitExplosion}
+                  disabled={!explosionAnswer.trim()}
+                  className="flex-1 py-3 rounded-2xl bg-amber-500 text-white font-extrabold text-lg active:scale-95 transition-all disabled:opacity-50"
+                >
+                  💥 فجّر الآن
+                </button>
+                <button
+                  onClick={() => { setExplosionQuestion(null); setExplosionFor(null); setExplosionAnswer(""); }}
+                  className="px-4 py-3 rounded-2xl bg-muted text-foreground font-bold active:scale-95"
+                >
+                  إلغاء
+                </button>
+              </div>
+            )}
+            <p className="text-[10px] text-center text-muted-foreground mt-2">
+              المحاولات المتبقية: {explosionFor === "green" ? explosionUses.green : explosionUses.red}/3
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
