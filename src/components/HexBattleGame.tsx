@@ -482,24 +482,17 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     setQuestionIndex(0);
   };
 
-  const rainbowPalette = [
-    "bg-pink-400 border-pink-500",
-    "bg-orange-400 border-orange-500",
-    "bg-yellow-400 border-yellow-500",
-    "bg-lime-400 border-lime-500",
-    "bg-cyan-400 border-cyan-500",
-    "bg-indigo-400 border-indigo-500",
-    "bg-fuchsia-400 border-fuchsia-500",
-  ];
-
   const getCellColor = (id: string) => {
     const owner = cellOwners.get(id);
-    if (owner === "green") return "bg-emerald-500 border-emerald-600 shadow-emerald-500/40 text-white";
-    if (owner === "red") return "bg-red-500 border-red-600 shadow-red-500/40 text-white";
-    if (selectedCell === id) return "bg-amber-300 border-amber-500 ring-4 ring-amber-300 text-amber-900";
-    const [r, c] = id.split("-").map(Number);
-    const idx = (r * BOARD_SIZE + c) % rainbowPalette.length;
-    return `${rainbowPalette[idx]} hover:brightness-110 text-white/90`;
+    const inNearPath = nearWin?.pathCells.has(id);
+    if (owner === "green") {
+      return `bg-emerald-500 border-emerald-700 text-white ${inNearPath && nearWin?.player === "green" ? "animate-gold-pulse" : ""}`;
+    }
+    if (owner === "red") {
+      return `bg-red-500 border-red-700 text-white ${inNearPath && nearWin?.player === "red" ? "animate-gold-pulse" : ""}`;
+    }
+    if (selectedCell === id) return "bg-amber-200 border-amber-500 ring-4 ring-amber-300 text-amber-900";
+    return "bg-white border-blue-500 text-blue-700 hover:bg-blue-50";
   };
 
   const subjectTitle = subjectFilter && subjectFilter !== "all" ? subjectNames[subjectFilter] || "" : "شامل";
