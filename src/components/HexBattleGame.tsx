@@ -557,6 +557,11 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     setFinalTime(null);
     setShowWinModal(false);
     setWinnerName(studentName || "");
+    setExplosionUses({ green: 3, red: 3 });
+    setNearWin(null);
+    setExplosionQuestion(null);
+    setExplosionFor(null);
+    setExplosionFeedback("");
     // Re-shuffle questions
     const filtered = subjectFilter && subjectFilter !== "all"
       ? allQuestions.filter(q => q.subject === subjectFilter)
