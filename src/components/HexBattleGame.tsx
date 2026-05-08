@@ -740,11 +740,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       {/* Hex Grid */}
       <div className="flex-1 flex flex-col items-center justify-center">
         <div className="relative">
-          <div className="absolute -left-3 top-0 bottom-0 w-1.5 rounded-full bg-emerald-500" />
-          <div className="absolute -right-3 top-0 bottom-0 w-1.5 rounded-full bg-emerald-500" />
-          <div className="absolute top-[-8px] left-0 right-0 h-1.5 rounded-full bg-red-500" />
-          <div className="absolute bottom-[-8px] left-0 right-0 h-1.5 rounded-full bg-red-500" />
-
+          {/* Clean board: no border guides — flexible win in any direction */}
           <div className="py-2 px-2">
             {Array.from({ length: BOARD_SIZE }, (_, r) => (
               <div
