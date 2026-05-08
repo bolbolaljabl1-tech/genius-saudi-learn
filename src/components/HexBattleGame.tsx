@@ -228,6 +228,14 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   const [aiThinking, setAiThinking] = useState(false);
   const winnerRef = useRef<HTMLDivElement>(null);
 
+  // Explosion mechanic
+  const [explosionUses, setExplosionUses] = useState<{ green: number; red: number }>({ green: 3, red: 3 });
+  const [nearWin, setNearWin] = useState<{ player: "green" | "red"; pathCells: Set<string> } | null>(null);
+  const [explosionQuestion, setExplosionQuestion] = useState<Question | null>(null);
+  const [explosionAnswer, setExplosionAnswer] = useState("");
+  const [explosionFor, setExplosionFor] = useState<"green" | "red" | null>(null);
+  const [explosionFeedback, setExplosionFeedback] = useState<"" | "ok" | "fail">("");
+
   // Shuffle-based question system (no repeats)
   const [shuffledQuestions, setShuffledQuestions] = useState<Question[]>([]);
   const [questionIndex, setQuestionIndex] = useState(0);
