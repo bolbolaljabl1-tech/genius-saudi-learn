@@ -230,8 +230,12 @@ const getMedalInfo = (seconds: number) => {
 };
 
 type GameMode = "select" | "pvp" | "ai";
+type PlayMode = "" | "classic" | "castle" | "treasure" | "alliance";
+
+const QUESTION_TIME_LIMIT = 18; // seconds — Stern Arbitrator timer
 
 const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: HexBattleGameProps) => {
+  const [playMode, setPlayMode] = useState<PlayMode>("");
   const [gameMode, setGameMode] = useState<GameMode>("select");
   const [grid] = useState(generateGrid);
   const [cellOwners, setCellOwners] = useState<Map<string, "green" | "red">>(new Map());
