@@ -675,7 +675,33 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     setFinalTime(null);
     setShowWinModal(false);
     setWinnerName(studentName || "");
-    setExplosionUses({ green: 3, red: 3 });
+    setExplosionUses(playMode === "alliance" ? { green: 6, red: 6 } : { green: 3, red: 3 });
+    setQuestionTimer(QUESTION_TIME_LIMIT);
+    // re-init mode-specific board state
+    const allIds: string[] = [];
+    for (let r = 0; r < BOARD_SIZE; r++)
+      for (let c = 0; c < BOARD_SIZE; c++) allIds.push(`${r}-${c}`);
+    if (playMode === "castle") {
+      const interior = allIds.filter(id => {
+        const [r, c] = id.split("-").map(Number);
+        return r > 0 && r < BOARD_SIZE - 1 && c > 0 && c < BOARD_SIZE - 1;
+      });
+      setCastles(new Set(shuffleArray(interior).slice(0, 3)));
+      setSiegedCastles(new Set());
+    } else {
+      setCastles(new Set());
+      setSiegedCastles(new Set());
+    }
+    if (playMode === "treasure") {
+      const mid = `${Math.floor(BOARD_SIZE / 2)}-${Math.floor(BOARD_SIZE / 2)}`;
+      const rev = new Set<string>([mid]);
+      const [mr, mc] = mid.split("-").map(Number);
+      for (const id of allIds) {
+        const [r, c] = id.split("-").map(Number);
+        if (areNeighbors(mr, mc, r, c)) rev.add(id);
+      }
+      setRevealed(rev);
+    } else setRevealed(new Set());
     setNearWin(null);
     setExplosionQuestion(null);
     setExplosionFor(null);
