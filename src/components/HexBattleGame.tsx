@@ -944,7 +944,15 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       {/* Question Modal */}
       {currentQuestion && selectedCell && !winner && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center p-3 pb-20" onClick={e => e.stopPropagation()}>
-          <div className="w-full max-w-md bg-card rounded-3xl p-5 shadow-2xl animate-slide-up border border-border mb-4">
+          <div className={`w-full max-w-md bg-card rounded-3xl p-5 shadow-2xl animate-slide-up border-4 mb-4 ${answered ? "border-border" : "animate-melt-border"}`}>
+            {!answered && (
+              <div className="flex items-center justify-between mb-2 text-xs font-bold">
+                <span className="text-amber-700">⏱️ المحكّم الصارم</span>
+                <span className={`px-2 py-1 rounded-full ${questionTimer <= 5 ? "bg-red-100 text-red-700 animate-pulse" : "bg-amber-100 text-amber-800"}`}>
+                  {questionTimer} ث
+                </span>
+              </div>
+            )}
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold px-2 py-1 rounded-full bg-muted text-muted-foreground">
                 {subjectEmoji[currentQuestion.subject] || "📚"} {subjectNames[currentQuestion.subject] || currentQuestion.subject}
