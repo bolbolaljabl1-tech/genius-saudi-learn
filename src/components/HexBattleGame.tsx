@@ -515,10 +515,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
             setSiegedCastles(newSieged);
             newOwners.set(castleId, player);
             setCellOwners(newOwners);
-            // Reward: grant the castle + bonus explosion attempt
-            setExplosionUses(u => playMode === "alliance"
-              ? { green: u.green + 1, red: u.red + 1 }
-              : { ...u, [player]: u[player] + 1 });
+            setExplosionUses(u => ({ ...u, [player]: u[player] + 1 }));
             break;
           }
         }
