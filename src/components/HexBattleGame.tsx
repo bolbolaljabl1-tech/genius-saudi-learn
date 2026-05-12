@@ -826,7 +826,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
               className="w-full px-5 py-4 rounded-2xl border-2 border-input bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-center text-2xl font-bold mb-4"
               dir="rtl"
             />
-            <p className="font-ruqaa text-matte-gold text-sm mb-4">منصة الطالب العبقري</p>
+            <p className="text-glow-gold text-base mb-4">منصة الطالب العبقري 2026 ✨</p>
             {sendingTelegram && <p className="text-sm text-muted-foreground mb-2">جارٍ إرسال التحدي...</p>}
             <div className="flex gap-3">
               <button
