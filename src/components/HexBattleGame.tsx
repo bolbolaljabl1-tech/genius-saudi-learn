@@ -434,7 +434,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       }, 1400);
     } else {
       setExplosionFeedback("fail");
-      setExplosionUses(u => ({ ...u, [explosionFor]: u[explosionFor] - 1 }));
+      setExplosionUses(u => playMode === "alliance" ? { green: u.green - 1, red: u.red - 1 } : { ...u, [explosionFor]: u[explosionFor] - 1 });
       setTimeout(() => {
         setExplosionQuestion(null);
         setExplosionFor(null);
