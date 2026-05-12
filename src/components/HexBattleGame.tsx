@@ -250,13 +250,23 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   const [aiThinking, setAiThinking] = useState(false);
   const winnerRef = useRef<HTMLDivElement>(null);
 
-  // Explosion mechanic
+  // Explosion mechanic (Alliance mode shares the counter via .green key)
   const [explosionUses, setExplosionUses] = useState<{ green: number; red: number }>({ green: 3, red: 3 });
   const [nearWin, setNearWin] = useState<{ player: "green" | "red"; pathCells: Set<string> } | null>(null);
   const [explosionQuestion, setExplosionQuestion] = useState<Question | null>(null);
   const [explosionAnswer, setExplosionAnswer] = useState("");
   const [explosionFor, setExplosionFor] = useState<"green" | "red" | null>(null);
   const [explosionFeedback, setExplosionFeedback] = useState<"" | "ok" | "fail">("");
+
+  // Castle Siege mode: castle cells (locked) — capture by surrounding with 3 own neighbors
+  const [castles, setCastles] = useState<Set<string>>(new Set());
+  const [siegedCastles, setSiegedCastles] = useState<Set<string>>(new Set());
+
+  // Lost Treasure mode: only revealed cells are clickable
+  const [revealed, setRevealed] = useState<Set<string>>(new Set());
+
+  // Stern Arbitrator timer (per-question)
+  const [questionTimer, setQuestionTimer] = useState<number>(QUESTION_TIME_LIMIT);
 
   // Shuffle-based question system (no repeats)
   const [shuffledQuestions, setShuffledQuestions] = useState<Question[]>([]);
