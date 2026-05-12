@@ -488,6 +488,45 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       newOwners.set(cell, player);
       setCellOwners(newOwners);
 
+      // Treasure mode: reveal neighbors
+      if (playMode === "treasure") {
+        const [r, c] = cell.split("-").map(Number);
+        const newRevealed = new Set(revealed);
+        for (let nr = 0; nr < BOARD_SIZE; nr++)
+          for (let nc = 0; nc < BOARD_SIZE; nc++)
+            if (areNeighbors(r, c, nr, nc)) newRevealed.add(`${nr}-${nc}`);
+        setRevealed(newRevealed);
+      }
+
+      // Castle siege: if a non-besieged castle has 3+ neighbors of this player, capture
+      if (playMode === "castle") {
+        for (const castleId of castles) {
+          if (siegedCastles.has(castleId)) continue;
+          const [cr, cc] = castleId.split("-").map(Number);
+          let count = 0;
+          for (const [k, v] of newOwners.entries()) {
+            if (v !== player) continue;
+            const [nr, nc] = k.split("-").map(Number);
+            if (areNeighbors(cr, cc, nr, nc)) count++;
+          }
+          if (count >= 3) {
+            const newSieged = new Set(siegedCastles);
+            newSieged.add(castleId);
+            setSiegedCastles(newSieged);
+            newOwners.set(castleId, player);
+            setCellOwners(newOwners);
+            // Auto-trigger explosion question reward
+            const eq = getNextQuestion();
+            setExplosionQuestion(eq);
+            setExplosionAnswer("");
+            setExplosionFor(player);
+            setExplosionFeedback("");
+            speak(eq.q);
+            break;
+          }
+        }
+      }
+
       if (checkWin(newOwners, player)) {
         handleWin(player);
         return;
@@ -501,7 +540,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       setSelectedAnswer(null);
       setCurrentPlayer(p => p === "green" ? "red" : "green");
     }, 1500);
-  }, [cellOwners, gameMode, onXP, onBadge, startTime, timerStarted]);
+  }, [cellOwners, gameMode, onXP, onBadge, startTime, timerStarted, playMode, revealed, castles, siegedCastles, getNextQuestion, speak]);
 
   const handleAnswer = (idx: number) => {
     if (answered || !currentQuestion) return;
