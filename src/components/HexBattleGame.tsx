@@ -713,7 +713,48 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     return m > 0 ? `${m}:${sec.toString().padStart(2, "0")}` : `${sec} ث`;
   };
 
-  // Mode selection screen
+  // Play-mode picker (4 game modes)
+  if (playMode === "") {
+    const modes: { id: PlayMode; title: string; emoji: string; desc: string; grad: string }[] = [
+      { id: "classic", title: "شبكة التحدي الكلاسيكية", emoji: "⬡", desc: "المحكّم الصارم + السؤال الانفجاري", grad: "from-emerald-500 to-teal-600" },
+      { id: "castle", title: "حصار القلعة الاستراتيجي", emoji: "🏰", desc: "حاصِر 3 قلاع لفتح أسئلة كبرى", grad: "from-amber-500 to-orange-600" },
+      { id: "treasure", title: "الكنز المفقود", emoji: "🗺️", desc: "اكشف المسار خطوة بخطوة", grad: "from-purple-500 to-fuchsia-600" },
+      { id: "alliance", title: "حلف العباقرة", emoji: "🤝", desc: "تعاون: 6 محاولات انفجار مشتركة", grad: "from-blue-500 to-indigo-600" },
+    ];
+    return (
+      <div className="min-h-screen flex flex-col px-4 py-6 pb-24">
+        <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4 self-start">
+          <ArrowRight className="w-5 h-5" />
+          <span className="font-bold text-lg">رجوع</span>
+        </button>
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-extrabold text-heading mb-1">🎮 اختر نمط التحدي</h1>
+          <p className="text-muted-foreground text-base">أربعة عوالم استراتيجية للعباقرة</p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 max-w-md mx-auto w-full">
+          {modes.map((m, i) => (
+            <button
+              key={m.id}
+              onClick={() => setPlayMode(m.id)}
+              className="bg-white/20 backdrop-blur-xl border border-white/30 rounded-3xl p-5 flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.97] animate-scale-in text-right"
+              style={{ animationDelay: `${i * 0.06}s` }}
+            >
+              <div className={`flex-shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br ${m.grad} shadow-lg flex items-center justify-center text-3xl`}>
+                {m.emoji}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-extrabold text-heading">{m.title}</h3>
+                <p className="text-muted-foreground text-sm mt-1">{m.desc}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+        <p className="text-center mt-6 text-glow-gold text-base">منصة الطالب العبقري 2026 ✨</p>
+      </div>
+    );
+  }
+
+  // Mode selection screen (PvP / AI)
   if (gameMode === "select") {
     return (
       <div className="min-h-screen flex flex-col px-4 py-6">
