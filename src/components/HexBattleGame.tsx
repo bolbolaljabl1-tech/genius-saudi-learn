@@ -283,14 +283,51 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   const [winnerName, setWinnerName] = useState(studentName || "");
   const { speak } = useTTS();
 
-  // Initialize shuffled questions
+  // Initialize shuffled questions + mode-specific board state
   useEffect(() => {
     const filtered = subjectFilter && subjectFilter !== "all"
       ? allQuestions.filter(q => q.subject === subjectFilter)
       : allQuestions;
     setShuffledQuestions(shuffleArray(filtered));
     setQuestionIndex(0);
-  }, [subjectFilter]);
+
+    // Setup mode-specific state
+    const allIds: string[] = [];
+    for (let r = 0; r < BOARD_SIZE; r++)
+      for (let c = 0; c < BOARD_SIZE; c++) allIds.push(`${r}-${c}`);
+
+    if (playMode === "castle") {
+      // 3 random non-edge castle cells
+      const interior = allIds.filter(id => {
+        const [r, c] = id.split("-").map(Number);
+        return r > 0 && r < BOARD_SIZE - 1 && c > 0 && c < BOARD_SIZE - 1;
+      });
+      const shuffled = shuffleArray(interior);
+      setCastles(new Set(shuffled.slice(0, 3)));
+      setSiegedCastles(new Set());
+    } else {
+      setCastles(new Set());
+      setSiegedCastles(new Set());
+    }
+
+    if (playMode === "treasure") {
+      // start with one center cell + neighbors revealed
+      const mid = `${Math.floor(BOARD_SIZE / 2)}-${Math.floor(BOARD_SIZE / 2)}`;
+      const rev = new Set<string>([mid]);
+      const [mr, mc] = mid.split("-").map(Number);
+      for (const id of allIds) {
+        const [r, c] = id.split("-").map(Number);
+        if (areNeighbors(mr, mc, r, c)) rev.add(id);
+      }
+      setRevealed(rev);
+    } else {
+      setRevealed(new Set());
+    }
+
+    // Alliance: shared 6 explosion uses (we store in .green and ignore .red)
+    if (playMode === "alliance") setExplosionUses({ green: 6, red: 6 });
+    else setExplosionUses({ green: 3, red: 3 });
+  }, [subjectFilter, playMode]);
 
   const getNextQuestion = useCallback((): Question => {
     if (questionIndex >= shuffledQuestions.length) {
