@@ -900,12 +900,12 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${currentPlayer === "green" ? "bg-emerald-100 text-emerald-700 ring-2 ring-emerald-400" : "bg-emerald-50 text-emerald-400"}`}>
           <div className="w-3 h-3 rounded-full bg-emerald-500" />
           {gameMode === "ai" ? "أنت" : "أخضر"}
-          <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-200 text-amber-800">💣 {explosionUses.green}/3</span>
+          <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-200 text-amber-800">💣 {explosionUses.green}/{playMode === "alliance" ? 6 : 3}</span>
         </div>
         {aiThinking && <span className="text-sm text-muted-foreground animate-pulse font-bold">🤖 يفكر...</span>}
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${currentPlayer === "red" ? "bg-red-100 text-red-700 ring-2 ring-red-400" : "bg-red-50 text-red-400"}`}>
           {gameMode === "ai" ? "🤖" : "أحمر"}
-          <span className="mr-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-200 text-amber-800">💣 {explosionUses.red}/3</span>
+          <span className="mr-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-200 text-amber-800">💣 {explosionUses.red}/{playMode === "alliance" ? 6 : 3}</span>
           <div className="w-3 h-3 rounded-full bg-red-500" />
         </div>
       </div>
@@ -921,7 +921,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
             onClick={() => triggerExplosion(opponent)}
             className="mx-auto mb-2 px-4 py-2 rounded-2xl border-2 border-red-500 text-red-700 font-extrabold text-sm animate-red-flash active:scale-95 transition-all"
           >
-            💥 السؤال الانفجاري — أوقف فوز {nearWin.player === "green" ? "الأخضر" : "الأحمر"}! ({explosionUses[opponent]}/3)
+            💥 السؤال الانفجاري — أوقف فوز {nearWin.player === "green" ? "الأخضر" : "الأحمر"}! ({explosionUses[opponent]}/{playMode === "alliance" ? 6 : 3})
           </button>
         );
       })()}
@@ -1069,7 +1069,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
               </div>
             )}
             <p className="text-[10px] text-center text-muted-foreground mt-2">
-              المحاولات المتبقية: {explosionFor === "green" ? explosionUses.green : explosionUses.red}/3
+              المحاولات المتبقية: {explosionFor === "green" ? explosionUses.green : explosionUses.red}/{playMode === "alliance" ? 6 : 3}
             </p>
           </div>
         </div>
