@@ -230,8 +230,12 @@ const getMedalInfo = (seconds: number) => {
 };
 
 type GameMode = "select" | "pvp" | "ai";
+type PlayMode = "" | "classic" | "castle" | "treasure" | "alliance";
+
+const QUESTION_TIME_LIMIT = 18; // seconds — Stern Arbitrator timer
 
 const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: HexBattleGameProps) => {
+  const [playMode, setPlayMode] = useState<PlayMode>("");
   const [gameMode, setGameMode] = useState<GameMode>("select");
   const [grid] = useState(generateGrid);
   const [cellOwners, setCellOwners] = useState<Map<string, "green" | "red">>(new Map());
@@ -246,13 +250,23 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   const [aiThinking, setAiThinking] = useState(false);
   const winnerRef = useRef<HTMLDivElement>(null);
 
-  // Explosion mechanic
+  // Explosion mechanic (Alliance mode shares the counter via .green key)
   const [explosionUses, setExplosionUses] = useState<{ green: number; red: number }>({ green: 3, red: 3 });
   const [nearWin, setNearWin] = useState<{ player: "green" | "red"; pathCells: Set<string> } | null>(null);
   const [explosionQuestion, setExplosionQuestion] = useState<Question | null>(null);
   const [explosionAnswer, setExplosionAnswer] = useState("");
   const [explosionFor, setExplosionFor] = useState<"green" | "red" | null>(null);
   const [explosionFeedback, setExplosionFeedback] = useState<"" | "ok" | "fail">("");
+
+  // Castle Siege mode: castle cells (locked) — capture by surrounding with 3 own neighbors
+  const [castles, setCastles] = useState<Set<string>>(new Set());
+  const [siegedCastles, setSiegedCastles] = useState<Set<string>>(new Set());
+
+  // Lost Treasure mode: only revealed cells are clickable
+  const [revealed, setRevealed] = useState<Set<string>>(new Set());
+
+  // Stern Arbitrator timer (per-question)
+  const [questionTimer, setQuestionTimer] = useState<number>(QUESTION_TIME_LIMIT);
 
   // Shuffle-based question system (no repeats)
   const [shuffledQuestions, setShuffledQuestions] = useState<Question[]>([]);
@@ -269,14 +283,51 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   const [winnerName, setWinnerName] = useState(studentName || "");
   const { speak } = useTTS();
 
-  // Initialize shuffled questions
+  // Initialize shuffled questions + mode-specific board state
   useEffect(() => {
     const filtered = subjectFilter && subjectFilter !== "all"
       ? allQuestions.filter(q => q.subject === subjectFilter)
       : allQuestions;
     setShuffledQuestions(shuffleArray(filtered));
     setQuestionIndex(0);
-  }, [subjectFilter]);
+
+    // Setup mode-specific state
+    const allIds: string[] = [];
+    for (let r = 0; r < BOARD_SIZE; r++)
+      for (let c = 0; c < BOARD_SIZE; c++) allIds.push(`${r}-${c}`);
+
+    if (playMode === "castle") {
+      // 3 random non-edge castle cells
+      const interior = allIds.filter(id => {
+        const [r, c] = id.split("-").map(Number);
+        return r > 0 && r < BOARD_SIZE - 1 && c > 0 && c < BOARD_SIZE - 1;
+      });
+      const shuffled = shuffleArray(interior);
+      setCastles(new Set(shuffled.slice(0, 3)));
+      setSiegedCastles(new Set());
+    } else {
+      setCastles(new Set());
+      setSiegedCastles(new Set());
+    }
+
+    if (playMode === "treasure") {
+      // start with one center cell + neighbors revealed
+      const mid = `${Math.floor(BOARD_SIZE / 2)}-${Math.floor(BOARD_SIZE / 2)}`;
+      const rev = new Set<string>([mid]);
+      const [mr, mc] = mid.split("-").map(Number);
+      for (const id of allIds) {
+        const [r, c] = id.split("-").map(Number);
+        if (areNeighbors(mr, mc, r, c)) rev.add(id);
+      }
+      setRevealed(rev);
+    } else {
+      setRevealed(new Set());
+    }
+
+    // Alliance: shared 6 explosion uses (we store in .green and ignore .red)
+    if (playMode === "alliance") setExplosionUses({ green: 6, red: 6 });
+    else setExplosionUses({ green: 3, red: 3 });
+  }, [subjectFilter, playMode]);
 
   const getNextQuestion = useCallback((): Question => {
     if (questionIndex >= shuffledQuestions.length) {
@@ -299,6 +350,34 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     }, 200);
     return () => clearInterval(interval);
   }, [timerStarted, startTime, winner]);
+
+  // Stern Arbitrator: per-question countdown (timeout = wrong answer)
+  useEffect(() => {
+    if (!currentQuestion || answered || winner) return;
+    setQuestionTimer(QUESTION_TIME_LIMIT);
+    const iv = setInterval(() => {
+      setQuestionTimer(t => {
+        if (t <= 1) {
+          clearInterval(iv);
+          if (currentQuestion && selectedCell) {
+            setAnswered(true);
+            setSelectedAnswer(-1);
+            setTimeout(() => {
+              setSelectedCell(null);
+              setCurrentQuestion(null);
+              setAnswered(false);
+              setSelectedAnswer(null);
+              setCurrentPlayer(p => p === "green" ? "red" : "green");
+            }, 1500);
+          }
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(iv);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentQuestion, answered, winner]);
 
   // Near-win detection (gold pulse + red flash for explosion availability)
   useEffect(() => {
@@ -347,7 +426,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
         newOwners.set(empties[Math.floor(Math.random() * empties.length)], explosionFor);
       }
       setCellOwners(newOwners);
-      setExplosionUses(u => ({ ...u, [explosionFor]: u[explosionFor] - 1 }));
+      setExplosionUses(u => playMode === "alliance" ? { green: u.green - 1, red: u.red - 1 } : { ...u, [explosionFor]: u[explosionFor] - 1 });
       setTimeout(() => {
         setExplosionQuestion(null);
         setExplosionFor(null);
@@ -355,7 +434,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       }, 1400);
     } else {
       setExplosionFeedback("fail");
-      setExplosionUses(u => ({ ...u, [explosionFor]: u[explosionFor] - 1 }));
+      setExplosionUses(u => playMode === "alliance" ? { green: u.green - 1, red: u.red - 1 } : { ...u, [explosionFor]: u[explosionFor] - 1 });
       setTimeout(() => {
         setExplosionQuestion(null);
         setExplosionFor(null);
@@ -368,8 +447,9 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   const handleCellClick = (id: string) => {
     if (winner || cellOwners.has(id) || selectedCell || aiThinking) return;
     if (gameMode === "ai" && currentPlayer === "red") return;
+    if (castles.has(id)) return; // can't claim a castle directly
+    if (playMode === "treasure" && !revealed.has(id)) return; // hidden in treasure mode
 
-    // Start timer on first move
     if (!timerStarted) {
       setTimerStarted(true);
       setStartTime(Date.now());
@@ -380,7 +460,6 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     setCurrentQuestion(q);
     setAnswered(false);
     setSelectedAnswer(null);
-    // Auto-read question aloud
     speak(q.q);
   };
 
@@ -409,6 +488,39 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       newOwners.set(cell, player);
       setCellOwners(newOwners);
 
+      // Treasure mode: reveal neighbors
+      if (playMode === "treasure") {
+        const [r, c] = cell.split("-").map(Number);
+        const newRevealed = new Set(revealed);
+        for (let nr = 0; nr < BOARD_SIZE; nr++)
+          for (let nc = 0; nc < BOARD_SIZE; nc++)
+            if (areNeighbors(r, c, nr, nc)) newRevealed.add(`${nr}-${nc}`);
+        setRevealed(newRevealed);
+      }
+
+      // Castle siege: if a non-besieged castle has 3+ neighbors of this player, capture
+      if (playMode === "castle") {
+        for (const castleId of castles) {
+          if (siegedCastles.has(castleId)) continue;
+          const [cr, cc] = castleId.split("-").map(Number);
+          let count = 0;
+          for (const [k, v] of newOwners.entries()) {
+            if (v !== player) continue;
+            const [nr, nc] = k.split("-").map(Number);
+            if (areNeighbors(cr, cc, nr, nc)) count++;
+          }
+          if (count >= 3) {
+            const newSieged = new Set(siegedCastles);
+            newSieged.add(castleId);
+            setSiegedCastles(newSieged);
+            newOwners.set(castleId, player);
+            setCellOwners(newOwners);
+            setExplosionUses(u => ({ ...u, [player]: u[player] + 1 }));
+            break;
+          }
+        }
+      }
+
       if (checkWin(newOwners, player)) {
         handleWin(player);
         return;
@@ -422,7 +534,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       setSelectedAnswer(null);
       setCurrentPlayer(p => p === "green" ? "red" : "green");
     }, 1500);
-  }, [cellOwners, gameMode, onXP, onBadge, startTime, timerStarted]);
+  }, [cellOwners, gameMode, onXP, onBadge, startTime, timerStarted, playMode, revealed, castles, siegedCastles, getNextQuestion, speak]);
 
   const handleAnswer = (idx: number) => {
     if (answered || !currentQuestion) return;
@@ -557,7 +669,33 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     setFinalTime(null);
     setShowWinModal(false);
     setWinnerName(studentName || "");
-    setExplosionUses({ green: 3, red: 3 });
+    setExplosionUses(playMode === "alliance" ? { green: 6, red: 6 } : { green: 3, red: 3 });
+    setQuestionTimer(QUESTION_TIME_LIMIT);
+    // re-init mode-specific board state
+    const allIds: string[] = [];
+    for (let r = 0; r < BOARD_SIZE; r++)
+      for (let c = 0; c < BOARD_SIZE; c++) allIds.push(`${r}-${c}`);
+    if (playMode === "castle") {
+      const interior = allIds.filter(id => {
+        const [r, c] = id.split("-").map(Number);
+        return r > 0 && r < BOARD_SIZE - 1 && c > 0 && c < BOARD_SIZE - 1;
+      });
+      setCastles(new Set(shuffleArray(interior).slice(0, 3)));
+      setSiegedCastles(new Set());
+    } else {
+      setCastles(new Set());
+      setSiegedCastles(new Set());
+    }
+    if (playMode === "treasure") {
+      const mid = `${Math.floor(BOARD_SIZE / 2)}-${Math.floor(BOARD_SIZE / 2)}`;
+      const rev = new Set<string>([mid]);
+      const [mr, mc] = mid.split("-").map(Number);
+      for (const id of allIds) {
+        const [r, c] = id.split("-").map(Number);
+        if (areNeighbors(mr, mc, r, c)) rev.add(id);
+      }
+      setRevealed(rev);
+    } else setRevealed(new Set());
     setNearWin(null);
     setExplosionQuestion(null);
     setExplosionFor(null);
@@ -573,6 +711,10 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   const getCellColor = (id: string) => {
     const owner = cellOwners.get(id);
     const inNearPath = nearWin?.pathCells.has(id);
+    const isCastle = castles.has(id) && !siegedCastles.has(id);
+    const isHidden = playMode === "treasure" && !revealed.has(id) && !owner;
+    if (isCastle) return "bg-gradient-to-br from-amber-400 to-yellow-600 border-amber-800 text-white shadow-gold";
+    if (isHidden) return "bg-slate-700 border-slate-900 text-slate-500";
     if (owner === "green") {
       return `bg-emerald-500 border-emerald-700 text-white ${inNearPath && nearWin?.player === "green" ? "animate-gold-pulse" : ""}`;
     }
@@ -591,11 +733,52 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     return m > 0 ? `${m}:${sec.toString().padStart(2, "0")}` : `${sec} ث`;
   };
 
-  // Mode selection screen
+  // Play-mode picker (4 game modes)
+  if (playMode === "") {
+    const modes: { id: PlayMode; title: string; emoji: string; desc: string; grad: string }[] = [
+      { id: "classic", title: "شبكة التحدي الكلاسيكية", emoji: "⬡", desc: "المحكّم الصارم + السؤال الانفجاري", grad: "from-emerald-500 to-teal-600" },
+      { id: "castle", title: "حصار القلعة الاستراتيجي", emoji: "🏰", desc: "حاصِر 3 قلاع لفتح أسئلة كبرى", grad: "from-amber-500 to-orange-600" },
+      { id: "treasure", title: "الكنز المفقود", emoji: "🗺️", desc: "اكشف المسار خطوة بخطوة", grad: "from-purple-500 to-fuchsia-600" },
+      { id: "alliance", title: "حلف العباقرة", emoji: "🤝", desc: "تعاون: 6 محاولات انفجار مشتركة", grad: "from-blue-500 to-indigo-600" },
+    ];
+    return (
+      <div className="min-h-screen flex flex-col px-4 py-6 pb-24">
+        <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4 self-start">
+          <ArrowRight className="w-5 h-5" />
+          <span className="font-bold text-lg">رجوع</span>
+        </button>
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-extrabold text-heading mb-1">🎮 اختر نمط التحدي</h1>
+          <p className="text-muted-foreground text-base">أربعة عوالم استراتيجية للعباقرة</p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 max-w-md mx-auto w-full">
+          {modes.map((m, i) => (
+            <button
+              key={m.id}
+              onClick={() => setPlayMode(m.id)}
+              className="bg-white/20 backdrop-blur-xl border border-white/30 rounded-3xl p-5 flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.97] animate-scale-in text-right"
+              style={{ animationDelay: `${i * 0.06}s` }}
+            >
+              <div className={`flex-shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br ${m.grad} shadow-lg flex items-center justify-center text-3xl`}>
+                {m.emoji}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-extrabold text-heading">{m.title}</h3>
+                <p className="text-muted-foreground text-sm mt-1">{m.desc}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+        <p className="text-center mt-6 text-glow-gold text-base">منصة الطالب العبقري 2026 ✨</p>
+      </div>
+    );
+  }
+
+  // Mode selection screen (PvP / AI)
   if (gameMode === "select") {
     return (
       <div className="min-h-screen flex flex-col px-4 py-6">
-        <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6 self-start">
+        <button onClick={() => setPlayMode("")} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-6 self-start">
           <ArrowRight className="w-5 h-5" />
           <span className="font-bold text-lg">رجوع</span>
         </button>
@@ -663,7 +846,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
               className="w-full px-5 py-4 rounded-2xl border-2 border-input bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-center text-2xl font-bold mb-4"
               dir="rtl"
             />
-            <p className="font-ruqaa text-matte-gold text-sm mb-4">منصة الطالب العبقري</p>
+            <p className="text-glow-gold text-base mb-4">منصة الطالب العبقري 2026 ✨</p>
             {sendingTelegram && <p className="text-sm text-muted-foreground mb-2">جارٍ إرسال التحدي...</p>}
             <div className="flex gap-3">
               <button
@@ -711,12 +894,12 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${currentPlayer === "green" ? "bg-emerald-100 text-emerald-700 ring-2 ring-emerald-400" : "bg-emerald-50 text-emerald-400"}`}>
           <div className="w-3 h-3 rounded-full bg-emerald-500" />
           {gameMode === "ai" ? "أنت" : "أخضر"}
-          <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-200 text-amber-800">💣 {explosionUses.green}/3</span>
+          <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-200 text-amber-800">💣 {explosionUses.green}/{playMode === "alliance" ? 6 : 3}</span>
         </div>
         {aiThinking && <span className="text-sm text-muted-foreground animate-pulse font-bold">🤖 يفكر...</span>}
         <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-bold transition-all ${currentPlayer === "red" ? "bg-red-100 text-red-700 ring-2 ring-red-400" : "bg-red-50 text-red-400"}`}>
           {gameMode === "ai" ? "🤖" : "أحمر"}
-          <span className="mr-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-200 text-amber-800">💣 {explosionUses.red}/3</span>
+          <span className="mr-1 text-[10px] px-1.5 py-0.5 rounded-full bg-amber-200 text-amber-800">💣 {explosionUses.red}/{playMode === "alliance" ? 6 : 3}</span>
           <div className="w-3 h-3 rounded-full bg-red-500" />
         </div>
       </div>
@@ -732,7 +915,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
             onClick={() => triggerExplosion(opponent)}
             className="mx-auto mb-2 px-4 py-2 rounded-2xl border-2 border-red-500 text-red-700 font-extrabold text-sm animate-red-flash active:scale-95 transition-all"
           >
-            💥 السؤال الانفجاري — أوقف فوز {nearWin.player === "green" ? "الأخضر" : "الأحمر"}! ({explosionUses[opponent]}/3)
+            💥 السؤال الانفجاري — أوقف فوز {nearWin.player === "green" ? "الأخضر" : "الأحمر"}! ({explosionUses[opponent]}/{playMode === "alliance" ? 6 : 3})
           </button>
         );
       })()}
@@ -750,7 +933,9 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
               >
                 {Array.from({ length: BOARD_SIZE }, (_, c) => {
                   const id = `${r}-${c}`;
-                  const isDisabled = winner !== null || cellOwners.has(id) || selectedCell !== null || aiThinking || (gameMode === "ai" && currentPlayer === "red");
+                  const isCastle = castles.has(id) && !siegedCastles.has(id);
+                  const isHidden = playMode === "treasure" && !revealed.has(id) && !cellOwners.has(id);
+                  const isDisabled = winner !== null || cellOwners.has(id) || selectedCell !== null || aiThinking || (gameMode === "ai" && currentPlayer === "red") || isCastle || isHidden;
                   return (
                     <button
                       key={id}
@@ -766,7 +951,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                         height: 48,
                       }}
                     >
-                      {cellOwners.has(id) ? (cellOwners.get(id) === "green" ? "🟢" : "🔴") : ""}
+                      {isCastle ? "🏰" : isHidden ? "؟" : cellOwners.has(id) ? (cellOwners.get(id) === "green" ? "🟢" : "🔴") : ""}
                     </button>
                   );
                 })}
@@ -779,7 +964,15 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       {/* Question Modal */}
       {currentQuestion && selectedCell && !winner && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-end justify-center p-3 pb-20" onClick={e => e.stopPropagation()}>
-          <div className="w-full max-w-md bg-card rounded-3xl p-5 shadow-2xl animate-slide-up border border-border mb-4">
+          <div className={`w-full max-w-md bg-card rounded-3xl p-5 shadow-2xl animate-slide-up border-4 mb-4 ${answered ? "border-border" : "animate-melt-border"}`}>
+            {!answered && (
+              <div className="flex items-center justify-between mb-2 text-xs font-bold">
+                <span className="text-amber-700">⏱️ المحكّم الصارم</span>
+                <span className={`px-2 py-1 rounded-full ${questionTimer <= 5 ? "bg-red-100 text-red-700 animate-pulse" : "bg-amber-100 text-amber-800"}`}>
+                  {questionTimer} ث
+                </span>
+              </div>
+            )}
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold px-2 py-1 rounded-full bg-muted text-muted-foreground">
                 {subjectEmoji[currentQuestion.subject] || "📚"} {subjectNames[currentQuestion.subject] || currentQuestion.subject}
@@ -870,7 +1063,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
               </div>
             )}
             <p className="text-[10px] text-center text-muted-foreground mt-2">
-              المحاولات المتبقية: {explosionFor === "green" ? explosionUses.green : explosionUses.red}/3
+              المحاولات المتبقية: {explosionFor === "green" ? explosionUses.green : explosionUses.red}/{playMode === "alliance" ? 6 : 3}
             </p>
           </div>
         </div>
