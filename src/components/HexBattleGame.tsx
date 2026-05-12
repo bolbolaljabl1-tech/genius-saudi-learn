@@ -351,6 +351,34 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     return () => clearInterval(interval);
   }, [timerStarted, startTime, winner]);
 
+  // Stern Arbitrator: per-question countdown (timeout = wrong answer)
+  useEffect(() => {
+    if (!currentQuestion || answered || winner) return;
+    setQuestionTimer(QUESTION_TIME_LIMIT);
+    const iv = setInterval(() => {
+      setQuestionTimer(t => {
+        if (t <= 1) {
+          clearInterval(iv);
+          if (currentQuestion && selectedCell) {
+            setAnswered(true);
+            setSelectedAnswer(-1);
+            setTimeout(() => {
+              setSelectedCell(null);
+              setCurrentQuestion(null);
+              setAnswered(false);
+              setSelectedAnswer(null);
+              setCurrentPlayer(p => p === "green" ? "red" : "green");
+            }, 1500);
+          }
+          return 0;
+        }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(iv);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentQuestion, answered, winner]);
+
   // Near-win detection (gold pulse + red flash for explosion availability)
   useEffect(() => {
     if (winner) { setNearWin(null); return; }
