@@ -872,7 +872,9 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
               >
                 {Array.from({ length: BOARD_SIZE }, (_, c) => {
                   const id = `${r}-${c}`;
-                  const isDisabled = winner !== null || cellOwners.has(id) || selectedCell !== null || aiThinking || (gameMode === "ai" && currentPlayer === "red");
+                  const isCastle = castles.has(id) && !siegedCastles.has(id);
+                  const isHidden = playMode === "treasure" && !revealed.has(id) && !cellOwners.has(id);
+                  const isDisabled = winner !== null || cellOwners.has(id) || selectedCell !== null || aiThinking || (gameMode === "ai" && currentPlayer === "red") || isCastle || isHidden;
                   return (
                     <button
                       key={id}
@@ -888,7 +890,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                         height: 48,
                       }}
                     >
-                      {cellOwners.has(id) ? (cellOwners.get(id) === "green" ? "🟢" : "🔴") : ""}
+                      {isCastle ? "🏰" : isHidden ? "؟" : cellOwners.has(id) ? (cellOwners.get(id) === "green" ? "🟢" : "🔴") : ""}
                     </button>
                   );
                 })}
