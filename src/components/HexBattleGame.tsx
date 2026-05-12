@@ -447,8 +447,9 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   const handleCellClick = (id: string) => {
     if (winner || cellOwners.has(id) || selectedCell || aiThinking) return;
     if (gameMode === "ai" && currentPlayer === "red") return;
+    if (castles.has(id)) return; // can't claim a castle directly
+    if (playMode === "treasure" && !revealed.has(id)) return; // hidden in treasure mode
 
-    // Start timer on first move
     if (!timerStarted) {
       setTimerStarted(true);
       setStartTime(Date.now());
@@ -459,7 +460,6 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     setCurrentQuestion(q);
     setAnswered(false);
     setSelectedAnswer(null);
-    // Auto-read question aloud
     speak(q.q);
   };
 
