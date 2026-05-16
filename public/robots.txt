@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://genius-saudi-learn.lovable.app/sitemap.xml

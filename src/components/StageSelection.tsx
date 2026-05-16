@@ -34,8 +34,17 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery,
         </div>
 
         {/* Hero Banner - main identity (enlarged 30%) */}
+        <h1 className="sr-only">منصة الطالب العبقري — مراجعة وتحديات ذكية</h1>
         <div className="w-full max-w-3xl mb-8 animate-scale-in px-0">
-          <img src={heroBanner} alt="منصة الطالب العبقري" className="w-full rounded-3xl shadow-emerald-lg" />
+          <img
+            src={heroBanner}
+            alt="منصة الطالب العبقري — شعار الواجهة الرئيسية"
+            width={1200}
+            height={600}
+            fetchPriority="high"
+            decoding="async"
+            className="w-full rounded-3xl shadow-emerald-lg"
+          />
         </div>
 
         {/* Camera Solver Button */}

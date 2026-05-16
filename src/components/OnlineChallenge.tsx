@@ -333,6 +333,7 @@ const OnlineChallenge = ({ onBack, onXP, studentName }: OnlineChallengeProps) =>
                 <button
                   onClick={() => { navigator.clipboard.writeText(roomCode); toast({ title: "تم نسخ الكود! 📋" }); }}
                   className="p-2 rounded-full bg-primary/10 text-primary hover:bg-primary/20"
+                  aria-label="نسخ كود الغرفة"
                 >
                   <Copy className="w-5 h-5" />
                 </button>

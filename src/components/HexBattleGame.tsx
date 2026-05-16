@@ -941,6 +941,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                       key={id}
                       onClick={() => handleCellClick(id)}
                       disabled={isDisabled}
+                      aria-label={`خلية شبكة التحدي ${r + 1}-${c + 1}`}
                       className={`w-12 h-12 rounded-lg border-2 shadow-md transition-all duration-200 text-xs font-bold
                         ${getCellColor(id)}
                         ${!isDisabled ? "active:scale-90 cursor-pointer" : ""}
