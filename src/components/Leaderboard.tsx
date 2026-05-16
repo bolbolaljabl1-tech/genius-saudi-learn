@@ -73,7 +73,7 @@ const Leaderboard = ({ onBack, currentName, currentXP }: LeaderboardProps) => {
             >
               {getRankIcon(i)}
               <span className="flex-1 font-extrabold text-foreground text-xl">{entry.student_name}</span>
-              {entry.badges?.includes("وسام العبقري") && <img src={appIcon} alt="وسام" className="w-8 h-8 rounded-lg" />}
+              {entry.badges?.includes("وسام العبقري") && <img src={appIcon} alt="وسام الطالب العبقري" className="w-8 h-8 rounded-lg" />}
               <span className="text-primary font-extrabold text-xl">{entry.xp} XP</span>
             </div>
           ))}

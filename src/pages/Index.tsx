@@ -49,7 +49,7 @@ const Index = () => {
   };
 
   return (
-    <div className="pb-16">
+    <main className="pb-16">
       {showNameModal && <StudentNameModal onSave={handleNameSave} />}
 
       {screen === "stage" && (
@@ -95,7 +95,7 @@ const Index = () => {
       </button>
 
       <AppFooter />
-    </div>
+    </main>
   );
 };
 
