@@ -75,7 +75,7 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
           <Wifi className="w-9 h-9 text-matte-gold" />
         </div>
         <div className="flex-1 text-right">
-          <h3 className="text-xl font-extrabold text-foreground">🌐 تحدي صديقك أونلاين</h3>
+          <h2 className="text-xl font-extrabold text-foreground">🌐 تحدي صديقك أونلاين</h2>
           <p className="text-muted-foreground text-sm mt-1">العب مع صديق عن بُعد! 🔥</p>
         </div>
         <span className="px-2 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-bold">جديد</span>
@@ -90,7 +90,7 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
           <Hexagon className="w-9 h-9 text-white" />
         </div>
         <div className="flex-1 text-right">
-          <h3 className="text-xl font-extrabold text-foreground">⬡ تحدي العبقري الشامل</h3>
+          <h2 className="text-xl font-extrabold text-foreground">⬡ تحدي العبقري الشامل</h2>
           <p className="text-muted-foreground text-sm mt-1">أسئلة من جميع المواد! 🔥</p>
         </div>
       </button>

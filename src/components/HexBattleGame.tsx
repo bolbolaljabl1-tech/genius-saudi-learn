@@ -795,7 +795,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
               <Users className="w-8 h-8 text-white" />
             </div>
             <div className="flex-1 text-right">
-              <h3 className="text-xl font-extrabold text-heading">👥 لاعب ضد لاعب</h3>
+              <h2 className="text-xl font-extrabold text-heading">👥 لاعب ضد لاعب</h2>
               <p className="text-muted-foreground text-sm mt-1">تحدَّ صديقك على نفس الجهاز!</p>
             </div>
           </button>
@@ -809,7 +809,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
               <Bot className="w-8 h-8 text-matte-gold" />
             </div>
             <div className="flex-1 text-right">
-              <h3 className="text-xl font-extrabold text-heading">🤖 ضد الذكاء الاصطناعي</h3>
+              <h2 className="text-xl font-extrabold text-heading">🤖 ضد الذكاء الاصطناعي</h2>
               <p className="text-muted-foreground text-sm mt-1">هل تستطيع هزيمة العبقري الآلي؟</p>
             </div>
           </button>
