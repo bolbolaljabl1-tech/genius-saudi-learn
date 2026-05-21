@@ -16,6 +16,7 @@ import SupportModal from "@/components/SupportModal";
 import AppFooter from "@/components/AppFooter";
 import { useXP } from "@/hooks/useXP";
 import { useIdleNotify } from "@/hooks/useIdleNotify";
+import { useOvertakeNotify } from "@/hooks/useOvertakeNotify";
 
 type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery";
 
@@ -29,6 +30,7 @@ const Index = () => {
   const [showWhisper, setShowWhisper] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   useIdleNotify(4);
+  useOvertakeNotify(studentName, 60);
 
   const handleStageSelect = (s: string) => { setStage(s); setScreen("subject"); };
   const handleSubjectSelect = (s: string) => { setSubject(s); setScreen("search"); };
