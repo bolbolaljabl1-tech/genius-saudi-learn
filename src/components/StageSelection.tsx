@@ -10,9 +10,10 @@ interface StageSelectionProps {
   onGallery: () => void;
   xp: number;
   studentName: string;
+  streak?: number;
 }
 
-const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery, xp, studentName }: StageSelectionProps) => {
+const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery, xp, studentName, streak = 0 }: StageSelectionProps) => {
   const stages = [
     { id: "elementary", title: "المرحلة الابتدائية", description: "من الصف الأول إلى السادس", icon: BookOpen, delay: "0.1s" },
     { id: "middle", title: "المرحلة المتوسطة", description: "من الصف الأول إلى الثالث", icon: GraduationCap, delay: "0.3s" },
@@ -23,12 +24,23 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery,
       <div className="w-full px-4 flex flex-col items-center">
         {/* Top bar with XP */}
         <div className="w-full max-w-xl flex items-center justify-between mb-4 animate-slide-up">
-          <button onClick={onLeaderboard} className="flex items-center gap-2 neu-btn px-5 py-3 hover:shadow-emerald transition-all active:scale-[0.98]">
+          <button onClick={onLeaderboard} className="flex items-center gap-2 neu-btn px-5 py-3 hover:shadow-emerald transition-all active:scale-[0.98]" aria-label="عرض لوحة الشرف">
             <Trophy className="w-5 h-5 text-gold" />
             <span className="text-foreground font-extrabold text-lg">{xp} XP</span>
           </button>
           {studentName && (
-            <span className="text-muted-foreground text-lg font-bold">مرحباً {studentName} 👋</span>
+            <span className="text-muted-foreground text-base font-bold flex items-center gap-2">
+              مرحباً {studentName} 👋
+              {streak > 0 && (
+                <span
+                  className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-orange-100 text-orange-700 text-sm font-extrabold shadow-sm animate-pulse-glow"
+                  title={`سلسلة ${streak} يوم متتالية`}
+                  aria-label={`سلسلة ${streak} يوم`}
+                >
+                  🔥 {streak}
+                </span>
+              )}
+            </span>
           )}
           <img src={appIcon} alt="منصة الطالب العبقري" className="w-12 h-12 rounded-xl shadow-emerald" />
         </div>
