@@ -15,6 +15,7 @@ import WhisperModal from "@/components/WhisperModal";
 import SupportModal from "@/components/SupportModal";
 import AppFooter from "@/components/AppFooter";
 import { useXP } from "@/hooks/useXP";
+import { useIdleNotify } from "@/hooks/useIdleNotify";
 
 type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery";
 
@@ -23,10 +24,11 @@ const Index = () => {
   const [stage, setStage] = useState("");
   const [subject, setSubject] = useState("");
   const [lessonTitle, setLessonTitle] = useState("");
-  const { xp, studentName, badges, addXP, awardBadge, saveStudentName } = useXP();
+  const { xp, studentName, badges, streak, addXP, awardBadge, saveStudentName } = useXP();
   const [showNameModal, setShowNameModal] = useState(false);
   const [showWhisper, setShowWhisper] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
+  useIdleNotify(4);
 
   const handleStageSelect = (s: string) => { setStage(s); setScreen("subject"); };
   const handleSubjectSelect = (s: string) => { setSubject(s); setScreen("search"); };
@@ -61,6 +63,7 @@ const Index = () => {
           onGallery={() => setScreen("gallery")}
           xp={xp}
           studentName={studentName}
+          streak={streak}
         />
       )}
       {screen === "subject" && <SubjectSelection stage={stage} onSelect={handleSubjectSelect} onBack={() => setScreen("stage")} />}
