@@ -9,8 +9,26 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
+    // Cap request body to ~8MB (base64 image + small hint)
+    const contentLength = Number(req.headers.get("content-length") ?? "0");
+    if (contentLength > 8_000_000) {
+      return new Response(JSON.stringify({ error: "Image too large (max ~8MB)" }), {
+        status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const { imageBase64, hint } = await req.json();
-    if (!imageBase64) throw new Error("No image provided");
+    if (!imageBase64 || typeof imageBase64 !== "string") throw new Error("No image provided");
+    if (imageBase64.length > 10_000_000) {
+      return new Response(JSON.stringify({ error: "Image too large" }), {
+        status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    if (hint && (typeof hint !== "string" || hint.length > 500)) {
+      return new Response(JSON.stringify({ error: "Hint too long (max 500 chars)" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
