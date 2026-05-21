@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Anyone can read messages" ON public.messages;

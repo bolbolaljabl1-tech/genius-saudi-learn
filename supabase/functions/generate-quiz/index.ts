@@ -9,7 +9,21 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    const { lessonTitle, subject, stage } = await req.json();
+    const contentLength = Number(req.headers.get("content-length") ?? "0");
+    if (contentLength > 4_000) {
+      return new Response(JSON.stringify({ error: "Payload too large" }), {
+        status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const body = await req.json();
+    const lessonTitle = typeof body?.lessonTitle === "string" ? body.lessonTitle.trim() : "";
+    const subject = typeof body?.subject === "string" ? body.subject.trim() : "";
+    const stage = typeof body?.stage === "string" ? body.stage : "";
+    if (!lessonTitle || lessonTitle.length > 200 || !subject || subject.length > 100) {
+      return new Response(JSON.stringify({ error: "Invalid lessonTitle or subject" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 

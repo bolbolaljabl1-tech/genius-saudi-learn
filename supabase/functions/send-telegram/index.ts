@@ -3,6 +3,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+// Escape Telegram MarkdownV1 special characters in user-supplied content
+function escapeMarkdown(input: string): string {
+  return input.replace(/([_*`\[\]])/g, '\\$1');
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -19,7 +24,25 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { student_name, message } = await req.json();
+    // Reject oversized request bodies (defensive cap before parsing JSON)
+    const contentLength = Number(req.headers.get('content-length') ?? '0');
+    if (contentLength > 8_000) {
+      return new Response(JSON.stringify({ error: 'Payload too large' }), { status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    const body = await req.json();
+    const rawName = typeof body?.student_name === 'string' ? body.student_name.trim() : '';
+    const rawMessage = typeof body?.message === 'string' ? body.message.trim() : '';
+
+    if (!rawName || rawName.length > 100) {
+      return new Response(JSON.stringify({ error: 'Invalid student_name (1-100 chars required)' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+    if (!rawMessage || rawMessage.length > 1000) {
+      return new Response(JSON.stringify({ error: 'Invalid message (1-1000 chars required)' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+    const student_name = escapeMarkdown(rawName);
+    const message = escapeMarkdown(rawMessage);
 
     const text = `
 💌 *همسة عبقرية جديدة!*
@@ -38,12 +61,13 @@ Deno.serve(async (req) => {
 
     const data = await response.json();
     if (!response.ok) {
-      throw new Error(`Telegram API error [${response.status}]: ${JSON.stringify(data)}`);
+      console.error('Telegram API error', response.status, data);
+      return new Response(JSON.stringify({ error: 'Failed to send message' }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 
     return new Response(JSON.stringify({ success: true }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   } catch (error) {
-    const msg = error instanceof Error ? error.message : 'Unknown error';
-    return new Response(JSON.stringify({ error: msg }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    console.error('send-telegram error:', error);
+    return new Response(JSON.stringify({ error: 'Unknown error' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
   }
 });
