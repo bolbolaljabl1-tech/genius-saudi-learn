@@ -719,7 +719,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       return `bg-emerald-500 border-emerald-700 text-white ${inNearPath && nearWin?.player === "green" ? "animate-neon-pulse" : ""}`;
     }
     if (owner === "red") {
-      return `bg-red-500 border-red-700 text-white ${inNearPath && nearWin?.player === "red" ? "animate-gold-pulse" : ""}`;
+      return `bg-red-500 border-red-700 text-white ${inNearPath && nearWin?.player === "red" ? "animate-neon-pulse" : ""}`;
     }
     if (selectedCell === id) return "bg-amber-200 border-amber-500 ring-4 ring-amber-300 text-amber-900";
     return "bg-white border-blue-500 text-blue-700 hover:bg-blue-50";
