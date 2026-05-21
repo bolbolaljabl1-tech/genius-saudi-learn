@@ -31,7 +31,7 @@ const Leaderboard = ({ onBack, currentName, currentXP }: LeaderboardProps) => {
         await (supabase as any).from("leaderboard").insert({ student_name: currentName, xp: currentXP });
       }
     }
-    const { data } = await (supabase as any).from("leaderboard").select("*").order("xp", { ascending: false }).limit(50);
+    const { data } = await (supabase as any).from("leaderboard").select("*").order("xp", { ascending: false }).limit(10);
     setEntries((data as LeaderboardEntry[]) || []);
     setLoading(false);
   };
@@ -54,7 +54,8 @@ const Leaderboard = ({ onBack, currentName, currentXP }: LeaderboardProps) => {
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-gold shadow-gold mb-4">
           <Trophy className="w-10 h-10 text-gold-foreground" />
         </div>
-        <h2 className="text-3xl font-extrabold text-foreground">🏆 لوحة المتصدرين</h2>
+        <h2 className="text-3xl font-extrabold text-foreground">🏆 لوحة الشرف — أفضل 10 عباقرة</h2>
+        <p className="text-sm text-muted-foreground mt-2 text-glow-gold">منصة الطالب العبقري 2026</p>
       </div>
 
       {loading ? (
