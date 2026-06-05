@@ -936,13 +936,17 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                   const isCastle = castles.has(id) && !siegedCastles.has(id);
                   const isHidden = playMode === "treasure" && !revealed.has(id) && !cellOwners.has(id);
                   const isDisabled = winner !== null || cellOwners.has(id) || selectedCell !== null || aiThinking || (gameMode === "ai" && currentPlayer === "red") || isCastle || isHidden;
+                  const ARABIC_LETTERS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن"];
+                  const letterIdx = r * BOARD_SIZE + c;
+                  const letter = ARABIC_LETTERS[letterIdx % ARABIC_LETTERS.length];
+                  const owner = cellOwners.get(id);
                   return (
                     <button
                       key={id}
                       onClick={() => handleCellClick(id)}
                       disabled={isDisabled}
-                      aria-label={`خلية شبكة التحدي ${r + 1}-${c + 1}`}
-                      className={`w-12 h-12 rounded-lg border-2 shadow-md transition-all duration-200 text-xs font-bold
+                      aria-label={`خلية شبكة التحدي ${r + 1}-${c + 1} حرف ${letter}`}
+                      className={`w-12 h-12 rounded-lg border-[3px] shadow-md transition-all duration-200 font-extrabold flex items-center justify-center
                         ${getCellColor(id)}
                         ${!isDisabled ? "active:scale-90 cursor-pointer" : ""}
                       `}
@@ -950,9 +954,12 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                         clipPath: "polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)",
                         width: 48,
                         height: 48,
+                        fontFamily: "'Amiri', 'Aref Ruqaa', serif",
+                        fontSize: owner || isCastle || isHidden ? 14 : 22,
+                        lineHeight: 1,
                       }}
                     >
-                      {isCastle ? "🏰" : isHidden ? "؟" : cellOwners.has(id) ? (cellOwners.get(id) === "green" ? "🟢" : "🔴") : ""}
+                      {isCastle ? "🏰" : isHidden ? "؟" : owner ? (owner === "green" ? "🟢" : "🔴") : letter}
                     </button>
                   );
                 })}
