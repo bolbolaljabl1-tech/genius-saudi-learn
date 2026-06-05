@@ -254,6 +254,7 @@ const firstLetterOfAnswer = (q: Question): string => {
 };
 
 const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: HexBattleGameProps) => {
+  const [turnStyle, setTurnStyle] = useState<TurnStyle>("");
   const [playMode, setPlayMode] = useState<PlayMode>("");
   const [gameMode, setGameMode] = useState<GameMode>("select");
   const [grid] = useState(generateGrid);
