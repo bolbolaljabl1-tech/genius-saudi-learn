@@ -41,7 +41,7 @@ const WhisperModal = ({ onClose }: WhisperModalProps) => {
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-card rounded-2xl shadow-2xl w-full max-w-sm p-6 animate-scale-in">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-heading">همسة للعبقري 💌</h2>
+          <h2 className="text-xl font-bold text-heading">راسل إدارة المنصة 💌</h2>
           <button onClick={onClose} className="p-1 rounded-full hover:bg-muted">
             <X className="w-5 h-5 text-muted-foreground" />
           </button>
