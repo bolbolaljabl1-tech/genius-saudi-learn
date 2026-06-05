@@ -231,10 +231,30 @@ const getMedalInfo = (seconds: number) => {
 
 type GameMode = "select" | "pvp" | "ai";
 type PlayMode = "" | "classic" | "castle" | "treasure" | "alliance";
+type TurnStyle = "" | "turn" | "race";
 
 const QUESTION_TIME_LIMIT = 18; // seconds — Stern Arbitrator timer
 
+// Arabic letter normalization: maps various forms to a canonical letter for matching
+const ARABIC_LETTERS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن"];
+const normalizeArabicLetter = (ch: string): string => {
+  if (!ch) return "";
+  const c = ch.trim().charAt(0);
+  // unify alef variants and hamza-bearing forms to ا
+  if ("اأإآٱءئؤ".includes(c)) return "ا";
+  if (c === "ة") return "ت";
+  if (c === "ى") return "ي";
+  return c;
+};
+const firstLetterOfAnswer = (q: Question): string => {
+  const ans = (q.opts[q.correct] || "").trim();
+  // skip "ال" prefix
+  const stripped = ans.startsWith("ال") ? ans.slice(2) : ans;
+  return normalizeArabicLetter(stripped.charAt(0));
+};
+
 const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: HexBattleGameProps) => {
+  const [turnStyle, setTurnStyle] = useState<TurnStyle>("");
   const [playMode, setPlayMode] = useState<PlayMode>("");
   const [gameMode, setGameMode] = useState<GameMode>("select");
   const [grid] = useState(generateGrid);
@@ -329,10 +349,23 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     else setExplosionUses({ green: 3, red: 3 });
   }, [subjectFilter, playMode]);
 
-  const getNextQuestion = useCallback((): Question => {
+  const getNextQuestion = useCallback((letter?: string): Question => {
+    // Try to find a question whose correct answer begins with the requested letter
+    if (letter) {
+      const target = normalizeArabicLetter(letter);
+      const pool = shuffledQuestions.length
+        ? shuffledQuestions
+        : (subjectFilter && subjectFilter !== "all" ? allQuestions.filter(q => q.subject === subjectFilter) : allQuestions);
+      const match = pool.find(q => firstLetterOfAnswer(q) === target);
+      if (match) {
+        // remove that one from rotation
+        const remaining = pool.filter(q => q !== match);
+        setShuffledQuestions(remaining);
+        return match;
+      }
+    }
     if (questionIndex >= shuffledQuestions.length) {
-      // Re-shuffle when exhausted
-      const newShuffle = shuffleArray(shuffledQuestions);
+      const newShuffle = shuffleArray(shuffledQuestions.length ? shuffledQuestions : allQuestions);
       setShuffledQuestions(newShuffle);
       setQuestionIndex(1);
       return newShuffle[0];
@@ -340,7 +373,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     const q = shuffledQuestions[questionIndex];
     setQuestionIndex(prev => prev + 1);
     return q;
-  }, [questionIndex, shuffledQuestions]);
+  }, [questionIndex, shuffledQuestions, subjectFilter]);
 
   // Timer tick
   useEffect(() => {
@@ -447,16 +480,21 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   const handleCellClick = (id: string) => {
     if (winner || cellOwners.has(id) || selectedCell || aiThinking) return;
     if (gameMode === "ai" && currentPlayer === "red") return;
-    if (castles.has(id)) return; // can't claim a castle directly
-    if (playMode === "treasure" && !revealed.has(id)) return; // hidden in treasure mode
+    if (castles.has(id)) return;
+    if (playMode === "treasure" && !revealed.has(id)) return;
 
     if (!timerStarted) {
       setTimerStarted(true);
       setStartTime(Date.now());
     }
 
+    // Letter linked to this cell
+    const [r, c] = id.split("-").map(Number);
+    const letterIdx = r * BOARD_SIZE + c;
+    const cellLetter = ARABIC_LETTERS[letterIdx % ARABIC_LETTERS.length];
+
     setSelectedCell(id);
-    const q = getNextQuestion();
+    const q = getNextQuestion(cellLetter);
     setCurrentQuestion(q);
     setAnswered(false);
     setSelectedAnswer(null);
@@ -532,15 +570,19 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       setCurrentQuestion(null);
       setAnswered(false);
       setSelectedAnswer(null);
-      setCurrentPlayer(p => p === "green" ? "red" : "green");
+      // In race mode there is no turn switching
+      if (turnStyle !== "race") {
+        setCurrentPlayer(p => p === "green" ? "red" : "green");
+      }
     }, 1500);
-  }, [cellOwners, gameMode, onXP, onBadge, startTime, timerStarted, playMode, revealed, castles, siegedCastles, getNextQuestion, speak]);
+  }, [cellOwners, gameMode, onXP, onBadge, startTime, timerStarted, playMode, revealed, castles, siegedCastles, getNextQuestion, speak, turnStyle]);
 
-  const handleAnswer = (idx: number) => {
+  const handleAnswer = (idx: number, racePlayer?: "green" | "red") => {
     if (answered || !currentQuestion) return;
     setSelectedAnswer(idx);
     setAnswered(true);
-    processAnswer(idx, currentQuestion, selectedCell!, currentPlayer);
+    const player = turnStyle === "race" && racePlayer ? racePlayer : currentPlayer;
+    processAnswer(idx, currentQuestion, selectedCell!, player);
   };
 
   // AI turn
@@ -733,6 +775,45 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     return m > 0 ? `${m}:${sec.toString().padStart(2, "0")}` : `${sec} ث`;
   };
 
+  // Turn-style picker (Turn-based vs Speed Race)
+  if (turnStyle === "") {
+    const styles: { id: TurnStyle; title: string; emoji: string; desc: string; grad: string }[] = [
+      { id: "turn", title: "نمط المناوبة", emoji: "🔁", desc: "يجيب الطرف الأول ثم ينتقل الدور تلقائياً للطرف الثاني", grad: "from-emerald-500 to-teal-600" },
+      { id: "race", title: "نمط السباق المباشر", emoji: "⚡", desc: "السؤال يظهر للطرفين معاً والخلية للأسرع في الإجابة الصحيحة", grad: "from-rose-500 to-orange-600" },
+    ];
+    return (
+      <div className="min-h-screen flex flex-col px-4 py-6 pb-24">
+        <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4 self-start">
+          <ArrowRight className="w-5 h-5" />
+          <span className="font-bold text-lg">رجوع</span>
+        </button>
+        <div className="text-center mb-6">
+          <h1 className="text-3xl font-extrabold text-heading mb-1">🎯 اختر أسلوب اللعب</h1>
+          <p className="text-muted-foreground text-base">مناوبة بالأدوار أو سباق مباشر للأسرع</p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 max-w-md mx-auto w-full">
+          {styles.map((m, i) => (
+            <button
+              key={m.id}
+              onClick={() => setTurnStyle(m.id)}
+              className="bg-white/20 backdrop-blur-xl border border-white/30 rounded-3xl p-5 flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.97] animate-scale-in text-right"
+              style={{ animationDelay: `${i * 0.06}s` }}
+            >
+              <div className={`flex-shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br ${m.grad} shadow-lg flex items-center justify-center text-3xl`}>
+                {m.emoji}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-extrabold text-heading">{m.title}</h3>
+                <p className="text-muted-foreground text-sm mt-1">{m.desc}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+        <p className="text-center mt-6 text-glow-gold text-base">منصة الطالب العبقري 2026 ✨</p>
+      </div>
+    );
+  }
+
   // Play-mode picker (4 game modes)
   if (playMode === "") {
     const modes: { id: PlayMode; title: string; emoji: string; desc: string; grad: string }[] = [
@@ -743,7 +824,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     ];
     return (
       <div className="min-h-screen flex flex-col px-4 py-6 pb-24">
-        <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4 self-start">
+        <button onClick={() => setTurnStyle("")} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4 self-start">
           <ArrowRight className="w-5 h-5" />
           <span className="font-bold text-lg">رجوع</span>
         </button>
@@ -1006,6 +1087,27 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                   cls += " border-border bg-card hover:border-primary/50";
                 }
                 const isAiTurn = gameMode === "ai" && currentPlayer === "red";
+                if (turnStyle === "race" && gameMode === "pvp") {
+                  // Race mode: two side-by-side buttons (green vs red) per option — first to press correct wins
+                  return (
+                    <div key={i} className="flex gap-2 items-stretch">
+                      <button
+                        onClick={() => handleAnswer(i, "green")}
+                        disabled={answered}
+                        className={`flex-1 py-3 px-3 rounded-xl border-2 text-right font-bold text-sm transition-all active:scale-[0.95] ${answered ? (i === currentQuestion.correct ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-border opacity-40") : "border-emerald-500 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"}`}
+                      >
+                        🟢 {opt}
+                      </button>
+                      <button
+                        onClick={() => handleAnswer(i, "red")}
+                        disabled={answered}
+                        className={`flex-1 py-3 px-3 rounded-xl border-2 text-right font-bold text-sm transition-all active:scale-[0.95] ${answered ? (i === currentQuestion.correct ? "border-red-500 bg-red-50 text-red-700" : "border-border opacity-40") : "border-red-500 bg-red-50 text-red-800 hover:bg-red-100"}`}
+                      >
+                        🔴 {opt}
+                      </button>
+                    </div>
+                  );
+                }
                 return (
                   <button key={i} onClick={() => handleAnswer(i)} disabled={answered || isAiTurn} className={cls}>
                     <span className="ml-2">{["🅰️", "🅱️", "🅲", "🅳"][i]}</span> {opt}

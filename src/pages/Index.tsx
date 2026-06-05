@@ -53,7 +53,7 @@ const Index = () => {
   };
 
   return (
-    <main className="pb-16">
+    <main className="pt-16 pb-16">
       {showNameModal && <StudentNameModal onSave={handleNameSave} />}
 
       {screen === "stage" && (
