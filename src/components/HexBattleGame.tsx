@@ -722,7 +722,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       return `bg-red-500 border-red-700 text-white ${inNearPath && nearWin?.player === "red" ? "animate-neon-pulse" : ""}`;
     }
     if (selectedCell === id) return "bg-amber-200 border-amber-500 ring-4 ring-amber-300 text-amber-900";
-    return "bg-white border-blue-500 text-blue-700 hover:bg-blue-50";
+    return "bg-white border-blue-600 text-blue-700 hover:bg-blue-50";
   };
 
   const subjectTitle = subjectFilter && subjectFilter !== "all" ? subjectNames[subjectFilter] || "" : "شامل";
