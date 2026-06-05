@@ -570,15 +570,19 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       setCurrentQuestion(null);
       setAnswered(false);
       setSelectedAnswer(null);
-      setCurrentPlayer(p => p === "green" ? "red" : "green");
+      // In race mode there is no turn switching
+      if (turnStyle !== "race") {
+        setCurrentPlayer(p => p === "green" ? "red" : "green");
+      }
     }, 1500);
-  }, [cellOwners, gameMode, onXP, onBadge, startTime, timerStarted, playMode, revealed, castles, siegedCastles, getNextQuestion, speak]);
+  }, [cellOwners, gameMode, onXP, onBadge, startTime, timerStarted, playMode, revealed, castles, siegedCastles, getNextQuestion, speak, turnStyle]);
 
-  const handleAnswer = (idx: number) => {
+  const handleAnswer = (idx: number, racePlayer?: "green" | "red") => {
     if (answered || !currentQuestion) return;
     setSelectedAnswer(idx);
     setAnswered(true);
-    processAnswer(idx, currentQuestion, selectedCell!, currentPlayer);
+    const player = turnStyle === "race" && racePlayer ? racePlayer : currentPlayer;
+    processAnswer(idx, currentQuestion, selectedCell!, player);
   };
 
   // AI turn
