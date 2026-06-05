@@ -349,10 +349,23 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     else setExplosionUses({ green: 3, red: 3 });
   }, [subjectFilter, playMode]);
 
-  const getNextQuestion = useCallback((): Question => {
+  const getNextQuestion = useCallback((letter?: string): Question => {
+    // Try to find a question whose correct answer begins with the requested letter
+    if (letter) {
+      const target = normalizeArabicLetter(letter);
+      const pool = shuffledQuestions.length
+        ? shuffledQuestions
+        : (subjectFilter && subjectFilter !== "all" ? allQuestions.filter(q => q.subject === subjectFilter) : allQuestions);
+      const match = pool.find(q => firstLetterOfAnswer(q) === target);
+      if (match) {
+        // remove that one from rotation
+        const remaining = pool.filter(q => q !== match);
+        setShuffledQuestions(remaining);
+        return match;
+      }
+    }
     if (questionIndex >= shuffledQuestions.length) {
-      // Re-shuffle when exhausted
-      const newShuffle = shuffleArray(shuffledQuestions);
+      const newShuffle = shuffleArray(shuffledQuestions.length ? shuffledQuestions : allQuestions);
       setShuffledQuestions(newShuffle);
       setQuestionIndex(1);
       return newShuffle[0];
@@ -360,7 +373,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     const q = shuffledQuestions[questionIndex];
     setQuestionIndex(prev => prev + 1);
     return q;
-  }, [questionIndex, shuffledQuestions]);
+  }, [questionIndex, shuffledQuestions, subjectFilter]);
 
   // Timer tick
   useEffect(() => {
