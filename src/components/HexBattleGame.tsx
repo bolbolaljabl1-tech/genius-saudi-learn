@@ -231,8 +231,27 @@ const getMedalInfo = (seconds: number) => {
 
 type GameMode = "select" | "pvp" | "ai";
 type PlayMode = "" | "classic" | "castle" | "treasure" | "alliance";
+type TurnStyle = "" | "turn" | "race";
 
 const QUESTION_TIME_LIMIT = 18; // seconds — Stern Arbitrator timer
+
+// Arabic letter normalization: maps various forms to a canonical letter for matching
+const ARABIC_LETTERS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن"];
+const normalizeArabicLetter = (ch: string): string => {
+  if (!ch) return "";
+  const c = ch.trim().charAt(0);
+  // unify alef variants and hamza-bearing forms to ا
+  if ("اأإآٱءئؤ".includes(c)) return "ا";
+  if (c === "ة") return "ت";
+  if (c === "ى") return "ي";
+  return c;
+};
+const firstLetterOfAnswer = (q: Question): string => {
+  const ans = (q.opts[q.correct] || "").trim();
+  // skip "ال" prefix
+  const stripped = ans.startsWith("ال") ? ans.slice(2) : ans;
+  return normalizeArabicLetter(stripped.charAt(0));
+};
 
 const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: HexBattleGameProps) => {
   const [playMode, setPlayMode] = useState<PlayMode>("");
