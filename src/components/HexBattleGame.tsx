@@ -480,16 +480,21 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   const handleCellClick = (id: string) => {
     if (winner || cellOwners.has(id) || selectedCell || aiThinking) return;
     if (gameMode === "ai" && currentPlayer === "red") return;
-    if (castles.has(id)) return; // can't claim a castle directly
-    if (playMode === "treasure" && !revealed.has(id)) return; // hidden in treasure mode
+    if (castles.has(id)) return;
+    if (playMode === "treasure" && !revealed.has(id)) return;
 
     if (!timerStarted) {
       setTimerStarted(true);
       setStartTime(Date.now());
     }
 
+    // Letter linked to this cell
+    const [r, c] = id.split("-").map(Number);
+    const letterIdx = r * BOARD_SIZE + c;
+    const cellLetter = ARABIC_LETTERS[letterIdx % ARABIC_LETTERS.length];
+
     setSelectedCell(id);
-    const q = getNextQuestion();
+    const q = getNextQuestion(cellLetter);
     setCurrentQuestion(q);
     setAnswered(false);
     setSelectedAnswer(null);
