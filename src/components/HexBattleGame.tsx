@@ -1087,6 +1087,27 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                   cls += " border-border bg-card hover:border-primary/50";
                 }
                 const isAiTurn = gameMode === "ai" && currentPlayer === "red";
+                if (turnStyle === "race" && gameMode === "pvp") {
+                  // Race mode: two side-by-side buttons (green vs red) per option — first to press correct wins
+                  return (
+                    <div key={i} className="flex gap-2 items-stretch">
+                      <button
+                        onClick={() => handleAnswer(i, "green")}
+                        disabled={answered}
+                        className={`flex-1 py-3 px-3 rounded-xl border-2 text-right font-bold text-sm transition-all active:scale-[0.95] ${answered ? (i === currentQuestion.correct ? "border-emerald-500 bg-emerald-50 text-emerald-700" : "border-border opacity-40") : "border-emerald-500 bg-emerald-50 text-emerald-800 hover:bg-emerald-100"}`}
+                      >
+                        🟢 {opt}
+                      </button>
+                      <button
+                        onClick={() => handleAnswer(i, "red")}
+                        disabled={answered}
+                        className={`flex-1 py-3 px-3 rounded-xl border-2 text-right font-bold text-sm transition-all active:scale-[0.95] ${answered ? (i === currentQuestion.correct ? "border-red-500 bg-red-50 text-red-700" : "border-border opacity-40") : "border-red-500 bg-red-50 text-red-800 hover:bg-red-100"}`}
+                      >
+                        🔴 {opt}
+                      </button>
+                    </div>
+                  );
+                }
                 return (
                   <button key={i} onClick={() => handleAnswer(i)} disabled={answered || isAiTurn} className={cls}>
                     <span className="ml-2">{["🅰️", "🅱️", "🅲", "🅳"][i]}</span> {opt}
