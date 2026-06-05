@@ -824,7 +824,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     ];
     return (
       <div className="min-h-screen flex flex-col px-4 py-6 pb-24">
-        <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4 self-start">
+        <button onClick={() => setTurnStyle("")} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4 self-start">
           <ArrowRight className="w-5 h-5" />
           <span className="font-bold text-lg">رجوع</span>
         </button>
