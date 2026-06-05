@@ -82,21 +82,22 @@ const Index = () => {
 
       <ShareButton />
 
+      {/* Top guide button — golden neon */}
+      <button
+        onClick={() => setShowSupport(true)}
+        className="fixed top-3 left-1/2 -translate-x-1/2 z-50 bg-royal-blue text-matte-gold rounded-full px-4 py-2 flex items-center gap-2 text-sm font-extrabold animate-gold-neon"
+        aria-label="دليل استكشاف المنصة"
+      >
+        <LifeBuoy className="w-5 h-5" />
+        <span>🗺️ دليل استكشاف المنصة</span>
+      </button>
+
       <button
         onClick={() => setShowWhisper(true)}
         className="fixed bottom-16 left-4 z-50 gradient-emerald text-primary-foreground rounded-full p-3 shadow-emerald-lg flex items-center gap-2 text-sm font-bold animate-pulse-glow"
       >
         <MessageCircleHeart className="w-5 h-5" />
-        همسة للعبقري
-      </button>
-
-      <button
-        onClick={() => setShowSupport(true)}
-        className="fixed bottom-32 left-4 z-50 bg-royal-blue text-matte-gold rounded-full p-3 shadow-lg border border-matte-gold/40 flex items-center gap-2 text-sm font-bold"
-        aria-label="الدعم الفني"
-      >
-        <LifeBuoy className="w-5 h-5" />
-        الدعم الفني
+        راسل إدارة المنصة
       </button>
 
       <AppFooter />
