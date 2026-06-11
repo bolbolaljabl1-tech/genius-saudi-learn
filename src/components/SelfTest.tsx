@@ -294,7 +294,12 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
           <h3 className="font-extrabold text-foreground text-xl mt-6">التغذية الراجعة المفصلة</h3>
           {test.questions.map((q, i) => {
             const a = answers[i];
-            const correct = q.type === "mcq" ? a === q.correctIndex : q.type === "tf" ? a === q.correctBool : (typeof a === "string" && a.trim().length >= 5);
+            const correct = q.type === "mcq" ? a === q.correctIndex
+              : q.type === "tf" ? a === q.correctBool
+              : q.type === "calligraphy" ? (typeof a === "string" && a.trim().length >= 5)
+              : q.type === "matching" ? (a && Array.isArray(q.pairs) && q.pairs.every((p, idx) => a[idx] === p))
+              : q.type === "fill" ? (a && Array.isArray(q.blanks) && q.blanks.every((b, idx) => String(a[idx] || "").trim().replace(/\s+/g, "") === b.replace(/\s+/g, "")))
+              : false;
             return (
               <div key={i} className={`neu-card p-4 border-2 ${correct ? "border-success/30" : "border-destructive/30"}`}>
                 <div className="flex items-start gap-2 mb-2">
