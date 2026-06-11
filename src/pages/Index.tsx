@@ -64,6 +64,7 @@ const Index = () => {
           onLeaderboard={openLeaderboard}
           onGames={() => setScreen("games")}
           onGallery={() => setScreen("gallery")}
+          onSelfTest={() => setScreen("selftest")}
           xp={xp}
           studentName={studentName}
           streak={streak}
