@@ -7,13 +7,17 @@ interface SelfTestProps {
   onXP?: (xp: number) => void;
 }
 
-type QType = "mcq" | "tf" | "calligraphy";
+type QType = "mcq" | "tf" | "calligraphy" | "matching" | "fill";
 interface SQ {
   type: QType;
   question: string;
   options?: string[];
   correctIndex?: number;
   correctBool?: boolean;
+  left?: string[];
+  right?: string[];
+  pairs?: number[]; // for matching: for each right[i] index of correct left
+  blanks?: string[]; // for fill
   explanation: string;
   points?: number;
   usesPassage?: boolean;
