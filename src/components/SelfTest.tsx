@@ -88,12 +88,25 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
     if (!test) return;
     let score = 0; let max = 0;
     test.questions.forEach((q, i) => {
-      const pts = q.points || (q.type === "calligraphy" ? 6 : 1);
+      const pts = q.points || (q.type === "calligraphy" ? 6 : q.type === "matching" ? (q.right?.length || 4) : q.type === "fill" ? (q.blanks?.length || 1) : 1);
       max += pts;
       const a = answers[i];
       if (q.type === "mcq" && typeof a === "number" && a === q.correctIndex) score += pts;
       else if (q.type === "tf" && typeof a === "boolean" && a === q.correctBool) score += pts;
-      else if (q.type === "calligraphy" && typeof a === "string" && a.trim().length >= 5) score += pts; // self attempt
+      else if (q.type === "calligraphy" && typeof a === "string" && a.trim().length >= 5) score += pts;
+      else if (q.type === "matching" && a && typeof a === "object" && Array.isArray(q.pairs)) {
+        let ok = 0;
+        q.pairs.forEach((p, idx) => { if (a[idx] === p) ok++; });
+        score += Math.round((ok / q.pairs.length) * pts);
+      }
+      else if (q.type === "fill" && a && typeof a === "object" && Array.isArray(q.blanks)) {
+        let ok = 0;
+        q.blanks.forEach((b, idx) => {
+          const v = String(a[idx] || "").trim();
+          if (v && v.replace(/\s+/g, "") === b.replace(/\s+/g, "")) ok++;
+        });
+        score += Math.round((ok / q.blanks.length) * pts);
+      }
     });
     const pct = Math.round((score / max) * 100);
     const feedback = pct >= 90 ? "أداء متميز يدل على فهم عميق وتحليل دقيق. واصل على هذا النهج."
