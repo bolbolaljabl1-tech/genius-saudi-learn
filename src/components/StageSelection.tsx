@@ -1,4 +1,4 @@
-import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2 } from "lucide-react";
+import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, ClipboardCheck } from "lucide-react";
 import appIcon from "@/assets/app-icon.png";
 import heroBanner from "@/assets/hero-banner.png";
 
@@ -8,12 +8,13 @@ interface StageSelectionProps {
   onLeaderboard: () => void;
   onGames: () => void;
   onGallery: () => void;
+  onSelfTest: () => void;
   xp: number;
   studentName: string;
   streak?: number;
 }
 
-const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery, xp, studentName, streak = 0 }: StageSelectionProps) => {
+const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery, onSelfTest, xp, studentName, streak = 0 }: StageSelectionProps) => {
   const stages = [
     { id: "elementary", title: "المرحلة الابتدائية", description: "من الصف الأول إلى السادس", icon: BookOpen, delay: "0.1s" },
     { id: "middle", title: "المرحلة المتوسطة", description: "من الصف الأول إلى الثالث", icon: GraduationCap, delay: "0.3s" },
