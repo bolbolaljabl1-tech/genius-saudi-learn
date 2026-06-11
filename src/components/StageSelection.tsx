@@ -1,4 +1,4 @@
-import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2 } from "lucide-react";
+import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, ClipboardCheck } from "lucide-react";
 import appIcon from "@/assets/app-icon.png";
 import heroBanner from "@/assets/hero-banner.png";
 
@@ -8,12 +8,13 @@ interface StageSelectionProps {
   onLeaderboard: () => void;
   onGames: () => void;
   onGallery: () => void;
+  onSelfTest: () => void;
   xp: number;
   studentName: string;
   streak?: number;
 }
 
-const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery, xp, studentName, streak = 0 }: StageSelectionProps) => {
+const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery, onSelfTest, xp, studentName, streak = 0 }: StageSelectionProps) => {
   const stages = [
     { id: "elementary", title: "المرحلة الابتدائية", description: "من الصف الأول إلى السادس", icon: BookOpen, delay: "0.1s" },
     { id: "middle", title: "المرحلة المتوسطة", description: "من الصف الأول إلى الثالث", icon: GraduationCap, delay: "0.3s" },
@@ -69,6 +70,12 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery,
         <button onClick={onGames} className="w-full max-w-xl mb-4 py-5 rounded-2xl gradient-gold text-gold-foreground font-extrabold text-2xl shadow-gold active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in" style={{ animationDelay: "0.1s" }}>
           <Gamepad2 className="w-7 h-7" />
           🎮 ألعاب العباقرة
+        </button>
+
+        {/* Self Test Button */}
+        <button onClick={onSelfTest} className="w-full max-w-xl mb-4 py-5 rounded-2xl bg-royal-blue text-matte-gold font-extrabold text-2xl shadow-emerald-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in animate-gold-neon" style={{ animationDelay: "0.15s" }}>
+          <ClipboardCheck className="w-7 h-7" />
+          اختبر نفسك
         </button>
 
 

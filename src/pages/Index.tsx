@@ -10,6 +10,7 @@ import ShareButton from "@/components/ShareButton";
 import Leaderboard from "@/components/Leaderboard";
 import GamesHub from "@/components/GamesHub";
 import GeniusGallery from "@/components/GeniusGallery";
+import SelfTest from "@/components/SelfTest";
 import StudentNameModal from "@/components/StudentNameModal";
 import WhisperModal from "@/components/WhisperModal";
 import SupportModal from "@/components/SupportModal";
@@ -18,7 +19,7 @@ import { useXP } from "@/hooks/useXP";
 import { useIdleNotify } from "@/hooks/useIdleNotify";
 import { useOvertakeNotify } from "@/hooks/useOvertakeNotify";
 
-type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery";
+type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery" | "selftest";
 
 const Index = () => {
   const [screen, setScreen] = useState<Screen>("stage");
@@ -63,6 +64,7 @@ const Index = () => {
           onLeaderboard={openLeaderboard}
           onGames={() => setScreen("games")}
           onGallery={() => setScreen("gallery")}
+          onSelfTest={() => setScreen("selftest")}
           xp={xp}
           studentName={studentName}
           streak={streak}
@@ -76,6 +78,7 @@ const Index = () => {
       {screen === "leaderboard" && <Leaderboard onBack={() => setScreen("stage")} currentName={studentName} currentXP={xp} />}
       {screen === "games" && <GamesHub onBack={() => setScreen("stage")} onXP={(amount) => addXP(amount)} onBadge={(badge) => awardBadge(badge)} studentName={studentName} />}
       {screen === "gallery" && <GeniusGallery onBack={() => setScreen("stage")} />}
+      {screen === "selftest" && <SelfTest onBack={() => setScreen("stage")} onXP={(n) => addXP(n)} />}
 
       {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}
       {showSupport && <SupportModal onClose={() => setShowSupport(false)} />}
