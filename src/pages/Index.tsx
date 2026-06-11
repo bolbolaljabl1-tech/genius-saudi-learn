@@ -19,7 +19,7 @@ import { useXP } from "@/hooks/useXP";
 import { useIdleNotify } from "@/hooks/useIdleNotify";
 import { useOvertakeNotify } from "@/hooks/useOvertakeNotify";
 
-type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery";
+type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery" | "selftest";
 
 const Index = () => {
   const [screen, setScreen] = useState<Screen>("stage");
