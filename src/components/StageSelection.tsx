@@ -72,6 +72,12 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery,
           🎮 ألعاب العباقرة
         </button>
 
+        {/* Self Test Button */}
+        <button onClick={onSelfTest} className="w-full max-w-xl mb-4 py-5 rounded-2xl bg-royal-blue text-matte-gold font-extrabold text-2xl shadow-emerald-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in animate-gold-neon" style={{ animationDelay: "0.15s" }}>
+          <ClipboardCheck className="w-7 h-7" />
+          اختبر نفسك
+        </button>
+
 
         {/* Stage Label */}
         <div className="text-center mb-6 animate-slide-up" style={{ animationDelay: "0.2s" }}>
