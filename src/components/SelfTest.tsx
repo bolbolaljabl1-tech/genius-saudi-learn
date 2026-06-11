@@ -35,6 +35,8 @@ const TYPES = [
   { id: "mcq", label: "اختيار من متعدد" },
   { id: "tf", label: "صح أو خطأ" },
   { id: "reading", label: "فهم المقروء + متعدد" },
+  { id: "matching", label: "التوصيل / المزاوجة" },
+  { id: "fill", label: "أكمل الفراغ" },
 ];
 
 const TEST_SECONDS = 30 * 60;
