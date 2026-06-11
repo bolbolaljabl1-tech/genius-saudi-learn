@@ -69,14 +69,19 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
   const startTest = async () => {
     setPhase("loading"); setError("");
     try {
-      const types = qType === "mixed" ? ["mcq","tf"] : qType === "reading" ? ["mcq"] : [qType];
+      const types = qType === "mixed" ? ["mcq","tf"]
+        : qType === "reading" ? ["mcq"]
+        : qType === "matching" ? ["matching"]
+        : qType === "fill" ? ["fill"]
+        : [qType];
       const { data, error: fnErr } = await supabase.functions.invoke("generate-self-test", {
         body: { grade, subject, count, types },
       });
       if (fnErr) throw new Error(fnErr.message);
       if (data?.error) throw new Error(data.error);
+      if (!data?.questions?.length) throw new Error("لم يتم إرجاع أسئلة، حاول مرة أخرى");
       setTest(data); setAnswers({}); setSeconds(TEST_SECONDS); setPhase("test");
-    } catch (e: any) { setError(e.message || "تعذر إنشاء الاختبار"); setPhase("config"); }
+    } catch (e: any) { setError(e.message || "تعذر إنشاء الاختبار، حاول مرة أخرى"); setPhase("config"); }
   };
 
   const submit = () => {
