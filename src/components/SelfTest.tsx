@@ -7,13 +7,17 @@ interface SelfTestProps {
   onXP?: (xp: number) => void;
 }
 
-type QType = "mcq" | "tf" | "calligraphy";
+type QType = "mcq" | "tf" | "calligraphy" | "matching" | "fill";
 interface SQ {
   type: QType;
   question: string;
   options?: string[];
   correctIndex?: number;
   correctBool?: boolean;
+  left?: string[];
+  right?: string[];
+  pairs?: number[]; // for matching: for each right[i] index of correct left
+  blanks?: string[]; // for fill
   explanation: string;
   points?: number;
   usesPassage?: boolean;
@@ -31,6 +35,8 @@ const TYPES = [
   { id: "mcq", label: "اختيار من متعدد" },
   { id: "tf", label: "صح أو خطأ" },
   { id: "reading", label: "فهم المقروء + متعدد" },
+  { id: "matching", label: "التوصيل / المزاوجة" },
+  { id: "fill", label: "أكمل الفراغ" },
 ];
 
 const TEST_SECONDS = 30 * 60;
@@ -63,26 +69,44 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
   const startTest = async () => {
     setPhase("loading"); setError("");
     try {
-      const types = qType === "mixed" ? ["mcq","tf"] : qType === "reading" ? ["mcq"] : [qType];
+      const types = qType === "mixed" ? ["mcq","tf"]
+        : qType === "reading" ? ["mcq"]
+        : qType === "matching" ? ["matching"]
+        : qType === "fill" ? ["fill"]
+        : [qType];
       const { data, error: fnErr } = await supabase.functions.invoke("generate-self-test", {
         body: { grade, subject, count, types },
       });
       if (fnErr) throw new Error(fnErr.message);
       if (data?.error) throw new Error(data.error);
+      if (!data?.questions?.length) throw new Error("لم يتم إرجاع أسئلة، حاول مرة أخرى");
       setTest(data); setAnswers({}); setSeconds(TEST_SECONDS); setPhase("test");
-    } catch (e: any) { setError(e.message || "تعذر إنشاء الاختبار"); setPhase("config"); }
+    } catch (e: any) { setError(e.message || "تعذر إنشاء الاختبار، حاول مرة أخرى"); setPhase("config"); }
   };
 
   const submit = () => {
     if (!test) return;
     let score = 0; let max = 0;
     test.questions.forEach((q, i) => {
-      const pts = q.points || (q.type === "calligraphy" ? 6 : 1);
+      const pts = q.points || (q.type === "calligraphy" ? 6 : q.type === "matching" ? (q.right?.length || 4) : q.type === "fill" ? (q.blanks?.length || 1) : 1);
       max += pts;
       const a = answers[i];
       if (q.type === "mcq" && typeof a === "number" && a === q.correctIndex) score += pts;
       else if (q.type === "tf" && typeof a === "boolean" && a === q.correctBool) score += pts;
-      else if (q.type === "calligraphy" && typeof a === "string" && a.trim().length >= 5) score += pts; // self attempt
+      else if (q.type === "calligraphy" && typeof a === "string" && a.trim().length >= 5) score += pts;
+      else if (q.type === "matching" && a && typeof a === "object" && Array.isArray(q.pairs)) {
+        let ok = 0;
+        q.pairs.forEach((p, idx) => { if (a[idx] === p) ok++; });
+        score += Math.round((ok / q.pairs.length) * pts);
+      }
+      else if (q.type === "fill" && a && typeof a === "object" && Array.isArray(q.blanks)) {
+        let ok = 0;
+        q.blanks.forEach((b, idx) => {
+          const v = String(a[idx] || "").trim();
+          if (v && v.replace(/\s+/g, "") === b.replace(/\s+/g, "")) ok++;
+        });
+        score += Math.round((ok / q.blanks.length) * pts);
+      }
     });
     const pct = Math.round((score / max) * 100);
     const feedback = pct >= 90 ? "أداء متميز يدل على فهم عميق وتحليل دقيق. واصل على هذا النهج."
@@ -200,6 +224,52 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
                   />
                 </div>
               )}
+
+              {q.type === "matching" && q.left && q.right && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2 text-center font-extrabold text-foreground text-base">
+                    <div className="bg-primary/10 rounded-lg py-2">العمود (أ)</div>
+                    <div className="bg-primary/10 rounded-lg py-2">العمود (ب)</div>
+                  </div>
+                  {q.right.map((r, rIdx) => (
+                    <div key={rIdx} className="grid grid-cols-2 gap-2 items-center">
+                      <div className="p-3 rounded-xl border-2 border-input bg-background font-bold text-base">{r}</div>
+                      <select
+                        value={(answers[i] && answers[i][rIdx] !== undefined) ? answers[i][rIdx] : ""}
+                        onChange={(e) => {
+                          const cur = { ...(answers[i] || {}) };
+                          cur[rIdx] = e.target.value === "" ? undefined : Number(e.target.value);
+                          setAnswers({ ...answers, [i]: cur });
+                        }}
+                        className="p-3 rounded-xl border-2 border-input bg-background text-foreground font-bold"
+                      >
+                        <option value="">اختر المقابل...</option>
+                        {q.left!.map((l, lIdx) => <option key={lIdx} value={lIdx}>{l}</option>)}
+                      </select>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {q.type === "fill" && Array.isArray(q.blanks) && (
+                <div className="space-y-2">
+                  <p className="text-body-blue text-lg leading-9 whitespace-pre-wrap">{q.question}</p>
+                  {q.blanks.map((_, bIdx) => (
+                    <input
+                      key={bIdx}
+                      type="text"
+                      value={(answers[i] && answers[i][bIdx]) || ""}
+                      onChange={(e) => {
+                        const cur = { ...(answers[i] || {}) };
+                        cur[bIdx] = e.target.value;
+                        setAnswers({ ...answers, [i]: cur });
+                      }}
+                      placeholder={`الفراغ رقم ${bIdx + 1}`}
+                      className="w-full p-3 rounded-xl border-2 border-input bg-background text-foreground text-lg font-bold"
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           ))}
 
@@ -224,7 +294,12 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
           <h3 className="font-extrabold text-foreground text-xl mt-6">التغذية الراجعة المفصلة</h3>
           {test.questions.map((q, i) => {
             const a = answers[i];
-            const correct = q.type === "mcq" ? a === q.correctIndex : q.type === "tf" ? a === q.correctBool : (typeof a === "string" && a.trim().length >= 5);
+            const correct = q.type === "mcq" ? a === q.correctIndex
+              : q.type === "tf" ? a === q.correctBool
+              : q.type === "calligraphy" ? (typeof a === "string" && a.trim().length >= 5)
+              : q.type === "matching" ? (a && Array.isArray(q.pairs) && q.pairs.every((p, idx) => a[idx] === p))
+              : q.type === "fill" ? (a && Array.isArray(q.blanks) && q.blanks.every((b, idx) => String(a[idx] || "").trim().replace(/\s+/g, "") === b.replace(/\s+/g, "")))
+              : false;
             return (
               <div key={i} className={`neu-card p-4 border-2 ${correct ? "border-success/30" : "border-destructive/30"}`}>
                 <div className="flex items-start gap-2 mb-2">
@@ -236,6 +311,16 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
                 )}
                 {q.type === "tf" && (
                   <p className="text-sm text-muted-foreground">الإجابة الصحيحة: {q.correctBool ? "صح" : "خطأ"}</p>
+                )}
+                {q.type === "matching" && Array.isArray(q.pairs) && q.left && q.right && (
+                  <ul className="text-sm text-muted-foreground space-y-1 mt-1">
+                    {q.pairs.map((p, idx) => (
+                      <li key={idx}>{q.right![idx]} ← {q.left![p]}</li>
+                    ))}
+                  </ul>
+                )}
+                {q.type === "fill" && Array.isArray(q.blanks) && (
+                  <p className="text-sm text-muted-foreground">الإجابات: {q.blanks.join(" — ")}</p>
                 )}
                 <p className="text-body-blue text-base mt-2 leading-7">{q.explanation}</p>
               </div>
