@@ -224,6 +224,52 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
                   />
                 </div>
               )}
+
+              {q.type === "matching" && q.left && q.right && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2 text-center font-extrabold text-foreground text-base">
+                    <div className="bg-primary/10 rounded-lg py-2">العمود (أ)</div>
+                    <div className="bg-primary/10 rounded-lg py-2">العمود (ب)</div>
+                  </div>
+                  {q.right.map((r, rIdx) => (
+                    <div key={rIdx} className="grid grid-cols-2 gap-2 items-center">
+                      <div className="p-3 rounded-xl border-2 border-input bg-background font-bold text-base">{r}</div>
+                      <select
+                        value={(answers[i] && answers[i][rIdx] !== undefined) ? answers[i][rIdx] : ""}
+                        onChange={(e) => {
+                          const cur = { ...(answers[i] || {}) };
+                          cur[rIdx] = e.target.value === "" ? undefined : Number(e.target.value);
+                          setAnswers({ ...answers, [i]: cur });
+                        }}
+                        className="p-3 rounded-xl border-2 border-input bg-background text-foreground font-bold"
+                      >
+                        <option value="">اختر المقابل...</option>
+                        {q.left!.map((l, lIdx) => <option key={lIdx} value={lIdx}>{l}</option>)}
+                      </select>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {q.type === "fill" && Array.isArray(q.blanks) && (
+                <div className="space-y-2">
+                  <p className="text-body-blue text-lg leading-9 whitespace-pre-wrap">{q.question}</p>
+                  {q.blanks.map((_, bIdx) => (
+                    <input
+                      key={bIdx}
+                      type="text"
+                      value={(answers[i] && answers[i][bIdx]) || ""}
+                      onChange={(e) => {
+                        const cur = { ...(answers[i] || {}) };
+                        cur[bIdx] = e.target.value;
+                        setAnswers({ ...answers, [i]: cur });
+                      }}
+                      placeholder={`الفراغ رقم ${bIdx + 1}`}
+                      className="w-full p-3 rounded-xl border-2 border-input bg-background text-foreground text-lg font-bold"
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           ))}
 
