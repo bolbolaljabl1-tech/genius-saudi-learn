@@ -312,6 +312,16 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
                 {q.type === "tf" && (
                   <p className="text-sm text-muted-foreground">الإجابة الصحيحة: {q.correctBool ? "صح" : "خطأ"}</p>
                 )}
+                {q.type === "matching" && Array.isArray(q.pairs) && q.left && q.right && (
+                  <ul className="text-sm text-muted-foreground space-y-1 mt-1">
+                    {q.pairs.map((p, idx) => (
+                      <li key={idx}>{q.right![idx]} ← {q.left![p]}</li>
+                    ))}
+                  </ul>
+                )}
+                {q.type === "fill" && Array.isArray(q.blanks) && (
+                  <p className="text-sm text-muted-foreground">الإجابات: {q.blanks.join(" — ")}</p>
+                )}
                 <p className="text-body-blue text-base mt-2 leading-7">{q.explanation}</p>
               </div>
             );
