@@ -10,6 +10,7 @@ import ShareButton from "@/components/ShareButton";
 import Leaderboard from "@/components/Leaderboard";
 import GamesHub from "@/components/GamesHub";
 import GeniusGallery from "@/components/GeniusGallery";
+import SelfTest from "@/components/SelfTest";
 import StudentNameModal from "@/components/StudentNameModal";
 import WhisperModal from "@/components/WhisperModal";
 import SupportModal from "@/components/SupportModal";
