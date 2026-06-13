@@ -86,13 +86,14 @@ ${isArabic ? "4) الرسم الكتابي (type=calligraphy): عبارة وطن
 - اللغة العربية الفصيحة الصحيحة.
 ${formatRules}
 ${(wantsMatching || wantsFill) ? extraTypes : ""}
-الصف: ${grade}. المادة: ${subject}. عدد الأسئلة المطلوب: ${count}.`;
+الصف: ${grade}. المادة: ${subject}. عدد الأسئلة المطلوب: ${count}.
+${lessons ? `قيد إلزامي: اقصر جميع الأسئلة حصرياً على هذه الدروس/المواضيع المحددة من الطالب ولا تخرج عنها مطلقاً: «${lessons}». لا تُدرج أي محتوى خارج هذا النطاق.` : ""}`;
 
     const payload = {
       model: "google/gemini-2.5-flash",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `أنشئ ${count} أسئلة لمادة ${subject} للصف ${grade}.` },
+        { role: "user", content: `أنشئ ${count} أسئلة لمادة ${subject} للصف ${grade}${lessons ? ` ضمن الدروس: ${lessons}` : ""}.` },
       ],
       tools: [{
         type: "function",
