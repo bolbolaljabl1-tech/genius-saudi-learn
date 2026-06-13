@@ -57,8 +57,11 @@ serve(async (req) => {
 
     const wantsMatching = types.includes("matching");
     const wantsFill = types.includes("fill");
+    const explicitSpecial = wantsMatching || wantsFill;
 
-    const formatRules = (isArabic || isEnglish)
+    const formatRules = explicitSpecial
+      ? `التزم حصرياً بإنتاج أسئلة من الأنواع المطلوبة: ${types.join(", ")} فقط. لا تُدرج أنواعاً أخرى.`
+      : (isArabic || isEnglish)
       ? `اعتمد التنسيق التالي بالترتيب إن أمكن:
 1) فهم المقروء: نص قصير (reading_passage) يليه 2-3 أسئلة اختيار من متعدد مرتبطة به (type=mcq, usesPassage=true).
 2) ضع علامة صح أو خطأ (type=tf) — العبارة فقط بدون رموز في النص.
@@ -70,6 +73,7 @@ ${isArabic ? "4) الرسم الكتابي (type=calligraphy): عبارة وطن
 يمكنك إضافة هذه الأنواع عند الطلب:
 - matching: عمودان (left, right) متساويا الطول 4-6 عناصر، وحقل pairs يربط فهرس عنصر اليمين بالصحيح من اليسار.
 - fill: نص فيه فراغات على شكل ____ ومصفوفة blanks بالكلمات الصحيحة بنفس الترتيب.`;
+
 
     const systemPrompt = `أنت خبير تعليمي ملم بأنظمة هيئة تقويم التعليم والتدريب السعودية.
 أنشئ اختباراً يقيس الفهم والاستيعاب والتحليل (لا الحفظ).
