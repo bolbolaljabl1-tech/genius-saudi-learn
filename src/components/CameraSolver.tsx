@@ -17,7 +17,8 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
   const handleCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
