@@ -156,6 +156,17 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
               {TYPES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
             </select>
           </label>
+          <label className="block">
+            <span className="font-extrabold text-foreground text-lg">تحديد الدروس (اختياري)</span>
+            <textarea
+              value={lessons}
+              onChange={(e) => setLessons(e.target.value)}
+              rows={2}
+              placeholder="مثال: درس المبتدأ والخبر، أو القسمة على عدد من رقمين..."
+              className="mt-2 w-full p-3 rounded-xl border-2 border-input bg-background text-foreground text-base font-bold resize-none"
+            />
+            <span className="text-xs text-muted-foreground mt-1 block">اتركه فارغاً لاختبار شامل للمادة.</span>
+          </label>
 
           {error && <p className="text-destructive font-bold text-center">{error}</p>}
 
