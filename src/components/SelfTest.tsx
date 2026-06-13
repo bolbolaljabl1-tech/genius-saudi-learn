@@ -47,6 +47,7 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
   const [subject, setSubject] = useState(SUBJECTS[0]);
   const [count, setCount] = useState(10);
   const [qType, setQType] = useState("mixed");
+  const [lessons, setLessons] = useState("");
   const [test, setTest] = useState<TestData | null>(null);
   const [error, setError] = useState("");
   const [answers, setAnswers] = useState<Record<number, any>>({});
@@ -75,7 +76,7 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
         : qType === "fill" ? ["fill"]
         : [qType];
       const { data, error: fnErr } = await supabase.functions.invoke("generate-self-test", {
-        body: { grade, subject, count, types },
+        body: { grade, subject, count, types, lessons: lessons.trim() || undefined },
       });
       if (fnErr) throw new Error(fnErr.message);
       if (data?.error) throw new Error(data.error);
@@ -154,6 +155,17 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
             <select value={qType} onChange={(e) => setQType(e.target.value)} className="mt-2 w-full p-3 rounded-xl border-2 border-input bg-background text-foreground text-lg font-bold">
               {TYPES.map((t) => <option key={t.id} value={t.id}>{t.label}</option>)}
             </select>
+          </label>
+          <label className="block">
+            <span className="font-extrabold text-foreground text-lg">تحديد الدروس (اختياري)</span>
+            <textarea
+              value={lessons}
+              onChange={(e) => setLessons(e.target.value)}
+              rows={2}
+              placeholder="مثال: درس المبتدأ والخبر، أو القسمة على عدد من رقمين..."
+              className="mt-2 w-full p-3 rounded-xl border-2 border-input bg-background text-foreground text-base font-bold resize-none"
+            />
+            <span className="text-xs text-muted-foreground mt-1 block">اتركه فارغاً لاختبار شامل للمادة.</span>
           </label>
 
           {error && <p className="text-destructive font-bold text-center">{error}</p>}

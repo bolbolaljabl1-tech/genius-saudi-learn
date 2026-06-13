@@ -17,7 +17,8 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
   const handleCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,30 +90,52 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
           <p className="text-muted-foreground text-xl">التقط صورة لأي سؤال من أي مادة وسيشرحه لك الذكاء الاصطناعي</p>
         </div>
 
-        <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleCapture} className="hidden" />
+        <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={handleCapture} className="hidden" />
+        <input ref={galleryInputRef} type="file" accept="image/jpeg,image/png,image/jpg,image/webp,image/*" onChange={handleCapture} className="hidden" />
 
         {!imagePreview && (
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="w-full py-14 rounded-2xl border-3 border-dashed border-primary/40 bg-primary/5 flex flex-col items-center justify-center gap-5 hover:border-primary/60 hover:bg-primary/10 transition-all active:scale-[0.98] animate-scale-in"
-          >
-            <div className="w-20 h-20 rounded-full gradient-emerald flex items-center justify-center shadow-emerald-lg">
-              <ImageIcon className="w-10 h-10 text-primary-foreground" />
-            </div>
-            <span className="text-foreground font-extrabold text-2xl">اضغط لالتقاط صورة السؤال</span>
-            <span className="text-muted-foreground text-lg">أو اختر صورة من المعرض</span>
-          </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 animate-scale-in">
+            <button
+              type="button"
+              onClick={() => cameraInputRef.current?.click()}
+              className="py-10 rounded-2xl border-3 border-dashed border-primary/40 bg-primary/5 flex flex-col items-center justify-center gap-3 active:scale-[0.98] transition-all"
+            >
+              <div className="w-16 h-16 rounded-full gradient-emerald flex items-center justify-center shadow-emerald-lg">
+                <Camera className="w-8 h-8 text-primary-foreground" />
+              </div>
+              <span className="text-foreground font-extrabold text-xl">التقاط بالكاميرا</span>
+              <span className="text-muted-foreground text-sm">فتح الكاميرا مباشرة</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => galleryInputRef.current?.click()}
+              className="py-10 rounded-2xl border-3 border-dashed border-matte-gold/50 bg-matte-gold/5 flex flex-col items-center justify-center gap-3 active:scale-[0.98] transition-all"
+            >
+              <div className="w-16 h-16 rounded-full bg-matte-gold flex items-center justify-center shadow-gold">
+                <ImageIcon className="w-8 h-8 text-gold-foreground" />
+              </div>
+              <span className="text-foreground font-extrabold text-xl">اختيار من المعرض</span>
+              <span className="text-muted-foreground text-sm">JPG / PNG من ملفات الجوال</span>
+            </button>
+          </div>
         )}
 
         {imagePreview && (
           <div className="neu-card overflow-hidden animate-scale-in">
             <img src={imagePreview} alt="صورة السؤال" className="w-full max-h-64 object-contain bg-muted/30" />
-            <div className="p-3 flex justify-center">
+            <div className="p-3 flex justify-center gap-4">
               <button
-                onClick={() => { setImagePreview(null); setImageBase64(null); setHint(""); setAnswer(""); setError(""); setShowHintTip(false); window.speechSynthesis.cancel(); setIsSpeaking(false); fileInputRef.current?.click(); }}
-                className="text-primary font-bold text-lg hover:underline"
+                onClick={() => { setImagePreview(null); setImageBase64(null); setHint(""); setAnswer(""); setError(""); setShowHintTip(false); window.speechSynthesis.cancel(); setIsSpeaking(false); cameraInputRef.current?.click(); }}
+                className="text-primary font-bold text-base hover:underline"
               >
-                📸 التقاط صورة أخرى
+                التقاط بالكاميرا
+              </button>
+              <span className="text-muted-foreground">|</span>
+              <button
+                onClick={() => { setImagePreview(null); setImageBase64(null); setHint(""); setAnswer(""); setError(""); setShowHintTip(false); window.speechSynthesis.cancel(); setIsSpeaking(false); galleryInputRef.current?.click(); }}
+                className="text-matte-gold font-bold text-base hover:underline"
+              >
+                من المعرض
               </button>
             </div>
           </div>
@@ -157,7 +180,7 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
         {error && (
           <div className="neu-card p-6 border-2 border-destructive/20 text-center animate-slide-up">
             <p className="text-destructive text-lg font-bold mb-3">{error}</p>
-            <button onClick={() => fileInputRef.current?.click()} className="text-primary font-bold text-lg hover:underline">حاول مرة أخرى</button>
+            <button onClick={() => galleryInputRef.current?.click()} className="text-primary font-bold text-lg hover:underline">حاول مرة أخرى</button>
           </div>
         )}
 

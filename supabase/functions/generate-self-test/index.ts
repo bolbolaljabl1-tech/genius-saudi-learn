@@ -32,7 +32,7 @@ serve(async (req) => {
 
   try {
     const contentLength = Number(req.headers.get("content-length") ?? "0");
-    if (contentLength > 4_000) {
+    if (contentLength > 6_000) {
       return new Response(JSON.stringify({ error: "Payload too large" }), {
         status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -42,6 +42,7 @@ serve(async (req) => {
     const subject = String(body?.subject ?? "").slice(0, 60);
     const count = Math.max(3, Math.min(20, Number(body?.count) || 10));
     const types: string[] = Array.isArray(body?.types) ? body.types.slice(0, 5) : ["mcq"];
+    const lessons = String(body?.lessons ?? "").slice(0, 400).trim();
 
     if (!grade || !subject) {
       return new Response(JSON.stringify({ error: "grade & subject required" }), {
@@ -85,13 +86,14 @@ ${isArabic ? "4) الرسم الكتابي (type=calligraphy): عبارة وطن
 - اللغة العربية الفصيحة الصحيحة.
 ${formatRules}
 ${(wantsMatching || wantsFill) ? extraTypes : ""}
-الصف: ${grade}. المادة: ${subject}. عدد الأسئلة المطلوب: ${count}.`;
+الصف: ${grade}. المادة: ${subject}. عدد الأسئلة المطلوب: ${count}.
+${lessons ? `قيد إلزامي: اقصر جميع الأسئلة حصرياً على هذه الدروس/المواضيع المحددة من الطالب ولا تخرج عنها مطلقاً: «${lessons}». لا تُدرج أي محتوى خارج هذا النطاق.` : ""}`;
 
     const payload = {
       model: "google/gemini-2.5-flash",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `أنشئ ${count} أسئلة لمادة ${subject} للصف ${grade}.` },
+        { role: "user", content: `أنشئ ${count} أسئلة لمادة ${subject} للصف ${grade}${lessons ? ` ضمن الدروس: ${lessons}` : ""}.` },
       ],
       tools: [{
         type: "function",
