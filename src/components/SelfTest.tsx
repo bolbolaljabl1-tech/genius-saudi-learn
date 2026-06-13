@@ -76,7 +76,7 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
         : qType === "fill" ? ["fill"]
         : [qType];
       const { data, error: fnErr } = await supabase.functions.invoke("generate-self-test", {
-        body: { grade, subject, count, types },
+        body: { grade, subject, count, types, lessons: lessons.trim() || undefined },
       });
       if (fnErr) throw new Error(fnErr.message);
       if (data?.error) throw new Error(data.error);
