@@ -180,7 +180,7 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
         {error && (
           <div className="neu-card p-6 border-2 border-destructive/20 text-center animate-slide-up">
             <p className="text-destructive text-lg font-bold mb-3">{error}</p>
-            <button onClick={() => fileInputRef.current?.click()} className="text-primary font-bold text-lg hover:underline">حاول مرة أخرى</button>
+            <button onClick={() => galleryInputRef.current?.click()} className="text-primary font-bold text-lg hover:underline">حاول مرة أخرى</button>
           </div>
         )}
 
