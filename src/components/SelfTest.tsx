@@ -47,6 +47,7 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
   const [subject, setSubject] = useState(SUBJECTS[0]);
   const [count, setCount] = useState(10);
   const [qType, setQType] = useState("mixed");
+  const [lessons, setLessons] = useState("");
   const [test, setTest] = useState<TestData | null>(null);
   const [error, setError] = useState("");
   const [answers, setAnswers] = useState<Record<number, any>>({});
