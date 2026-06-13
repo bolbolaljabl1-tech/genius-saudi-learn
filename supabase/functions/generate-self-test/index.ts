@@ -32,7 +32,7 @@ serve(async (req) => {
 
   try {
     const contentLength = Number(req.headers.get("content-length") ?? "0");
-    if (contentLength > 4_000) {
+    if (contentLength > 6_000) {
       return new Response(JSON.stringify({ error: "Payload too large" }), {
         status: 413, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
