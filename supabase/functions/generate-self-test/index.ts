@@ -42,6 +42,7 @@ serve(async (req) => {
     const subject = String(body?.subject ?? "").slice(0, 60);
     const count = Math.max(3, Math.min(20, Number(body?.count) || 10));
     const types: string[] = Array.isArray(body?.types) ? body.types.slice(0, 5) : ["mcq"];
+    const lessons = String(body?.lessons ?? "").slice(0, 400).trim();
 
     if (!grade || !subject) {
       return new Response(JSON.stringify({ error: "grade & subject required" }), {
