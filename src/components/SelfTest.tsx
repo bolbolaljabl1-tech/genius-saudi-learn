@@ -354,7 +354,7 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
               : q.type === "tf" ? a === q.correctBool
               : q.type === "calligraphy" ? (typeof a === "string" && a.trim().length >= 5)
               : q.type === "matching" ? (a && Array.isArray(q.pairs) && q.pairs.every((p, idx) => a[idx] === p))
-              : q.type === "fill" ? (a && Array.isArray(q.blanks) && q.blanks.every((b, idx) => String(a[idx] || "").trim().replace(/\s+/g, "") === b.replace(/\s+/g, "")))
+              : q.type === "fill" ? (a && Array.isArray(q.blanks) && q.blanks.every((b, idx) => isBlankCorrect(String(a[idx] || ""), b, q.acceptedBlanks?.[idx])))
               : false;
             return (
               <div key={i} className={`neu-card p-4 border-2 ${correct ? "border-success/30" : "border-destructive/30"}`}>
