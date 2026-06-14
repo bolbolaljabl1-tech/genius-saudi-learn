@@ -118,6 +118,11 @@ ${lessons ? `قيد إلزامي: اقصر جميع الأسئلة حصرياً 
                     right: { type: "array", items: { type: "string" } },
                     pairs: { type: "array", items: { type: "number" }, description: "for matching: for each right[i] the index of correct left" },
                     blanks: { type: "array", items: { type: "string" }, description: "for fill: correct words in order of ____" },
+                    acceptedBlanks: {
+                      type: "array",
+                      description: "for fill: per-blank array of ALL acceptable alternative answers (synonyms, valid classifications, numeric equivalents). Index matches blanks[].",
+                      items: { type: "array", items: { type: "string" } },
+                    },
                     explanation: { type: "string" },
                     points: { type: "number" },
                     usesPassage: { type: "boolean" },
