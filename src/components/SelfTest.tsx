@@ -147,8 +147,8 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
       else if (q.type === "fill" && a && typeof a === "object" && Array.isArray(q.blanks)) {
         let ok = 0;
         q.blanks.forEach((b, idx) => {
-          const v = String(a[idx] || "").trim();
-          if (v && v.replace(/\s+/g, "") === b.replace(/\s+/g, "")) ok++;
+          const v = String(a[idx] || "");
+          if (isBlankCorrect(v, b, q.acceptedBlanks?.[idx])) ok++;
         });
         score += Math.round((ok / q.blanks.length) * pts);
       }
