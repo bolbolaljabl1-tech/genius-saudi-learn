@@ -18,11 +18,55 @@ interface SQ {
   right?: string[];
   pairs?: number[]; // for matching: for each right[i] index of correct left
   blanks?: string[]; // for fill
+  acceptedBlanks?: string[][]; // for fill: per-blank accepted alternatives
   explanation: string;
   points?: number;
   usesPassage?: boolean;
 }
 interface TestData { reading_passage?: string; questions: SQ[] }
+
+// ====== Answer normalization helpers ======
+const AR_DIGITS: Record<string, string> = { "٠":"0","١":"1","٢":"2","٣":"3","٤":"4","٥":"5","٦":"6","٧":"7","٨":"8","٩":"9","۰":"0","۱":"1","۲":"2","۳":"3","۴":"4","۵":"5","۶":"6","۷":"7","۸":"8","۹":"9" };
+const toLatinDigits = (s: string) => s.replace(/[٠-٩۰-۹]/g, (d) => AR_DIGITS[d] || d);
+const normalizeAr = (s: string) => {
+  if (!s) return "";
+  let t = toLatinDigits(String(s)).trim();
+  // remove tashkeel
+  t = t.replace(/[\u064B-\u0652\u0670\u0640]/g, "");
+  // unify alef
+  t = t.replace(/[\u0622\u0623\u0625]/g, "\u0627");
+  // alef maqsura -> ya
+  t = t.replace(/\u0649/g, "\u064A");
+  // ta marbuta -> ha
+  t = t.replace(/\u0629/g, "\u0647");
+  // hamza on waw/ya to base
+  t = t.replace(/\u0624/g, "\u0648").replace(/\u0626/g, "\u064A");
+  // remove standalone hamza
+  t = t.replace(/\u0621/g, "");
+  // collapse whitespace
+  t = t.replace(/\s+/g, " ").trim();
+  return t;
+};
+const numericEqual = (a: string, b: string) => {
+  const na = parseFloat(toLatinDigits(a).replace(/[^\d.\-]/g, ""));
+  const nb = parseFloat(toLatinDigits(b).replace(/[^\d.\-]/g, ""));
+  if (isNaN(na) || isNaN(nb)) return false;
+  return Math.abs(na - nb) < 1e-9;
+};
+const isBlankCorrect = (userVal: string, correct: string, accepted?: string[]): boolean => {
+  const u = String(userVal || "").trim();
+  if (!u) return false;
+  if (numericEqual(u, correct)) return true;
+  const nu = normalizeAr(u);
+  if (nu === normalizeAr(correct)) return true;
+  if (Array.isArray(accepted)) {
+    for (const alt of accepted) {
+      if (numericEqual(u, alt)) return true;
+      if (nu === normalizeAr(alt)) return true;
+    }
+  }
+  return false;
+};
 
 const GRADES = [
   "الأول الابتدائي","الثاني الابتدائي","الثالث الابتدائي","الرابع الابتدائي","الخامس الابتدائي","السادس الابتدائي",
@@ -103,8 +147,8 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
       else if (q.type === "fill" && a && typeof a === "object" && Array.isArray(q.blanks)) {
         let ok = 0;
         q.blanks.forEach((b, idx) => {
-          const v = String(a[idx] || "").trim();
-          if (v && v.replace(/\s+/g, "") === b.replace(/\s+/g, "")) ok++;
+          const v = String(a[idx] || "");
+          if (isBlankCorrect(v, b, q.acceptedBlanks?.[idx])) ok++;
         });
         score += Math.round((ok / q.blanks.length) * pts);
       }
@@ -310,7 +354,7 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
               : q.type === "tf" ? a === q.correctBool
               : q.type === "calligraphy" ? (typeof a === "string" && a.trim().length >= 5)
               : q.type === "matching" ? (a && Array.isArray(q.pairs) && q.pairs.every((p, idx) => a[idx] === p))
-              : q.type === "fill" ? (a && Array.isArray(q.blanks) && q.blanks.every((b, idx) => String(a[idx] || "").trim().replace(/\s+/g, "") === b.replace(/\s+/g, "")))
+              : q.type === "fill" ? (a && Array.isArray(q.blanks) && q.blanks.every((b, idx) => isBlankCorrect(String(a[idx] || ""), b, q.acceptedBlanks?.[idx])))
               : false;
             return (
               <div key={i} className={`neu-card p-4 border-2 ${correct ? "border-success/30" : "border-destructive/30"}`}>

@@ -73,7 +73,9 @@ ${isArabic ? "4) الرسم الكتابي (type=calligraphy): عبارة وطن
     const extraTypes = `
 يمكنك إضافة هذه الأنواع عند الطلب:
 - matching: عمودان (left, right) متساويا الطول 4-6 عناصر، وحقل pairs يربط فهرس عنصر اليمين بالصحيح من اليسار.
-- fill: نص فيه فراغات على شكل ____ ومصفوفة blanks بالكلمات الصحيحة بنفس الترتيب.`;
+- fill: نص فيه فراغات على شكل ____ ومصفوفة blanks بالكلمات الصحيحة بنفس الترتيب.
+  ولكل فراغ يجب تعبئة acceptedBlanks[index] بمصفوفة شاملة لكل الإجابات المقبولة علمياً من زوايا التصنيف المختلفة (مثلاً للفعل "قام": ["معتل","معتل أجوف","أجوف","ماض","ماضي","فعل ماض"]).
+  للأسئلة الرقمية اكتب الرقم بالأرقام العربية القياسية فقط (0-9) ولا تستخدم الأرقام الهندية.`;
 
 
     const systemPrompt = `أنت خبير تعليمي ملم بأنظمة هيئة تقويم التعليم والتدريب السعودية.
@@ -118,6 +120,11 @@ ${lessons ? `قيد إلزامي: اقصر جميع الأسئلة حصرياً 
                     right: { type: "array", items: { type: "string" } },
                     pairs: { type: "array", items: { type: "number" }, description: "for matching: for each right[i] the index of correct left" },
                     blanks: { type: "array", items: { type: "string" }, description: "for fill: correct words in order of ____" },
+                    acceptedBlanks: {
+                      type: "array",
+                      description: "for fill: per-blank array of ALL acceptable alternative answers (synonyms, valid classifications, numeric equivalents). Index matches blanks[].",
+                      items: { type: "array", items: { type: "string" } },
+                    },
                     explanation: { type: "string" },
                     points: { type: "number" },
                     usesPassage: { type: "boolean" },
