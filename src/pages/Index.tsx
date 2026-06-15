@@ -84,8 +84,8 @@ const Index = () => {
         <Checkout
           expired={expired}
           onBack={() => setScreenRaw("stage")}
-          onPaymentSuccess={() => {
-            subscribe();
+          onPaymentSuccess={(selectedPlan) => {
+            subscribe(selectedPlan);
             toast.success("تم تفعيل اشتراكك بنجاح، نتمنى لك رحلة تعليمية ممتعة");
             setScreenRaw("stage");
           }}
