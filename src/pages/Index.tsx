@@ -15,14 +15,29 @@ import StudentNameModal from "@/components/StudentNameModal";
 import WhisperModal from "@/components/WhisperModal";
 import SupportModal from "@/components/SupportModal";
 import AppFooter from "@/components/AppFooter";
+import TrialBanner from "@/components/TrialBanner";
+import Checkout from "@/components/Checkout";
 import { useXP } from "@/hooks/useXP";
+import { useTrial } from "@/hooks/useTrial";
 import { useIdleNotify } from "@/hooks/useIdleNotify";
 import { useOvertakeNotify } from "@/hooks/useOvertakeNotify";
+import { toast } from "@/components/ui/sonner";
 
-type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery" | "selftest";
+type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery" | "selftest" | "checkout";
+
+const LOCKED_SCREENS: Screen[] = ["lesson", "quiz", "selftest", "camera", "games"];
 
 const Index = () => {
-  const [screen, setScreen] = useState<Screen>("stage");
+  const [screen, setScreenRaw] = useState<Screen>("stage");
+  const { daysLeft, expired, subscribed, subscribe } = useTrial();
+
+  const setScreen = (next: Screen) => {
+    if (expired && LOCKED_SCREENS.includes(next)) {
+      setScreenRaw("checkout");
+      return;
+    }
+    setScreenRaw(next);
+  };
   const [stage, setStage] = useState("");
   const [subject, setSubject] = useState("");
   const [lessonTitle, setLessonTitle] = useState("");
