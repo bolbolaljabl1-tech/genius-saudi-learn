@@ -28,7 +28,7 @@ const Checkout = ({ onBack, onPaymentSuccess, expired }: CheckoutProps) => {
     setProcessing(method);
     setTimeout(() => {
       setProcessing(null);
-      onPaymentSuccess();
+      onPaymentSuccess(selected as "monthly" | "yearly");
     }, 1400);
   };
 
