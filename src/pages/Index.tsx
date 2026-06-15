@@ -117,6 +117,25 @@ const Index = () => {
 
       {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}
       {showSupport && <SupportModal onClose={() => setShowSupport(false)} />}
+      {showSubSettings && (
+        <SubscriptionSettings
+          onClose={() => setShowSubSettings(false)}
+          onUpgrade={() => {
+            setShowSubSettings(false);
+            setScreenRaw("checkout");
+          }}
+        />
+      )}
+
+      {/* Subscription settings button */}
+      <button
+        onClick={() => setShowSubSettings(true)}
+        className="fixed top-14 right-3 z-50 bg-card border-2 border-matte-gold/30 text-matte-gold rounded-full p-2 shadow-md active:scale-95 transition"
+        aria-label="إعدادات لوحة الاشتراك"
+        title="إعدادات لوحة الاشتراك"
+      >
+        <Settings className="w-5 h-5" />
+      </button>
 
       <ShareButton />
 
