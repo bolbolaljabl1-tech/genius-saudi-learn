@@ -2,8 +2,12 @@ import { useEffect, useState, useCallback } from "react";
 
 const TRIAL_START_KEY = "genius_trial_start";
 const SUBSCRIBED_KEY = "genius_subscribed";
+const PLAN_KEY = "genius_plan";
+const SUB_START_KEY = "genius_sub_start";
 const TRIAL_DAYS = 7;
 const DAY_MS = 86400000;
+
+export type PlanType = "trial" | "monthly" | "yearly";
 
 export function useTrial() {
   const [startedAt, setStartedAt] = useState<number>(() => {
@@ -16,6 +20,14 @@ export function useTrial() {
   const [subscribed, setSubscribed] = useState<boolean>(
     () => localStorage.getItem(SUBSCRIBED_KEY) === "1"
   );
+  const [plan, setPlan] = useState<PlanType>(() => {
+    const p = localStorage.getItem(PLAN_KEY) as PlanType | null;
+    return p ?? "trial";
+  });
+  const [subStartedAt, setSubStartedAt] = useState<number>(() => {
+    const s = localStorage.getItem(SUB_START_KEY);
+    return s ? parseInt(s, 10) : 0;
+  });
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
@@ -29,10 +41,42 @@ export function useTrial() {
   const expired = !subscribed && remainingMs <= 0;
   const active = subscribed || !expired;
 
-  const subscribe = useCallback(() => {
+  const planDurationDays = plan === "yearly" ? 365 : plan === "monthly" ? 30 : 0;
+  const subEndAt = subStartedAt && planDurationDays
+    ? subStartedAt + planDurationDays * DAY_MS
+    : 0;
+
+  const subscribe = useCallback((newPlan: Exclude<PlanType, "trial"> = "yearly") => {
+    const nowMs = Date.now();
     localStorage.setItem(SUBSCRIBED_KEY, "1");
+    localStorage.setItem(PLAN_KEY, newPlan);
+    localStorage.setItem(SUB_START_KEY, String(nowMs));
     setSubscribed(true);
+    setPlan(newPlan);
+    setSubStartedAt(nowMs);
   }, []);
 
-  return { daysLeft, expired, active, subscribed, subscribe, startedAt, setStartedAt };
+  const cancelSubscription = useCallback(() => {
+    localStorage.removeItem(SUBSCRIBED_KEY);
+    localStorage.removeItem(PLAN_KEY);
+    localStorage.removeItem(SUB_START_KEY);
+    setSubscribed(false);
+    setPlan("trial");
+    setSubStartedAt(0);
+  }, []);
+
+  return {
+    daysLeft,
+    expired,
+    active,
+    subscribed,
+    plan,
+    subStartedAt,
+    subEndAt,
+    trialStartedAt: startedAt,
+    trialEndAt: startedAt + TRIAL_DAYS * DAY_MS,
+    subscribe,
+    cancelSubscription,
+    setStartedAt,
+  };
 }
