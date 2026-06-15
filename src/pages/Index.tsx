@@ -69,8 +69,26 @@ const Index = () => {
   };
 
   return (
-    <main className="pt-16 pb-16">
+    <main className={`${subscribed ? "pt-16" : "pt-24"} pb-16`}>
+      <TrialBanner
+        daysLeft={daysLeft}
+        expired={expired}
+        subscribed={subscribed}
+        onSubscribe={() => setScreenRaw("checkout")}
+      />
       {showNameModal && <StudentNameModal onSave={handleNameSave} />}
+
+      {screen === "checkout" && (
+        <Checkout
+          expired={expired}
+          onBack={() => setScreenRaw("stage")}
+          onPaymentSuccess={() => {
+            subscribe();
+            toast.success("تم تفعيل اشتراكك بنجاح، نتمنى لك رحلة تعليمية ممتعة");
+            setScreenRaw("stage");
+          }}
+        />
+      )}
 
       {screen === "stage" && (
         <StageSelection
