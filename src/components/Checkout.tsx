@@ -3,7 +3,7 @@ import { useState } from "react";
 
 interface CheckoutProps {
   onBack: () => void;
-  onPaymentSuccess: () => void;
+  onPaymentSuccess: (plan: "monthly" | "yearly") => void;
   expired: boolean;
 }
 
@@ -28,7 +28,7 @@ const Checkout = ({ onBack, onPaymentSuccess, expired }: CheckoutProps) => {
     setProcessing(method);
     setTimeout(() => {
       setProcessing(null);
-      onPaymentSuccess();
+      onPaymentSuccess(selected as "monthly" | "yearly");
     }, 1400);
   };
 
@@ -131,10 +131,12 @@ const Checkout = ({ onBack, onPaymentSuccess, expired }: CheckoutProps) => {
             {processing === "mada" ? (
               <Loader2 className="w-6 h-6 animate-spin text-foreground" />
             ) : (
-              <span className="inline-flex items-center gap-1">
-                <span className="text-[#84BD00] tracking-tight text-2xl font-black">m</span>
-                <span className="text-[#231F20] tracking-tight text-2xl font-black">ada</span>
-                <span className="text-foreground text-base font-extrabold mr-2">الدفع عبر مدى</span>
+              <span className="inline-flex items-center gap-3">
+                <span dir="ltr" className="inline-flex items-baseline tracking-tight text-2xl font-black leading-none">
+                  <span className="text-[#84BD00]">m</span>
+                  <span className="text-[#231F20]">ada</span>
+                </span>
+                <span className="text-foreground text-base font-extrabold">الدفع عبر مدى</span>
               </span>
             )}
           </button>

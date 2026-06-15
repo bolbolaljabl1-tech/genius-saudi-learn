@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageCircleHeart, LifeBuoy } from "lucide-react";
+import { MessageCircleHeart, LifeBuoy, Settings } from "lucide-react";
 import StageSelection from "@/components/StageSelection";
 import SubjectSelection from "@/components/SubjectSelection";
 import LessonSearch from "@/components/LessonSearch";
@@ -17,6 +17,7 @@ import SupportModal from "@/components/SupportModal";
 import AppFooter from "@/components/AppFooter";
 import TrialBanner from "@/components/TrialBanner";
 import Checkout from "@/components/Checkout";
+import SubscriptionSettings from "@/components/SubscriptionSettings";
 import { useXP } from "@/hooks/useXP";
 import { useTrial } from "@/hooks/useTrial";
 import { useIdleNotify } from "@/hooks/useIdleNotify";
@@ -45,6 +46,7 @@ const Index = () => {
   const [showNameModal, setShowNameModal] = useState(false);
   const [showWhisper, setShowWhisper] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
+  const [showSubSettings, setShowSubSettings] = useState(false);
   useIdleNotify(4);
   useOvertakeNotify(studentName, 60);
 
@@ -82,8 +84,8 @@ const Index = () => {
         <Checkout
           expired={expired}
           onBack={() => setScreenRaw("stage")}
-          onPaymentSuccess={() => {
-            subscribe();
+          onPaymentSuccess={(selectedPlan) => {
+            subscribe(selectedPlan);
             toast.success("تم تفعيل اشتراكك بنجاح، نتمنى لك رحلة تعليمية ممتعة");
             setScreenRaw("stage");
           }}
@@ -115,6 +117,25 @@ const Index = () => {
 
       {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}
       {showSupport && <SupportModal onClose={() => setShowSupport(false)} />}
+      {showSubSettings && (
+        <SubscriptionSettings
+          onClose={() => setShowSubSettings(false)}
+          onUpgrade={() => {
+            setShowSubSettings(false);
+            setScreenRaw("checkout");
+          }}
+        />
+      )}
+
+      {/* Subscription settings button */}
+      <button
+        onClick={() => setShowSubSettings(true)}
+        className="fixed top-14 right-3 z-50 bg-card border-2 border-matte-gold/30 text-matte-gold rounded-full p-2 shadow-md active:scale-95 transition"
+        aria-label="إعدادات لوحة الاشتراك"
+        title="إعدادات لوحة الاشتراك"
+      >
+        <Settings className="w-5 h-5" />
+      </button>
 
       <ShareButton />
 
