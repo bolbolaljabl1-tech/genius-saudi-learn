@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MessageCircleHeart, LifeBuoy } from "lucide-react";
+import { MessageCircleHeart, LifeBuoy, Settings } from "lucide-react";
 import StageSelection from "@/components/StageSelection";
 import SubjectSelection from "@/components/SubjectSelection";
 import LessonSearch from "@/components/LessonSearch";
