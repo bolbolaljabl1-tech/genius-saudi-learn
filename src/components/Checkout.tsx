@@ -3,7 +3,7 @@ import { useState } from "react";
 
 interface CheckoutProps {
   onBack: () => void;
-  onPaymentSuccess: () => void;
+  onPaymentSuccess: (plan: "monthly" | "yearly") => void;
   expired: boolean;
 }
 
