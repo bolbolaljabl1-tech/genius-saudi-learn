@@ -46,6 +46,7 @@ const Index = () => {
   const [showNameModal, setShowNameModal] = useState(false);
   const [showWhisper, setShowWhisper] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
+  const [showSubSettings, setShowSubSettings] = useState(false);
   useIdleNotify(4);
   useOvertakeNotify(studentName, 60);
 
