@@ -106,7 +106,7 @@ const SubscriptionSettings = ({ onClose, onUpgrade }: SubscriptionSettingsProps)
             className="w-full py-3 rounded-2xl bg-royal-blue text-matte-gold font-extrabold flex items-center justify-center gap-2 active:scale-95 transition"
           >
             <Crown className="w-5 h-5" />
-            {subscribed && plan === "monthly" ? "ترقية إلى الاشتراك السنوي" : subscribed ? "تجديد الاشتراك" : "ترقية الاشتراك الآن"}
+            {subscribed && plan === "semester" ? "ترقية إلى اشتراك السنة الكاملة" : subscribed ? "تجديد الاشتراك" : "ترقية الاشتراك الآن"}
           </button>
 
           {subscribed && (
