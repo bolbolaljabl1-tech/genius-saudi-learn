@@ -16,10 +16,8 @@ Deno.serve(async (req) => {
   }
 
   // Strict: telegram spam prevention — 3 msgs / minute / IP, origin required
-  const blocked = abuseCheck(req, { limit: 3, windowMs: 60_000, requireOrigin: true });
-  if (blocked) {
-    return new Response(blocked.body, { status: blocked.status, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-  }
+  const blocked = abuseCheck(req, { limit: 3, windowMs: 60_000, requireOrigin: true, corsHeaders });
+  if (blocked) return blocked;
 
   const BOT_TOKEN = Deno.env.get('TELEGRAM_BOT_TOKEN');
   if (!BOT_TOKEN) {
