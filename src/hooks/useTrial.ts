@@ -56,7 +56,7 @@ export function useTrial() {
   const expired = !subscribed && remainingMs <= 0;
   const active = subscribed || !expired;
 
-  const planDurationDays = plan === "yearly" ? 365 : plan === "monthly" ? 30 : 0;
+  const planDurationDays = plan === "yearly" ? 365 : plan === "semester" ? 120 : 0;
   const subEndAt = subStartedAt && planDurationDays
     ? subStartedAt + planDurationDays * DAY_MS
     : 0;
