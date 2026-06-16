@@ -27,8 +27,8 @@ const SubscriptionSettings = ({ onClose, onUpgrade }: SubscriptionSettingsProps)
 
   const planLabel = subscribed
     ? plan === "yearly"
-      ? "اشتراك سنوي"
-      : "اشتراك شهري"
+      ? "اشتراك سنة كاملة"
+      : "اشتراك فصل دراسي واحد"
     : "فترة تجريبية";
   const statusLabel = subscribed ? "نشط" : expired ? "منتهٍ" : "نشط (تجريبي)";
   const startAt = subscribed ? subStartedAt : trialStartedAt;
