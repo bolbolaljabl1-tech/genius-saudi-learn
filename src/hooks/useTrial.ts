@@ -7,7 +7,7 @@ const SUB_START_KEY = "genius_sub_start";
 const TRIAL_DAYS = 7;
 const DAY_MS = 86400000;
 
-export type PlanType = "trial" | "monthly" | "yearly";
+export type PlanType = "trial" | "semester" | "yearly";
 
 export function useTrial() {
   const [startedAt, setStartedAt] = useState<number>(() => {
