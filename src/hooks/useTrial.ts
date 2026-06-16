@@ -23,11 +23,11 @@ export function useTrial() {
   const [plan, setPlan] = useState<PlanType>(() => {
     const isSub = localStorage.getItem(SUBSCRIBED_KEY) === "1";
     const p = localStorage.getItem(PLAN_KEY) as PlanType | null;
-    if (p && p !== "trial") return p;
-    // Migration: subscribed users without saved plan default to monthly
-    if (isSub) {
-      localStorage.setItem(PLAN_KEY, "monthly");
-      return "monthly";
+    if (p === "semester" || p === "yearly") return p;
+    // Migration: old 'monthly' plans become 'semester'
+    if (p === ("monthly" as string) || isSub) {
+      localStorage.setItem(PLAN_KEY, "semester");
+      return "semester";
     }
     return "trial";
   });
