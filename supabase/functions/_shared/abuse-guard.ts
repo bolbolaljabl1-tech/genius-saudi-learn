@@ -48,20 +48,16 @@ export function originAllowed(req: Request): boolean {
 
 export function abuseCheck(
   req: Request,
-  opts: { limit: number; windowMs: number; requireOrigin?: boolean },
+  opts: { limit: number; windowMs: number; requireOrigin?: boolean; corsHeaders?: Record<string, string> },
 ): Response | null {
+  const headers = { ...(opts.corsHeaders ?? {}), "Content-Type": "application/json" };
   if (opts.requireOrigin && !originAllowed(req)) {
-    return new Response(JSON.stringify({ error: "Forbidden" }), {
-      status: 403,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers });
   }
   const ip = clientIp(req);
   if (!rateLimit(ip, opts.limit, opts.windowMs)) {
-    return new Response(JSON.stringify({ error: "تم تجاوز الحد المسموح، حاول لاحقاً" }), {
-      status: 429,
-      headers: { "Content-Type": "application/json" },
-    });
+    return new Response(JSON.stringify({ error: "تم تجاوز الحد المسموح، حاول لاحقاً" }), { status: 429, headers });
   }
   return null;
 }
+
