@@ -11,13 +11,13 @@ interface SubscriptionSettingsProps {
 const fmtDate = (ms: number) => {
   if (!ms) return "—";
   try {
-    return new Intl.DateTimeFormat("ar-SA-u-ca-gregory", {
+    return new Intl.DateTimeFormat("ar-SA-u-ca-gregory-nu-latn", {
       year: "numeric",
       month: "long",
       day: "numeric",
     }).format(new Date(ms));
   } catch {
-    return new Date(ms).toLocaleDateString();
+    return new Date(ms).toLocaleDateString("ar-EG");
   }
 };
 
