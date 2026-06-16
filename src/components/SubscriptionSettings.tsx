@@ -27,8 +27,8 @@ const SubscriptionSettings = ({ onClose, onUpgrade }: SubscriptionSettingsProps)
 
   const planLabel = subscribed
     ? plan === "yearly"
-      ? "اشتراك سنوي"
-      : "اشتراك شهري"
+      ? "اشتراك سنة كاملة"
+      : "اشتراك فصل دراسي واحد"
     : "فترة تجريبية";
   const statusLabel = subscribed ? "نشط" : expired ? "منتهٍ" : "نشط (تجريبي)";
   const startAt = subscribed ? subStartedAt : trialStartedAt;
@@ -106,7 +106,7 @@ const SubscriptionSettings = ({ onClose, onUpgrade }: SubscriptionSettingsProps)
             className="w-full py-3 rounded-2xl bg-royal-blue text-matte-gold font-extrabold flex items-center justify-center gap-2 active:scale-95 transition"
           >
             <Crown className="w-5 h-5" />
-            {subscribed && plan === "monthly" ? "ترقية إلى الاشتراك السنوي" : subscribed ? "تجديد الاشتراك" : "ترقية الاشتراك الآن"}
+            {subscribed && plan === "semester" ? "ترقية إلى اشتراك السنة الكاملة" : subscribed ? "تجديد الاشتراك" : "ترقية الاشتراك الآن"}
           </button>
 
           {subscribed && (
