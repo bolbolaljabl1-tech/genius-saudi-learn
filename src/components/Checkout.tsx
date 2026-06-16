@@ -3,13 +3,13 @@ import { useState } from "react";
 
 interface CheckoutProps {
   onBack: () => void;
-  onPaymentSuccess: (plan: "monthly" | "yearly") => void;
+  onPaymentSuccess: (plan: "semester" | "yearly") => void;
   expired: boolean;
 }
 
 const PLANS = [
-  { id: "monthly", title: "اشتراك شهري", price: "29", period: "شهرياً", note: "تجديد تلقائي شهري" },
-  { id: "yearly", title: "اشتراك سنوي", price: "249", period: "سنوياً", note: "وفر أكثر من 28٪", featured: true },
+  { id: "semester", title: "اشتراك فصل دراسي واحد", price: "30", period: "للفصل الواحد", note: "صلاحية حتى نهاية الفصل الدراسي" },
+  { id: "yearly", title: "اشتراك سنة كاملة", price: "50", period: "سنوياً", note: "العرض الأفضل قيمة وأطول صلاحية", featured: true },
 ];
 
 const BENEFITS = [
