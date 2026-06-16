@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { abuseCheck } from "../_shared/abuse-guard.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -7,6 +8,10 @@ const corsHeaders = {
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const blocked = abuseCheck(req, { limit: 15, windowMs: 60_000, requireOrigin: true, corsHeaders });
+  if (blocked) return blocked;
+
 
   try {
     // Cap request body to ~8MB (base64 image + small hint)
