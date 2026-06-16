@@ -21,12 +21,27 @@ export function useTrial() {
     () => localStorage.getItem(SUBSCRIBED_KEY) === "1"
   );
   const [plan, setPlan] = useState<PlanType>(() => {
+    const isSub = localStorage.getItem(SUBSCRIBED_KEY) === "1";
     const p = localStorage.getItem(PLAN_KEY) as PlanType | null;
-    return p ?? "trial";
+    if (p && p !== "trial") return p;
+    // Migration: subscribed users without saved plan default to monthly
+    if (isSub) {
+      localStorage.setItem(PLAN_KEY, "monthly");
+      return "monthly";
+    }
+    return "trial";
   });
   const [subStartedAt, setSubStartedAt] = useState<number>(() => {
+    const isSub = localStorage.getItem(SUBSCRIBED_KEY) === "1";
     const s = localStorage.getItem(SUB_START_KEY);
-    return s ? parseInt(s, 10) : 0;
+    if (s) return parseInt(s, 10);
+    // Migration: existing subscribers without a saved start date — backfill to now
+    if (isSub) {
+      const nowMs = Date.now();
+      localStorage.setItem(SUB_START_KEY, String(nowMs));
+      return nowMs;
+    }
+    return 0;
   });
   const [now, setNow] = useState(Date.now());
 
