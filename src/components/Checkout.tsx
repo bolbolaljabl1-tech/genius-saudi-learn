@@ -1,15 +1,31 @@
-import { ArrowRight, Check, Lock, Loader2 } from "lucide-react";
+import { ArrowRight, Check, Lock, Copy, MessageCircle, KeyRound, Building2 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "@/components/ui/sonner";
+import { BANK_INFO, ADMIN_WHATSAPP, PLAN_PRICES, type PlanId } from "@/lib/payment-config";
+import { verifyActivationCode, detectPlanFromCode } from "@/lib/activation";
 
 interface CheckoutProps {
   onBack: () => void;
-  onPaymentSuccess: (plan: "semester" | "yearly") => void;
+  onPaymentSuccess: (plan: PlanId) => void;
   expired: boolean;
 }
 
 const PLANS = [
-  { id: "semester", title: "اشتراك فصل دراسي واحد", price: "30", period: "للفصل الواحد", note: "صلاحية حتى نهاية الفصل الدراسي" },
-  { id: "yearly", title: "اشتراك سنة كاملة", price: "50", period: "سنوياً", note: "العرض الأفضل قيمة وأطول صلاحية", featured: true },
+  {
+    id: "semester" as PlanId,
+    title: PLAN_PRICES.semester.label,
+    price: PLAN_PRICES.semester.price,
+    period: PLAN_PRICES.semester.period,
+    note: "صلاحية حتى نهاية الفصل الدراسي",
+  },
+  {
+    id: "yearly" as PlanId,
+    title: PLAN_PRICES.yearly.label,
+    price: PLAN_PRICES.yearly.price,
+    period: PLAN_PRICES.yearly.period,
+    note: "العرض الأفضل قيمة وأطول صلاحية",
+    featured: true,
+  },
 ];
 
 const BENEFITS = [
@@ -20,16 +36,56 @@ const BENEFITS = [
   "تحديثات مستمرة ومحتوى تعليمي متجدد بانتظام",
 ];
 
-const Checkout = ({ onBack, onPaymentSuccess, expired }: CheckoutProps) => {
-  const [selected, setSelected] = useState("yearly");
-  const [processing, setProcessing] = useState<string | null>(null);
+const STUDENT_NAME_KEY = "genius_student_name";
 
-  const handlePay = (method: "applepay" | "mada") => {
-    setProcessing(method);
-    setTimeout(() => {
-      setProcessing(null);
-      onPaymentSuccess(selected as "semester" | "yearly");
-    }, 1400);
+const Checkout = ({ onBack, onPaymentSuccess, expired }: CheckoutProps) => {
+  const [selected, setSelected] = useState<PlanId>("yearly");
+  const [activationCode, setActivationCode] = useState("");
+  const [verifying, setVerifying] = useState(false);
+
+  const copyIban = async () => {
+    try {
+      await navigator.clipboard.writeText(BANK_INFO.iban.replace(/\s/g, ""));
+      toast.success("تم نسخ رقم الآيبان بنجاح");
+    } catch {
+      toast.error("تعذّر النسخ، يرجى نسخ الرقم يدوياً");
+    }
+  };
+
+  const openWhatsApp = () => {
+    const studentName = localStorage.getItem(STUDENT_NAME_KEY) || "الطالب";
+    const planLabel = PLAN_PRICES[selected].label;
+    const price = PLAN_PRICES[selected].price;
+    const msg = `مرحباً أستاذ جابر، أنا الطالب ${studentName}. لقد قمت بالتحويل البنكي بمبلغ ${price} ريالاً للاشتراك في "${planLabel}" بمنصة الطالب العبقري، ومرفق لكم إيصال التحويل لتفعيل الحساب.`;
+    const url = `https://wa.me/${ADMIN_WHATSAPP}?text=${encodeURIComponent(msg)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const handleActivate = async () => {
+    const code = activationCode.trim();
+    if (!code) {
+      toast.error("يرجى إدخال رمز التفعيل الذي وصلك من الإدارة");
+      return;
+    }
+    const studentName = localStorage.getItem(STUDENT_NAME_KEY);
+    if (!studentName) {
+      toast.error("يرجى تسجيل اسم الطالب أولاً من الصفحة الرئيسية");
+      return;
+    }
+    setVerifying(true);
+    try {
+      const detected = detectPlanFromCode(code);
+      const planToCheck: PlanId = detected ?? selected;
+      const ok = await verifyActivationCode(studentName, planToCheck, code);
+      if (ok) {
+        toast.success("تم تفعيل اشتراكك بنجاح، نتمنى لك رحلة تعليمية ممتعة");
+        onPaymentSuccess(planToCheck);
+      } else {
+        toast.error("رمز التفعيل غير صحيح، يرجى التأكد من الإدارة");
+      }
+    } finally {
+      setVerifying(false);
+    }
   };
 
   return (
@@ -51,7 +107,7 @@ const Checkout = ({ onBack, onPaymentSuccess, expired }: CheckoutProps) => {
             {expired ? "فعّل اشتراكك لمواصلة التفوق" : "ارتقِ بتجربتك التعليمية"}
           </h1>
           <p className="text-muted-foreground text-base leading-7">
-            انضم إلى آلاف الطلاب المتفوقين، وافتح كامل محتوى منصة الطالب العبقري بضغطة واحدة، بأمان تام وبخطوات ميسرة على جوالك.
+            انضم إلى آلاف الطلاب المتفوقين، وافتح كامل محتوى منصة الطالب العبقري عبر التحويل البنكي المباشر بخطوات ميسرة وآمنة.
           </p>
         </header>
 
@@ -88,7 +144,7 @@ const Checkout = ({ onBack, onPaymentSuccess, expired }: CheckoutProps) => {
                   <span className="font-extrabold text-heading text-lg">{p.title}</span>
                   {p.featured && (
                     <span className="text-[11px] font-extrabold gradient-gold text-gold-foreground px-2 py-0.5 rounded-full">
-                      الأفضل قيمة
+                      العرض الأفضل قيمة
                     </span>
                   )}
                 </div>
@@ -102,48 +158,91 @@ const Checkout = ({ onBack, onPaymentSuccess, expired }: CheckoutProps) => {
           })}
         </section>
 
-        {/* Payment methods */}
-        <section className="space-y-3 animate-scale-in" style={{ animationDelay: "0.15s" }}>
-          <h2 className="text-lg font-extrabold text-heading">اختر طريقة الدفع</h2>
+        {/* Bank Transfer Node */}
+        <section
+          className="neu-card p-5 border-2 border-primary/30 animate-scale-in"
+          style={{ animationDelay: "0.15s" }}
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-11 h-11 rounded-xl gradient-emerald flex items-center justify-center shrink-0">
+              <Building2 className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <h2 className="text-xl font-extrabold text-heading">بيانات التحويل البنكي</h2>
+          </div>
 
-          <button
-            onClick={() => handlePay("applepay")}
-            disabled={!!processing}
-            className="w-full py-4 rounded-2xl bg-black text-white font-extrabold text-xl flex items-center justify-center gap-2 active:scale-[0.98] transition shadow-lg disabled:opacity-60"
-            aria-label="الدفع عبر Apple Pay"
-          >
-            {processing === "applepay" ? (
-              <Loader2 className="w-6 h-6 animate-spin" />
-            ) : (
-              <>
-                <span className="text-2xl leading-none"></span>
-                <span className="tracking-tight">Pay</span>
-              </>
-            )}
-          </button>
-
-          <button
-            onClick={() => handlePay("mada")}
-            disabled={!!processing}
-            className="w-full py-4 rounded-2xl bg-white border-2 border-foreground/15 font-extrabold text-xl flex items-center justify-center gap-3 active:scale-[0.98] transition shadow-md disabled:opacity-60"
-            aria-label="الدفع عبر مدى"
-          >
-            {processing === "mada" ? (
-              <Loader2 className="w-6 h-6 animate-spin text-foreground" />
-            ) : (
-              <span className="inline-flex items-center gap-3">
-                <span dir="ltr" className="inline-flex items-baseline tracking-tight text-2xl font-black leading-none">
-                  <span className="text-[#84BD00]">m</span>
-                  <span className="text-[#231F20]">ada</span>
-                </span>
-                <span className="text-foreground text-base font-extrabold">الدفع عبر مدى</span>
-              </span>
-            )}
-          </button>
-
-          <p className="text-center text-xs text-muted-foreground leading-6 mt-2">
-            دفع آمن ومشفر بالكامل. يمكنك إلغاء الاشتراك في أي وقت من إعدادات حسابك.
+          <p className="text-body-blue text-base leading-7 mb-4">
+            لإتمام الاشتراك وتفعيل حسابك العبقري، يرجى التحويل البنكي المباشر على الحساب التالي:
           </p>
+
+          <div className="space-y-3">
+            <div className="flex justify-between items-center bg-muted/40 rounded-xl p-3">
+              <span className="text-muted-foreground font-bold text-sm">اسم البنك</span>
+              <span className="font-extrabold text-heading text-base">{BANK_INFO.bankName}</span>
+            </div>
+            <div className="flex justify-between items-center bg-muted/40 rounded-xl p-3">
+              <span className="text-muted-foreground font-bold text-sm">اسم الحساب</span>
+              <span className="font-extrabold text-heading text-base">{BANK_INFO.accountName}</span>
+            </div>
+            <div className="bg-muted/40 rounded-xl p-3">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-muted-foreground font-bold text-sm">رقم الآيبان</span>
+                <button
+                  onClick={copyIban}
+                  className="inline-flex items-center gap-1 text-primary font-extrabold text-sm hover:underline"
+                >
+                  <Copy className="w-4 h-4" />
+                  نسخ
+                </button>
+              </div>
+              <div dir="ltr" className="text-center font-mono font-extrabold text-heading text-lg tracking-wider">
+                {BANK_INFO.iban}
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={openWhatsApp}
+            className="w-full mt-5 py-4 rounded-2xl bg-[#25D366] text-white font-extrabold text-lg flex items-center justify-center gap-3 active:scale-[0.98] transition shadow-lg"
+            aria-label="تأكيد التحويل وتفعيل الحساب عبر واتساب"
+          >
+            <MessageCircle className="w-6 h-6" />
+            تأكيد التحويل وتفعيل الحساب فوراً
+          </button>
+
+          <p className="text-center text-xs text-muted-foreground leading-6 mt-3">
+            سيتم فتح محادثة واتساب مباشرة مع إدارة المنصة لإرسال إيصال التحويل وتفعيل حسابك.
+          </p>
+        </section>
+
+        {/* Manual Activation Code */}
+        <section
+          className="neu-card p-5 animate-scale-in"
+          style={{ animationDelay: "0.2s" }}
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-11 h-11 rounded-xl gradient-gold flex items-center justify-center shrink-0">
+              <KeyRound className="w-6 h-6 text-gold-foreground" />
+            </div>
+            <h2 className="text-xl font-extrabold text-heading">رمز التفعيل من الإدارة</h2>
+          </div>
+          <p className="text-body-blue text-base leading-7 mb-3">
+            بعد تأكيد التحويل، ستصلك رسالة من الإدارة تحتوي على رمز التفعيل الخاص بك. أدخله هنا لتفعيل اشتراكك فوراً.
+          </p>
+          <input
+            type="text"
+            value={activationCode}
+            onChange={(e) => setActivationCode(e.target.value)}
+            placeholder="مثال: YR-AB12CD34EF"
+            dir="ltr"
+            className="w-full px-4 py-3 rounded-xl border-2 border-border bg-card font-mono font-extrabold text-lg text-center tracking-wider focus:outline-none focus:border-primary"
+          />
+          <button
+            onClick={handleActivate}
+            disabled={verifying}
+            className="w-full mt-3 py-4 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-lg active:scale-[0.98] transition shadow-emerald disabled:opacity-60"
+          >
+            {verifying ? "جارٍ التحقق..." : "تفعيل الاشتراك"}
+          </button>
         </section>
       </div>
     </div>
