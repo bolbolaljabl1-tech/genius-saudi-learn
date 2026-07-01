@@ -97,10 +97,11 @@ const Admin = () => {
           />
           <button
             type="submit"
-            className="w-full py-3 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition shadow-emerald"
+            disabled={loggingIn}
+            className="w-full py-3 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition shadow-emerald disabled:opacity-60"
           >
             <LogIn className="w-5 h-5" />
-            دخول
+            {loggingIn ? "جارٍ التحقق..." : "دخول"}
           </button>
           <Link
             to="/"
