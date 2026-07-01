@@ -7,13 +7,14 @@ export const BANK_INFO = {
 
 // رقم واتساب الإدارة بالصيغة الدولية بدون علامة + وبدون مسافات
 // يمكن تحديثه لاحقاً بالرقم الفعلي للإدارة
-export const ADMIN_WHATSAPP = "966500000000";
+export const ADMIN_WHATSAPP = "966534181656";
 
 // مفتاح سري لتوليد رموز التفعيل (يُعرف فقط من قبل لوحة الإدارة والمنصة)
-export const ACTIVATION_SALT = "genius-platform-2026-secure-salt";
+export const ACTIVATION_SALT =
+  "iPitGMBi2xw_0-OAUUeDEyAKzg4sHmx18iyqLe5eXCTVUtZ26cM9nICfhlg8QkCr-genius-2026";
 
 // كلمة سر دخول لوحة الإدارة
-export const ADMIN_PASSPHRASE = "genius-admin-2026";
+export const ADMIN_PASSPHRASE = "Jaber66hi";
 
 export const PLAN_PRICES = {
   semester: { price: 30, label: "اشتراك فصل دراسي واحد", period: "للفصل الواحد" },
