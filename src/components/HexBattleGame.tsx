@@ -1144,7 +1144,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
             </div>
             {answered && (
               <p className={`text-center mt-3 font-bold text-sm ${selectedAnswer === currentQuestion.correct ? "text-emerald-600" : "text-red-600"}`}>
-                {selectedAnswer === currentQuestion.correct ? "✅ إجابة صحيحة! تم احتلال الخلية" : "❌ إجابة خاطئة! انتقل الدور"}
+                {selectedAnswer === currentQuestion.correct ? "إجابة صحيحة، تم احتلال الخلية" : "إجابة خاطئة، أُقفلت الخلية ولن تُحتسب لأحد"}
               </p>
             )}
           </div>
