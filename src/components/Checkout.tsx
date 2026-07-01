@@ -2,7 +2,7 @@ import { ArrowRight, Check, Lock, Copy, MessageCircle, KeyRound, Building2 } fro
 import { useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import { BANK_INFO, ADMIN_WHATSAPP, PLAN_PRICES, type PlanId } from "@/lib/payment-config";
-import { verifyActivationCode, detectPlanFromCode } from "@/lib/activation";
+import { verifyActivationCode } from "@/lib/activation";
 
 interface CheckoutProps {
   onBack: () => void;
