@@ -1041,7 +1041,8 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                   const id = `${r}-${c}`;
                   const isCastle = castles.has(id) && !siegedCastles.has(id);
                   const isHidden = playMode === "treasure" && !revealed.has(id) && !cellOwners.has(id);
-                  const isDisabled = winner !== null || cellOwners.has(id) || selectedCell !== null || aiThinking || (gameMode === "ai" && currentPlayer === "red") || isCastle || isHidden;
+                  const isLocked = lockedCells.has(id);
+                  const isDisabled = winner !== null || cellOwners.has(id) || selectedCell !== null || aiThinking || (gameMode === "ai" && currentPlayer === "red") || isCastle || isHidden || isLocked;
                   const ARABIC_LETTERS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن"];
                   const letterIdx = r * BOARD_SIZE + c;
                   const letter = ARABIC_LETTERS[letterIdx % ARABIC_LETTERS.length];
