@@ -74,12 +74,10 @@ const Checkout = ({ onBack, onPaymentSuccess, expired }: CheckoutProps) => {
     }
     setVerifying(true);
     try {
-      const detected = detectPlanFromCode(code);
-      const planToCheck: PlanId = detected ?? selected;
-      const ok = await verifyActivationCode(studentName, planToCheck, code);
-      if (ok) {
+      const res = await verifyActivationCode(studentName, selected, code);
+      if (res.ok && res.plan) {
         toast.success("تم تفعيل اشتراكك بنجاح، نتمنى لك رحلة تعليمية ممتعة");
-        onPaymentSuccess(planToCheck);
+        onPaymentSuccess(res.plan);
       } else {
         toast.error("رمز التفعيل غير صحيح، يرجى التأكد من الإدارة");
       }
