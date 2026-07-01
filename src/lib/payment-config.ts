@@ -6,15 +6,10 @@ export const BANK_INFO = {
 };
 
 // رقم واتساب الإدارة بالصيغة الدولية بدون علامة + وبدون مسافات
-// يمكن تحديثه لاحقاً بالرقم الفعلي للإدارة
 export const ADMIN_WHATSAPP = "966534181656";
 
-// مفتاح سري لتوليد رموز التفعيل (يُعرف فقط من قبل لوحة الإدارة والمنصة)
-export const ACTIVATION_SALT =
-  "iPitGMBi2xw_0-OAUUeDEyAKzg4sHmx18iyqLe5eXCTVUtZ26cM9nICfhlg8QkCr-genius-2026";
-
-// كلمة سر دخول لوحة الإدارة
-export const ADMIN_PASSPHRASE = "Jaber66hi";
+// ملاحظة أمنية: كلمة سر الإدارة وملح رمز التفعيل لم تعد محفوظة في الواجهة.
+// يتم التحقق منها حصراً داخل Edge Function (activation) على الخادم.
 
 export const PLAN_PRICES = {
   semester: { price: 30, label: "اشتراك فصل دراسي واحد", period: "للفصل الواحد" },

@@ -2,27 +2,37 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Copy, KeyRound, ShieldCheck, LogIn } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
-import { ADMIN_PASSPHRASE, PLAN_PRICES, type PlanId } from "@/lib/payment-config";
-import { generateActivationCode } from "@/lib/activation";
+import { PLAN_PRICES, type PlanId } from "@/lib/payment-config";
+import {
+  adminLogin,
+  clearAdminToken,
+  generateActivationCode,
+  getAdminToken,
+} from "@/lib/activation";
 
 const Admin = () => {
-  const [authed, setAuthed] = useState(
-    () => sessionStorage.getItem("genius_admin_authed") === "1"
-  );
+  const [authed, setAuthed] = useState(() => !!getAdminToken());
   const [pass, setPass] = useState("");
   const [studentName, setStudentName] = useState("");
   const [plan, setPlan] = useState<PlanId>("yearly");
   const [code, setCode] = useState("");
   const [generating, setGenerating] = useState(false);
+  const [loggingIn, setLoggingIn] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pass.trim() === ADMIN_PASSPHRASE) {
-      sessionStorage.setItem("genius_admin_authed", "1");
-      setAuthed(true);
-      toast.success("تم تسجيل الدخول بنجاح");
-    } else {
-      toast.error("كلمة سر الإدارة غير صحيحة");
+    setLoggingIn(true);
+    try {
+      const ok = await adminLogin(pass);
+      if (ok) {
+        setAuthed(true);
+        setPass("");
+        toast.success("تم تسجيل الدخول بنجاح");
+      } else {
+        toast.error("كلمة سر الإدارة غير صحيحة");
+      }
+    } finally {
+      setLoggingIn(false);
     }
   };
 
@@ -37,6 +47,14 @@ const Admin = () => {
       const c = await generateActivationCode(name, plan);
       setCode(c);
       toast.success("تم توليد رمز التفعيل بنجاح");
+    } catch (err) {
+      if ((err as Error)?.message === "unauthorized") {
+        clearAdminToken();
+        setAuthed(false);
+        toast.error("انتهت صلاحية جلسة الإدارة، يرجى تسجيل الدخول مرة أخرى");
+      } else {
+        toast.error("تعذّر توليد رمز التفعيل، حاول لاحقاً");
+      }
     } finally {
       setGenerating(false);
     }
@@ -79,10 +97,11 @@ const Admin = () => {
           />
           <button
             type="submit"
-            className="w-full py-3 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition shadow-emerald"
+            disabled={loggingIn}
+            className="w-full py-3 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-lg flex items-center justify-center gap-2 active:scale-[0.98] transition shadow-emerald disabled:opacity-60"
           >
             <LogIn className="w-5 h-5" />
-            دخول
+            {loggingIn ? "جارٍ التحقق..." : "دخول"}
           </button>
           <Link
             to="/"

@@ -1,32 +1,76 @@
-import { ACTIVATION_SALT, type PlanId } from "./payment-config";
+import { supabase } from "@/integrations/supabase/client";
+import type { PlanId } from "./payment-config";
 
-// توليد رمز تفعيل قصير وفريد لكل (اسم الطالب + الباقة)
-// نفس الاسم والباقة يُنتجان نفس الرمز دائماً، حتى يتمكن المشرف من توليده وإرساله للطالب
+const ADMIN_TOKEN_KEY = "genius_admin_token";
+
+async function invoke<T = unknown>(body: Record<string, unknown>): Promise<T> {
+  const { data, error } = await supabase.functions.invoke("activation", { body });
+  if (error) throw error;
+  return data as T;
+}
+
+export async function adminLogin(passphrase: string): Promise<boolean> {
+  try {
+    const res = await invoke<{ ok?: boolean; token?: string }>({
+      action: "admin_login",
+      passphrase,
+    });
+    if (res?.ok && res.token) {
+      sessionStorage.setItem(ADMIN_TOKEN_KEY, res.token);
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+export function getAdminToken(): string | null {
+  return sessionStorage.getItem(ADMIN_TOKEN_KEY);
+}
+
+export function clearAdminToken(): void {
+  sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+}
+
 export async function generateActivationCode(
   studentName: string,
-  plan: PlanId
+  plan: PlanId,
 ): Promise<string> {
-  const normalized = studentName.trim().replace(/\s+/g, " ").toLowerCase();
-  const payload = `${normalized}|${plan}|${ACTIVATION_SALT}`;
-  const buf = new TextEncoder().encode(payload);
-  const hashBuf = await crypto.subtle.digest("SHA-256", buf);
-  const bytes = Array.from(new Uint8Array(hashBuf));
-  const hex = bytes.map((b) => b.toString(16).padStart(2, "0")).join("");
-  // 10 خانات سداسية عشرية بأحرف كبيرة + بادئة لتمييز الباقة
-  const prefix = plan === "yearly" ? "YR" : "SM";
-  return `${prefix}-${hex.slice(0, 10).toUpperCase()}`;
+  const adminToken = getAdminToken();
+  if (!adminToken) throw new Error("unauthorized");
+  const res = await invoke<{ ok?: boolean; code?: string; error?: string }>({
+    action: "generate_code",
+    adminToken,
+    studentName,
+    plan,
+  });
+  if (res?.error === "unauthorized") {
+    clearAdminToken();
+    throw new Error("unauthorized");
+  }
+  if (!res?.ok || !res.code) throw new Error("failed_to_generate");
+  return res.code;
 }
 
 export async function verifyActivationCode(
   studentName: string,
   plan: PlanId,
-  code: string
-): Promise<boolean> {
-  const expected = await generateActivationCode(studentName, plan);
-  return expected === code.trim().toUpperCase();
+  code: string,
+): Promise<{ ok: boolean; plan: PlanId | null }> {
+  try {
+    const res = await invoke<{ ok?: boolean; plan?: PlanId }>({
+      action: "verify_code",
+      studentName,
+      plan,
+      code,
+    });
+    return { ok: !!res?.ok, plan: (res?.plan as PlanId | undefined) ?? null };
+  } catch {
+    return { ok: false, plan: null };
+  }
 }
 
-// محاولة كشف الباقة من الرمز المُدخل (sm/yr)
 export function detectPlanFromCode(code: string): PlanId | null {
   const c = code.trim().toUpperCase();
   if (c.startsWith("YR-")) return "yearly";
