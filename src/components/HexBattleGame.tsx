@@ -285,6 +285,9 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   // Lost Treasure mode: only revealed cells are clickable
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
 
+  // Locked cells: a wrong answer permanently locks the cell (no owner, no re-click)
+  const [lockedCells, setLockedCells] = useState<Set<string>>(new Set());
+
   // Stern Arbitrator timer (per-question)
   const [questionTimer, setQuestionTimer] = useState<number>(QUESTION_TIME_LIMIT);
 
@@ -393,8 +396,15 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
         if (t <= 1) {
           clearInterval(iv);
           if (currentQuestion && selectedCell) {
+            const timedOutCell = selectedCell;
             setAnswered(true);
             setSelectedAnswer(-1);
+            // Timeout counts as a wrong answer → lock the cell
+            setLockedCells(prev => {
+              const next = new Set(prev);
+              next.add(timedOutCell);
+              return next;
+            });
             setTimeout(() => {
               setSelectedCell(null);
               setCurrentQuestion(null);
@@ -563,6 +573,13 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
         handleWin(player);
         return;
       }
+    } else {
+      // Wrong answer: lock the cell so neither side may claim it (fair penalty)
+      setLockedCells(prev => {
+        const next = new Set(prev);
+        next.add(cell);
+        return next;
+      });
     }
 
     setTimeout(() => {
@@ -595,7 +612,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       for (let r = 0; r < BOARD_SIZE; r++) {
         for (let c = 0; c < BOARD_SIZE; c++) {
           const id = `${r}-${c}`;
-          if (!cellOwners.has(id)) emptyCells.push(id);
+          if (!cellOwners.has(id) && !lockedCells.has(id) && !castles.has(id)) emptyCells.push(id);
         }
       }
       if (emptyCells.length === 0) { setAiThinking(false); return; }
@@ -646,6 +663,13 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
             setTimeout(() => setCelebrate(false), 4000);
             setShowWinModal(true);
           }
+        } else {
+          // AI wrong answer: lock the cell (fair rule for both sides)
+          setLockedCells(prev => {
+            const next = new Set(prev);
+            next.add(chosen);
+            return next;
+          });
         }
 
         setTimeout(() => {
@@ -700,6 +724,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
 
   const resetGame = () => {
     setCellOwners(new Map());
+    setLockedCells(new Set());
     setCurrentPlayer("green");
     setSelectedCell(null);
     setCurrentQuestion(null);
@@ -756,6 +781,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     const isCastle = castles.has(id) && !siegedCastles.has(id);
     const isHidden = playMode === "treasure" && !revealed.has(id) && !owner;
     if (isCastle) return "bg-gradient-to-br from-amber-400 to-yellow-600 border-amber-800 text-white shadow-gold";
+    if (lockedCells.has(id)) return "bg-slate-400 border-slate-600 text-slate-100 opacity-70";
     if (isHidden) return "bg-slate-700 border-slate-900 text-slate-500";
     if (owner === "green") {
       return `bg-emerald-500 border-emerald-700 text-white ${inNearPath && nearWin?.player === "green" ? "animate-neon-pulse" : ""}`;
@@ -1016,7 +1042,8 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                   const id = `${r}-${c}`;
                   const isCastle = castles.has(id) && !siegedCastles.has(id);
                   const isHidden = playMode === "treasure" && !revealed.has(id) && !cellOwners.has(id);
-                  const isDisabled = winner !== null || cellOwners.has(id) || selectedCell !== null || aiThinking || (gameMode === "ai" && currentPlayer === "red") || isCastle || isHidden;
+                  const isLocked = lockedCells.has(id);
+                  const isDisabled = winner !== null || cellOwners.has(id) || selectedCell !== null || aiThinking || (gameMode === "ai" && currentPlayer === "red") || isCastle || isHidden || isLocked;
                   const ARABIC_LETTERS = ["ا","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن"];
                   const letterIdx = r * BOARD_SIZE + c;
                   const letter = ARABIC_LETTERS[letterIdx % ARABIC_LETTERS.length];
@@ -1040,7 +1067,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                         lineHeight: 1,
                       }}
                     >
-                      {isCastle ? "🏰" : isHidden ? "؟" : owner ? (owner === "green" ? "🟢" : "🔴") : letter}
+                      {isCastle ? "🏰" : isLocked ? "✕" : isHidden ? "؟" : owner ? (owner === "green" ? "🟢" : "🔴") : letter}
                     </button>
                   );
                 })}
@@ -1117,7 +1144,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
             </div>
             {answered && (
               <p className={`text-center mt-3 font-bold text-sm ${selectedAnswer === currentQuestion.correct ? "text-emerald-600" : "text-red-600"}`}>
-                {selectedAnswer === currentQuestion.correct ? "✅ إجابة صحيحة! تم احتلال الخلية" : "❌ إجابة خاطئة! انتقل الدور"}
+                {selectedAnswer === currentQuestion.correct ? "إجابة صحيحة، تم احتلال الخلية" : "إجابة خاطئة، أُقفلت الخلية ولن تُحتسب لأحد"}
               </p>
             )}
           </div>
