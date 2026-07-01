@@ -285,6 +285,9 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
   // Lost Treasure mode: only revealed cells are clickable
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
 
+  // Locked cells: a wrong answer permanently locks the cell (no owner, no re-click)
+  const [lockedCells, setLockedCells] = useState<Set<string>>(new Set());
+
   // Stern Arbitrator timer (per-question)
   const [questionTimer, setQuestionTimer] = useState<number>(QUESTION_TIME_LIMIT);
 
