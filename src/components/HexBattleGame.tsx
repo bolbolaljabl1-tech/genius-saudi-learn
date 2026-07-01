@@ -780,6 +780,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     const isCastle = castles.has(id) && !siegedCastles.has(id);
     const isHidden = playMode === "treasure" && !revealed.has(id) && !owner;
     if (isCastle) return "bg-gradient-to-br from-amber-400 to-yellow-600 border-amber-800 text-white shadow-gold";
+    if (lockedCells.has(id)) return "bg-slate-400 border-slate-600 text-slate-100 opacity-70";
     if (isHidden) return "bg-slate-700 border-slate-900 text-slate-500";
     if (owner === "green") {
       return `bg-emerald-500 border-emerald-700 text-white ${inNearPath && nearWin?.player === "green" ? "animate-neon-pulse" : ""}`;
