@@ -605,7 +605,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       for (let r = 0; r < BOARD_SIZE; r++) {
         for (let c = 0; c < BOARD_SIZE; c++) {
           const id = `${r}-${c}`;
-          if (!cellOwners.has(id)) emptyCells.push(id);
+          if (!cellOwners.has(id) && !lockedCells.has(id) && !castles.has(id)) emptyCells.push(id);
         }
       }
       if (emptyCells.length === 0) { setAiThinking(false); return; }
