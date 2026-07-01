@@ -1066,7 +1066,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                         lineHeight: 1,
                       }}
                     >
-                      {isCastle ? "🏰" : isHidden ? "؟" : owner ? (owner === "green" ? "🟢" : "🔴") : letter}
+                      {isCastle ? "🏰" : isLocked ? "✕" : isHidden ? "؟" : owner ? (owner === "green" ? "🟢" : "🔴") : letter}
                     </button>
                   );
                 })}
