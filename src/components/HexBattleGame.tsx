@@ -656,6 +656,13 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
             setTimeout(() => setCelebrate(false), 4000);
             setShowWinModal(true);
           }
+        } else {
+          // AI wrong answer: lock the cell (fair rule for both sides)
+          setLockedCells(prev => {
+            const next = new Set(prev);
+            next.add(chosen);
+            return next;
+          });
         }
 
         setTimeout(() => {
