@@ -396,8 +396,15 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
         if (t <= 1) {
           clearInterval(iv);
           if (currentQuestion && selectedCell) {
+            const timedOutCell = selectedCell;
             setAnswered(true);
             setSelectedAnswer(-1);
+            // Timeout counts as a wrong answer → lock the cell
+            setLockedCells(prev => {
+              const next = new Set(prev);
+              next.add(timedOutCell);
+              return next;
+            });
             setTimeout(() => {
               setSelectedCell(null);
               setCurrentQuestion(null);
