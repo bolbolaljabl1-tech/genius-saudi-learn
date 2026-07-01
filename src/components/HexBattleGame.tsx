@@ -724,6 +724,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
 
   const resetGame = () => {
     setCellOwners(new Map());
+    setLockedCells(new Set());
     setCurrentPlayer("green");
     setSelectedCell(null);
     setCurrentQuestion(null);
