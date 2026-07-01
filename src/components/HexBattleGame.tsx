@@ -566,6 +566,13 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
         handleWin(player);
         return;
       }
+    } else {
+      // Wrong answer: lock the cell so neither side may claim it (fair penalty)
+      setLockedCells(prev => {
+        const next = new Set(prev);
+        next.add(cell);
+        return next;
+      });
     }
 
     setTimeout(() => {
