@@ -1,8 +1,8 @@
-// Server-side admin auth + activation code generation/verification.
-// Secrets (ADMIN_PASSPHRASE, ACTIVATION_SALT, ADMIN_SESSION_SECRET) never
-// leave the edge runtime, so the client cannot self-mint codes or bypass
-// the admin gate by editing bundled JS.
+// Server-side admin auth + subscription request lifecycle.
+// Secrets never leave the edge runtime; the client can only submit a
+// subscription request or poll the current status of its own name.
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const enc = new TextEncoder();
 
@@ -10,6 +10,16 @@ const ADMIN_PASSPHRASE = Deno.env.get("ADMIN_PASSPHRASE") ?? "";
 const ACTIVATION_SALT = Deno.env.get("ACTIVATION_SALT") ?? "";
 const ADMIN_SESSION_SECRET = Deno.env.get("ADMIN_SESSION_SECRET") ?? "";
 const ADMIN_TOKEN_TTL_SECONDS = 60 * 60 * 4; // 4h
+
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
+
+function normName(v: string): string {
+  return v.trim().replace(/\s+/g, " ");
+}
 
 function b64url(bytes: Uint8Array): string {
   let s = btoa(String.fromCharCode(...bytes));
