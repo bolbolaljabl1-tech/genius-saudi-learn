@@ -28,6 +28,9 @@ import { toast } from "@/components/ui/sonner";
 type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery" | "selftest" | "checkout";
 
 const LOCKED_SCREENS: Screen[] = ["lesson", "quiz", "selftest", "camera", "games"];
+// Distraction-free screens: hide the settings gear so it never sits near
+// the back arrow or the "إنهاء" button on quizzes / self-tests / camera.
+const HIDE_GEAR_SCREENS: Screen[] = ["quiz", "selftest", "camera", "checkout"];
 
 const Index = () => {
   const [screen, setScreenRaw] = useState<Screen>("stage");
@@ -50,6 +53,27 @@ const Index = () => {
   const [showSubSettings, setShowSubSettings] = useState(false);
   useIdleNotify(4);
   useOvertakeNotify(studentName, 60);
+
+  // Poll the server for admin activation so the student's account unlocks
+  // automatically once the admin approves their bank transfer.
+  useEffect(() => {
+    if (!studentName || subscribed) return;
+    let cancelled = false;
+    const tick = async () => {
+      const res = await checkSubscriptionStatus(studentName);
+      if (cancelled) return;
+      if (res.status === "active" && res.plan) {
+        subscribe(res.plan);
+        toast.success("تم تفعيل اشتراكك من قِبَل الإدارة، نتمنى لك رحلة تعليمية ممتعة");
+      }
+    };
+    void tick();
+    const id = window.setInterval(tick, 30000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [studentName, subscribed, subscribe]);
 
   const handleStageSelect = (s: string) => { setStage(s); setScreen("subject"); };
   const handleSubjectSelect = (s: string) => { setSubject(s); setScreen("search"); };
