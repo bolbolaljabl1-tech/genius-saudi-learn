@@ -156,6 +156,74 @@ async function handle(req: Request): Promise<Response> {
     return json({ ok: false }, 200);
   }
 
+  if (action === "request_subscription") {
+    const name = typeof body.studentName === "string" ? normName(body.studentName) : "";
+    const plan = body.plan;
+    if (!name || !isPlan(plan)) return json({ error: "invalid_input" }, 400);
+    // Avoid stacking duplicate pending requests for the same name+plan
+    const { data: existing } = await admin
+      .from("subscription_requests")
+      .select("id,status")
+      .ilike("student_name", name)
+      .eq("plan", plan)
+      .in("status", ["pending", "active"])
+      .limit(1);
+    if (existing && existing.length > 0) {
+      return json({ ok: true, duplicate: true, status: existing[0].status });
+    }
+    const { error } = await admin.from("subscription_requests").insert({
+      student_name: name,
+      plan,
+      status: "pending",
+    });
+    if (error) return json({ error: "db_error" }, 500);
+    return json({ ok: true });
+  }
+
+  if (action === "check_status") {
+    const name = typeof body.studentName === "string" ? normName(body.studentName) : "";
+    if (!name) return json({ error: "invalid_input" }, 400);
+    const { data } = await admin
+      .from("subscription_requests")
+      .select("plan,status,activated_at,requested_at")
+      .ilike("student_name", name)
+      .order("requested_at", { ascending: false })
+      .limit(20);
+    const active = (data ?? []).find((r) => r.status === "active");
+    if (active) return json({ ok: true, status: "active", plan: active.plan, activated_at: active.activated_at });
+    const pending = (data ?? []).find((r) => r.status === "pending");
+    if (pending) return json({ ok: true, status: "pending", plan: pending.plan });
+    return json({ ok: true, status: "none" });
+  }
+
+  if (action === "list_requests") {
+    const token = typeof body.adminToken === "string" ? body.adminToken : "";
+    if (!(await verifyAdminToken(token))) return json({ error: "unauthorized" }, 401);
+    const { data, error } = await admin
+      .from("subscription_requests")
+      .select("id,student_name,plan,status,requested_at,activated_at")
+      .order("status", { ascending: true })
+      .order("requested_at", { ascending: false })
+      .limit(200);
+    if (error) return json({ error: "db_error" }, 500);
+    return json({ ok: true, requests: data ?? [] });
+  }
+
+  if (action === "activate_request") {
+    const token = typeof body.adminToken === "string" ? body.adminToken : "";
+    if (!(await verifyAdminToken(token))) return json({ error: "unauthorized" }, 401);
+    const id = typeof body.id === "string" ? body.id : "";
+    if (!id) return json({ error: "invalid_input" }, 400);
+    const { data, error } = await admin
+      .from("subscription_requests")
+      .update({ status: "active", activated_at: new Date().toISOString() })
+      .eq("id", id)
+      .select("id,student_name,plan,status,activated_at")
+      .maybeSingle();
+    if (error || !data) return json({ error: "db_error" }, 500);
+    return json({ ok: true, request: data });
+  }
+
   return json({ error: "unknown_action" }, 400);
 }
 
