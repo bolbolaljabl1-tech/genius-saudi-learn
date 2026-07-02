@@ -4,7 +4,7 @@ const TRIAL_START_KEY = "genius_trial_start";
 const SUBSCRIBED_KEY = "genius_subscribed";
 const PLAN_KEY = "genius_plan";
 const SUB_START_KEY = "genius_sub_start";
-const TRIAL_DAYS = 7;
+const TRIAL_DAYS = 3;
 const DAY_MS = 86400000;
 
 export type PlanType = "trial" | "semester" | "yearly";
