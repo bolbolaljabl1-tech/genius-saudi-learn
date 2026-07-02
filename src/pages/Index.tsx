@@ -152,15 +152,19 @@ const Index = () => {
         />
       )}
 
-      {/* Subscription settings button */}
-      <button
-        onClick={() => setShowSubSettings(true)}
-        className="fixed top-14 right-3 z-50 bg-card border-2 border-matte-gold/30 text-matte-gold rounded-full p-2 shadow-md active:scale-95 transition"
-        aria-label="إعدادات لوحة الاشتراك"
-        title="إعدادات لوحة الاشتراك"
-      >
-        <Settings className="w-5 h-5" />
-      </button>
+      {/* Subscription settings gear — pinned to the top-left, opposite the
+          RTL back arrow (top-right) and hidden entirely on distraction-free
+          screens (quizzes / self-test / camera / checkout). */}
+      {!HIDE_GEAR_SCREENS.includes(screen) && (
+        <button
+          onClick={() => setShowSubSettings(true)}
+          className="fixed top-14 left-3 z-50 bg-card border-2 border-matte-gold/30 text-matte-gold rounded-full p-2 shadow-md active:scale-95 transition"
+          aria-label="إعدادات لوحة الاشتراك"
+          title="إعدادات لوحة الاشتراك"
+        >
+          <Settings className="w-5 h-5" />
+        </button>
+      )}
 
       <ShareButton />
 
