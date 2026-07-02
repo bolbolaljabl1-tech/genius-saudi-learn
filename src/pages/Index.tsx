@@ -22,6 +22,7 @@ import { useXP } from "@/hooks/useXP";
 import { useTrial } from "@/hooks/useTrial";
 import { useIdleNotify } from "@/hooks/useIdleNotify";
 import { useOvertakeNotify } from "@/hooks/useOvertakeNotify";
+import { checkSubscriptionStatus } from "@/lib/activation";
 import { toast } from "@/components/ui/sonner";
 
 type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery" | "selftest" | "checkout";
