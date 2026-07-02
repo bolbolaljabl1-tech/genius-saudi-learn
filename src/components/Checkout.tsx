@@ -1,8 +1,8 @@
-import { ArrowRight, Check, Lock, Copy, MessageCircle, KeyRound, Building2 } from "lucide-react";
+import { ArrowRight, Check, Lock, Copy, MessageCircle, Building2, Clock } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import { BANK_INFO, ADMIN_WHATSAPP, PLAN_PRICES, type PlanId } from "@/lib/payment-config";
-import { verifyActivationCode } from "@/lib/activation";
+import { requestSubscription } from "@/lib/activation";
 
 interface CheckoutProps {
   onBack: () => void;
