@@ -1,8 +1,8 @@
-// Server-side admin auth + activation code generation/verification.
-// Secrets (ADMIN_PASSPHRASE, ACTIVATION_SALT, ADMIN_SESSION_SECRET) never
-// leave the edge runtime, so the client cannot self-mint codes or bypass
-// the admin gate by editing bundled JS.
+// Server-side admin auth + subscription request lifecycle.
+// Secrets never leave the edge runtime; the client can only submit a
+// subscription request or poll the current status of its own name.
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { createClient } from "npm:@supabase/supabase-js@2";
 
 const enc = new TextEncoder();
 
@@ -10,6 +10,16 @@ const ADMIN_PASSPHRASE = Deno.env.get("ADMIN_PASSPHRASE") ?? "";
 const ACTIVATION_SALT = Deno.env.get("ACTIVATION_SALT") ?? "";
 const ADMIN_SESSION_SECRET = Deno.env.get("ADMIN_SESSION_SECRET") ?? "";
 const ADMIN_TOKEN_TTL_SECONDS = 60 * 60 * 4; // 4h
+
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+  auth: { persistSession: false, autoRefreshToken: false },
+});
+
+function normName(v: string): string {
+  return v.trim().replace(/\s+/g, " ");
+}
 
 function b64url(bytes: Uint8Array): string {
   let s = btoa(String.fromCharCode(...bytes));
@@ -144,6 +154,74 @@ async function handle(req: Request): Promise<Response> {
       }
     }
     return json({ ok: false }, 200);
+  }
+
+  if (action === "request_subscription") {
+    const name = typeof body.studentName === "string" ? normName(body.studentName) : "";
+    const plan = body.plan;
+    if (!name || !isPlan(plan)) return json({ error: "invalid_input" }, 400);
+    // Avoid stacking duplicate pending requests for the same name+plan
+    const { data: existing } = await admin
+      .from("subscription_requests")
+      .select("id,status")
+      .ilike("student_name", name)
+      .eq("plan", plan)
+      .in("status", ["pending", "active"])
+      .limit(1);
+    if (existing && existing.length > 0) {
+      return json({ ok: true, duplicate: true, status: existing[0].status });
+    }
+    const { error } = await admin.from("subscription_requests").insert({
+      student_name: name,
+      plan,
+      status: "pending",
+    });
+    if (error) return json({ error: "db_error" }, 500);
+    return json({ ok: true });
+  }
+
+  if (action === "check_status") {
+    const name = typeof body.studentName === "string" ? normName(body.studentName) : "";
+    if (!name) return json({ error: "invalid_input" }, 400);
+    const { data } = await admin
+      .from("subscription_requests")
+      .select("plan,status,activated_at,requested_at")
+      .ilike("student_name", name)
+      .order("requested_at", { ascending: false })
+      .limit(20);
+    const active = (data ?? []).find((r) => r.status === "active");
+    if (active) return json({ ok: true, status: "active", plan: active.plan, activated_at: active.activated_at });
+    const pending = (data ?? []).find((r) => r.status === "pending");
+    if (pending) return json({ ok: true, status: "pending", plan: pending.plan });
+    return json({ ok: true, status: "none" });
+  }
+
+  if (action === "list_requests") {
+    const token = typeof body.adminToken === "string" ? body.adminToken : "";
+    if (!(await verifyAdminToken(token))) return json({ error: "unauthorized" }, 401);
+    const { data, error } = await admin
+      .from("subscription_requests")
+      .select("id,student_name,plan,status,requested_at,activated_at")
+      .order("status", { ascending: true })
+      .order("requested_at", { ascending: false })
+      .limit(200);
+    if (error) return json({ error: "db_error" }, 500);
+    return json({ ok: true, requests: data ?? [] });
+  }
+
+  if (action === "activate_request") {
+    const token = typeof body.adminToken === "string" ? body.adminToken : "";
+    if (!(await verifyAdminToken(token))) return json({ error: "unauthorized" }, 401);
+    const id = typeof body.id === "string" ? body.id : "";
+    if (!id) return json({ error: "invalid_input" }, 400);
+    const { data, error } = await admin
+      .from("subscription_requests")
+      .update({ status: "active", activated_at: new Date().toISOString() })
+      .eq("id", id)
+      .select("id,student_name,plan,status,activated_at")
+      .maybeSingle();
+    if (error || !data) return json({ error: "db_error" }, 500);
+    return json({ ok: true, request: data });
   }
 
   return json({ error: "unknown_action" }, 400);

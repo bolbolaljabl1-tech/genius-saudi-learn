@@ -1,8 +1,8 @@
-import { ArrowRight, Check, Lock, Copy, MessageCircle, KeyRound, Building2 } from "lucide-react";
+import { ArrowRight, Check, Lock, Copy, MessageCircle, Building2, Clock } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import { BANK_INFO, ADMIN_WHATSAPP, PLAN_PRICES, type PlanId } from "@/lib/payment-config";
-import { verifyActivationCode } from "@/lib/activation";
+import { requestSubscription } from "@/lib/activation";
 
 interface CheckoutProps {
   onBack: () => void;
@@ -38,10 +38,13 @@ const BENEFITS = [
 
 const STUDENT_NAME_KEY = "genius_student_name";
 
-const Checkout = ({ onBack, onPaymentSuccess, expired }: CheckoutProps) => {
+const Checkout = ({ onBack, onPaymentSuccess: _onPaymentSuccess, expired }: CheckoutProps) => {
   const [selected, setSelected] = useState<PlanId>("yearly");
-  const [activationCode, setActivationCode] = useState("");
-  const [verifying, setVerifying] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+
+  // suppress unused warning; kept for API compatibility
+  void _onPaymentSuccess;
 
   const copyIban = async () => {
     try {
@@ -61,28 +64,23 @@ const Checkout = ({ onBack, onPaymentSuccess, expired }: CheckoutProps) => {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const handleActivate = async () => {
-    const code = activationCode.trim();
-    if (!code) {
-      toast.error("يرجى إدخال رمز التفعيل الذي وصلك من الإدارة");
-      return;
-    }
+  const handleConfirmTransfer = async () => {
     const studentName = localStorage.getItem(STUDENT_NAME_KEY);
     if (!studentName) {
       toast.error("يرجى تسجيل اسم الطالب أولاً من الصفحة الرئيسية");
       return;
     }
-    setVerifying(true);
+    setSubmitting(true);
     try {
-      const res = await verifyActivationCode(studentName, selected, code);
-      if (res.ok && res.plan) {
-        toast.success("تم تفعيل اشتراكك بنجاح، نتمنى لك رحلة تعليمية ممتعة");
-        onPaymentSuccess(res.plan);
-      } else {
-        toast.error("رمز التفعيل غير صحيح، يرجى التأكد من الإدارة");
+      const res = await requestSubscription(studentName, selected);
+      if (!res.ok) {
+        toast.error("تعذّر إرسال طلبك، يرجى المحاولة مرة أخرى");
+        return;
       }
+      setConfirmed(true);
+      openWhatsApp();
     } finally {
-      setVerifying(false);
+      setSubmitting(false);
     }
   };
 
@@ -199,49 +197,36 @@ const Checkout = ({ onBack, onPaymentSuccess, expired }: CheckoutProps) => {
           </div>
 
           <button
-            onClick={openWhatsApp}
-            className="w-full mt-5 py-4 rounded-2xl bg-[#25D366] text-white font-extrabold text-lg flex items-center justify-center gap-3 active:scale-[0.98] transition shadow-lg"
+            onClick={handleConfirmTransfer}
+            disabled={submitting}
+            className="w-full mt-5 py-4 rounded-2xl bg-[#25D366] text-white font-extrabold text-lg flex items-center justify-center gap-3 active:scale-[0.98] transition shadow-lg disabled:opacity-60"
             aria-label="تأكيد التحويل وتفعيل الحساب عبر واتساب"
           >
             <MessageCircle className="w-6 h-6" />
-            تأكيد التحويل وتفعيل الحساب فوراً
+            {submitting ? "جارٍ إرسال طلبك..." : "تأكيد التحويل وتفعيل الحساب فوراً"}
           </button>
 
           <p className="text-center text-xs text-muted-foreground leading-6 mt-3">
-            سيتم فتح محادثة واتساب مباشرة مع إدارة المنصة لإرسال إيصال التحويل وتفعيل حسابك.
+            سيتم فتح محادثة واتساب مباشرة مع إدارة المنصة لإرسال إيصال التحويل مع طلبك.
           </p>
         </section>
 
-        {/* Manual Activation Code */}
-        <section
-          className="neu-card p-5 animate-scale-in"
-          style={{ animationDelay: "0.2s" }}
-        >
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-11 h-11 rounded-xl gradient-gold flex items-center justify-center shrink-0">
-              <KeyRound className="w-6 h-6 text-gold-foreground" />
-            </div>
-            <h2 className="text-xl font-extrabold text-heading">رمز التفعيل من الإدارة</h2>
-          </div>
-          <p className="text-body-blue text-base leading-7 mb-3">
-            بعد تأكيد التحويل، ستصلك رسالة من الإدارة تحتوي على رمز التفعيل الخاص بك. أدخله هنا لتفعيل اشتراكك فوراً.
-          </p>
-          <input
-            type="text"
-            value={activationCode}
-            onChange={(e) => setActivationCode(e.target.value)}
-            placeholder="مثال: YR-AB12CD34EF"
-            dir="ltr"
-            className="w-full px-4 py-3 rounded-xl border-2 border-border bg-card font-mono font-extrabold text-lg text-center tracking-wider focus:outline-none focus:border-primary"
-          />
-          <button
-            onClick={handleActivate}
-            disabled={verifying}
-            className="w-full mt-3 py-4 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-lg active:scale-[0.98] transition shadow-emerald disabled:opacity-60"
+        {confirmed && (
+          <section
+            className="neu-card p-5 border-2 border-primary/40 bg-primary/5 animate-scale-in"
+            role="status"
           >
-            {verifying ? "جارٍ التحقق..." : "تفعيل الاشتراك"}
-          </button>
-        </section>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-11 h-11 rounded-xl gradient-emerald flex items-center justify-center shrink-0">
+                <Clock className="w-6 h-6 text-primary-foreground" />
+              </div>
+              <h2 className="text-xl font-extrabold text-heading">تم استلام طلبك بنجاح</h2>
+            </div>
+            <p className="text-body-blue text-base leading-8">
+              نشكر لكم ثقتكم واشتراككم في منصة الطالب العبقري. نرجو منكم التماس العذر لنا؛ حيث إن تفعيل الحساب يتم يدوياً من قِبل الإدارة بحد أقصى لا يتجاوز أربعاً وعشرين ساعة، وذلك بحسب ضغط الطلبات الواردة. نسعد بخدمتكم دائماً.
+            </p>
+          </section>
+        )}
       </div>
     </div>
   );

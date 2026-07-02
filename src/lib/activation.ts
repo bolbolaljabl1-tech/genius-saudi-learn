@@ -77,3 +77,73 @@ export function detectPlanFromCode(code: string): PlanId | null {
   if (c.startsWith("SM-")) return "semester";
   return null;
 }
+
+export interface SubscriptionRequestRow {
+  id: string;
+  student_name: string;
+  plan: PlanId;
+  status: "pending" | "active";
+  requested_at: string;
+  activated_at: string | null;
+}
+
+export async function requestSubscription(
+  studentName: string,
+  plan: PlanId,
+): Promise<{ ok: boolean; duplicate?: boolean }> {
+  try {
+    const res = await invoke<{ ok?: boolean; duplicate?: boolean }>({
+      action: "request_subscription",
+      studentName,
+      plan,
+    });
+    return { ok: !!res?.ok, duplicate: !!res?.duplicate };
+  } catch {
+    return { ok: false };
+  }
+}
+
+export async function checkSubscriptionStatus(
+  studentName: string,
+): Promise<{ status: "none" | "pending" | "active"; plan: PlanId | null }> {
+  try {
+    const res = await invoke<{ ok?: boolean; status?: string; plan?: PlanId }>({
+      action: "check_status",
+      studentName,
+    });
+    const status = (res?.status ?? "none") as "none" | "pending" | "active";
+    return { status, plan: (res?.plan as PlanId | undefined) ?? null };
+  } catch {
+    return { status: "none", plan: null };
+  }
+}
+
+export async function listSubscriptionRequests(): Promise<SubscriptionRequestRow[]> {
+  const adminToken = getAdminToken();
+  if (!adminToken) throw new Error("unauthorized");
+  const res = await invoke<{ ok?: boolean; requests?: SubscriptionRequestRow[]; error?: string }>({
+    action: "list_requests",
+    adminToken,
+  });
+  if (res?.error === "unauthorized") {
+    clearAdminToken();
+    throw new Error("unauthorized");
+  }
+  return res?.requests ?? [];
+}
+
+export async function activateSubscriptionRequest(id: string): Promise<SubscriptionRequestRow> {
+  const adminToken = getAdminToken();
+  if (!adminToken) throw new Error("unauthorized");
+  const res = await invoke<{ ok?: boolean; request?: SubscriptionRequestRow; error?: string }>({
+    action: "activate_request",
+    adminToken,
+    id,
+  });
+  if (res?.error === "unauthorized") {
+    clearAdminToken();
+    throw new Error("unauthorized");
+  }
+  if (!res?.ok || !res.request) throw new Error("failed");
+  return res.request;
+}

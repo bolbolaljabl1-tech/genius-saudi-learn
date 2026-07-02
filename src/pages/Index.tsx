@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MessageCircleHeart, LifeBuoy, Settings } from "lucide-react";
 import StageSelection from "@/components/StageSelection";
 import SubjectSelection from "@/components/SubjectSelection";
@@ -22,11 +22,15 @@ import { useXP } from "@/hooks/useXP";
 import { useTrial } from "@/hooks/useTrial";
 import { useIdleNotify } from "@/hooks/useIdleNotify";
 import { useOvertakeNotify } from "@/hooks/useOvertakeNotify";
+import { checkSubscriptionStatus } from "@/lib/activation";
 import { toast } from "@/components/ui/sonner";
 
 type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery" | "selftest" | "checkout";
 
 const LOCKED_SCREENS: Screen[] = ["lesson", "quiz", "selftest", "camera", "games"];
+// Distraction-free screens: hide the settings gear so it never sits near
+// the back arrow or the "إنهاء" button on quizzes / self-tests / camera.
+const HIDE_GEAR_SCREENS: Screen[] = ["quiz", "selftest", "camera", "checkout"];
 
 const Index = () => {
   const [screen, setScreenRaw] = useState<Screen>("stage");
@@ -49,6 +53,27 @@ const Index = () => {
   const [showSubSettings, setShowSubSettings] = useState(false);
   useIdleNotify(4);
   useOvertakeNotify(studentName, 60);
+
+  // Poll the server for admin activation so the student's account unlocks
+  // automatically once the admin approves their bank transfer.
+  useEffect(() => {
+    if (!studentName || subscribed) return;
+    let cancelled = false;
+    const tick = async () => {
+      const res = await checkSubscriptionStatus(studentName);
+      if (cancelled) return;
+      if (res.status === "active" && res.plan) {
+        subscribe(res.plan);
+        toast.success("تم تفعيل اشتراكك من قِبَل الإدارة، نتمنى لك رحلة تعليمية ممتعة");
+      }
+    };
+    void tick();
+    const id = window.setInterval(tick, 30000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [studentName, subscribed, subscribe]);
 
   const handleStageSelect = (s: string) => { setStage(s); setScreen("subject"); };
   const handleSubjectSelect = (s: string) => { setSubject(s); setScreen("search"); };
@@ -127,15 +152,19 @@ const Index = () => {
         />
       )}
 
-      {/* Subscription settings button */}
-      <button
-        onClick={() => setShowSubSettings(true)}
-        className="fixed top-14 right-3 z-50 bg-card border-2 border-matte-gold/30 text-matte-gold rounded-full p-2 shadow-md active:scale-95 transition"
-        aria-label="إعدادات لوحة الاشتراك"
-        title="إعدادات لوحة الاشتراك"
-      >
-        <Settings className="w-5 h-5" />
-      </button>
+      {/* Subscription settings gear — pinned to the top-left, opposite the
+          RTL back arrow (top-right) and hidden entirely on distraction-free
+          screens (quizzes / self-test / camera / checkout). */}
+      {!HIDE_GEAR_SCREENS.includes(screen) && (
+        <button
+          onClick={() => setShowSubSettings(true)}
+          className="fixed top-14 left-3 z-50 bg-card border-2 border-matte-gold/30 text-matte-gold rounded-full p-2 shadow-md active:scale-95 transition"
+          aria-label="إعدادات لوحة الاشتراك"
+          title="إعدادات لوحة الاشتراك"
+        >
+          <Settings className="w-5 h-5" />
+        </button>
+      )}
 
       <ShareButton />
 

@@ -140,6 +140,33 @@ export type Database = {
         }
         Relationships: []
       }
+      subscription_requests: {
+        Row: {
+          activated_at: string | null
+          id: string
+          plan: string
+          requested_at: string
+          status: string
+          student_name: string
+        }
+        Insert: {
+          activated_at?: string | null
+          id?: string
+          plan: string
+          requested_at?: string
+          status?: string
+          student_name: string
+        }
+        Update: {
+          activated_at?: string | null
+          id?: string
+          plan?: string
+          requested_at?: string
+          status?: string
+          student_name?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
