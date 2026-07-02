@@ -1,23 +1,61 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Copy, KeyRound, ShieldCheck, LogIn } from "lucide-react";
+import { ArrowRight, CheckCircle2, RefreshCw, ShieldCheck, LogIn, Users, Clock } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
-import { PLAN_PRICES, type PlanId } from "@/lib/payment-config";
+import { PLAN_PRICES } from "@/lib/payment-config";
 import {
+  activateSubscriptionRequest,
   adminLogin,
   clearAdminToken,
-  generateActivationCode,
   getAdminToken,
+  listSubscriptionRequests,
+  type SubscriptionRequestRow,
 } from "@/lib/activation";
+
+const formatDate = (iso: string | null) => {
+  if (!iso) return "-";
+  try {
+    return new Date(iso).toLocaleString("ar-SA", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
+};
 
 const Admin = () => {
   const [authed, setAuthed] = useState(() => !!getAdminToken());
   const [pass, setPass] = useState("");
-  const [studentName, setStudentName] = useState("");
-  const [plan, setPlan] = useState<PlanId>("yearly");
-  const [code, setCode] = useState("");
-  const [generating, setGenerating] = useState(false);
   const [loggingIn, setLoggingIn] = useState(false);
+  const [rows, setRows] = useState<SubscriptionRequestRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [activatingId, setActivatingId] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await listSubscriptionRequests();
+      setRows(data);
+    } catch (err) {
+      if ((err as Error)?.message === "unauthorized") {
+        clearAdminToken();
+        setAuthed(false);
+        toast.error("انتهت صلاحية جلسة الإدارة، يرجى تسجيل الدخول من جديد");
+      } else {
+        toast.error("تعذّر تحميل قائمة الطلبات");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (authed) void load();
+  }, [authed, load]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,57 +74,37 @@ const Admin = () => {
     }
   };
 
-  const handleGenerate = async () => {
-    const name = studentName.trim();
-    if (!name) {
-      toast.error("يرجى إدخال اسم الطالب كما هو مسجل في المنصة");
-      return;
-    }
-    setGenerating(true);
+  const handleActivate = async (row: SubscriptionRequestRow) => {
+    setActivatingId(row.id);
     try {
-      const c = await generateActivationCode(name, plan);
-      setCode(c);
-      toast.success("تم توليد رمز التفعيل بنجاح");
+      const updated = await activateSubscriptionRequest(row.id);
+      setRows((prev) => prev.map((r) => (r.id === updated.id ? updated : r)));
+      toast.success(`تم تفعيل حساب الطالب ${updated.student_name}`);
     } catch (err) {
       if ((err as Error)?.message === "unauthorized") {
         clearAdminToken();
         setAuthed(false);
-        toast.error("انتهت صلاحية جلسة الإدارة، يرجى تسجيل الدخول مرة أخرى");
+        toast.error("انتهت صلاحية جلسة الإدارة، يرجى تسجيل الدخول من جديد");
       } else {
-        toast.error("تعذّر توليد رمز التفعيل، حاول لاحقاً");
+        toast.error("تعذّر تفعيل الحساب، حاول لاحقاً");
       }
     } finally {
-      setGenerating(false);
-    }
-  };
-
-  const handleCopy = async () => {
-    if (!code) return;
-    try {
-      await navigator.clipboard.writeText(code);
-      toast.success("تم نسخ الرمز، أرسله للطالب عبر واتساب");
-    } catch {
-      toast.error("تعذّر النسخ، يرجى نسخ الرمز يدوياً");
+      setActivatingId(null);
     }
   };
 
   if (!authed) {
     return (
       <main className="min-h-screen flex items-center justify-center px-4 py-10">
-        <form
-          onSubmit={handleLogin}
-          className="neu-card p-6 w-full max-w-md space-y-4"
-        >
+        <form onSubmit={handleLogin} className="neu-card p-6 w-full max-w-md space-y-4">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl gradient-emerald flex items-center justify-center">
               <ShieldCheck className="w-6 h-6 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-extrabold text-heading">
-              لوحة تحكم الإدارة
-            </h1>
+            <h1 className="text-2xl font-extrabold text-heading">لوحة تحكم الإدارة</h1>
           </div>
           <p className="text-body-blue text-base leading-7">
-            أدخل كلمة سر الإدارة للوصول إلى أداة التفعيل اليدوي لحسابات الطلاب المشتركين عبر التحويل البنكي.
+            أدخل كلمة سر الإدارة للاطلاع على طلبات الاشتراك وتفعيلها بضغطة زر واحدة.
           </p>
           <input
             type="password"
@@ -103,16 +121,16 @@ const Admin = () => {
             <LogIn className="w-5 h-5" />
             {loggingIn ? "جارٍ التحقق..." : "دخول"}
           </button>
-          <Link
-            to="/"
-            className="block text-center text-muted-foreground text-sm hover:text-foreground font-bold"
-          >
+          <Link to="/" className="block text-center text-muted-foreground text-sm hover:text-foreground font-bold">
             العودة إلى المنصة
           </Link>
         </form>
       </main>
     );
   }
+
+  const pending = rows.filter((r) => r.status === "pending");
+  const active = rows.filter((r) => r.status === "active");
 
   return (
     <main className="min-h-screen px-4 py-6">
@@ -124,104 +142,94 @@ const Admin = () => {
         رجوع إلى المنصة
       </Link>
 
-      <div className="max-w-xl mx-auto space-y-6">
+      <div className="max-w-3xl mx-auto space-y-6">
         <header className="text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl gradient-emerald mb-4">
-            <KeyRound className="w-8 h-8 text-primary-foreground" />
+            <Users className="w-8 h-8 text-primary-foreground" />
           </div>
-          <h1 className="text-3xl font-extrabold text-heading mb-2">
-            التفعيل اليدوي للاشتراكات
-          </h1>
+          <h1 className="text-3xl font-extrabold text-heading mb-2">طلبات الاشتراك</h1>
           <p className="text-muted-foreground text-base leading-7">
-            بعد تأكدك من وصول الحوالة البنكية، ولّد رمز التفعيل الخاص بالطالب وأرسله له عبر واتساب لتفعيل حسابه فوراً.
+            بعد التأكد من وصول الحوالة البنكية، فعّل حساب الطالب مباشرةً بضغطة زر واحدة، وستتحول تجربته المجانية إلى اشتراك نشط فوراً.
           </p>
         </header>
 
-        <section className="neu-card p-5 space-y-4">
-          <div>
-            <label className="block text-heading font-extrabold mb-2 text-base">
-              اسم الطالب (كما هو مسجل في المنصة)
-            </label>
-            <input
-              type="text"
-              value={studentName}
-              onChange={(e) => setStudentName(e.target.value)}
-              placeholder="أدخل اسم الطالب بدقة"
-              className="w-full px-4 py-3 rounded-xl border-2 border-border bg-card font-bold text-lg focus:outline-none focus:border-primary"
-            />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm font-bold text-muted-foreground">
+            <span className="inline-flex items-center gap-1 text-heading">
+              <Clock className="w-4 h-4" /> قيد الانتظار: {pending.length}
+            </span>
+            <span className="mx-1">|</span>
+            <span className="inline-flex items-center gap-1 text-primary">
+              <CheckCircle2 className="w-4 h-4" /> نشط: {active.length}
+            </span>
           </div>
-
-          <div>
-            <label className="block text-heading font-extrabold mb-2 text-base">
-              الباقة
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              {(Object.keys(PLAN_PRICES) as PlanId[]).map((p) => {
-                const active = plan === p;
-                return (
-                  <button
-                    key={p}
-                    type="button"
-                    onClick={() => setPlan(p)}
-                    className={`text-right p-3 rounded-xl border-2 transition-all ${
-                      active
-                        ? "border-primary bg-primary/5"
-                        : "border-border bg-card"
-                    }`}
-                  >
-                    <div className="font-extrabold text-heading text-base">
-                      {PLAN_PRICES[p].label}
-                    </div>
-                    <div className="text-primary font-extrabold mt-1">
-                      {PLAN_PRICES[p].price} ريال
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
           <button
-            onClick={handleGenerate}
-            disabled={generating}
-            className="w-full py-3 rounded-2xl gradient-gold text-gold-foreground font-extrabold text-lg active:scale-[0.98] transition shadow-gold disabled:opacity-60"
+            onClick={load}
+            disabled={loading}
+            className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-border bg-card font-extrabold text-sm active:scale-95 disabled:opacity-60"
           >
-            {generating ? "جارٍ التوليد..." : "توليد رمز التفعيل"}
+            <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
+            تحديث
           </button>
+        </div>
 
-          {code && (
-            <div className="mt-2 p-4 rounded-xl bg-primary/5 border-2 border-primary/30 space-y-3">
-              <div className="text-sm font-bold text-muted-foreground text-center">
-                رمز التفعيل الخاص بالطالب
-              </div>
-              <div
-                dir="ltr"
-                className="text-center font-mono font-extrabold text-heading text-2xl tracking-widest"
-              >
-                {code}
-              </div>
-              <button
-                onClick={handleCopy}
-                className="w-full py-3 rounded-xl bg-card border-2 border-primary text-primary font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition"
-              >
-                <Copy className="w-5 h-5" />
-                نسخ الرمز
-              </button>
+        <section className="space-y-3">
+          {rows.length === 0 && !loading && (
+            <div className="neu-card p-6 text-center text-muted-foreground font-bold">
+              لا توجد طلبات اشتراك بعد.
             </div>
           )}
-        </section>
-
-        <section className="neu-card p-5 text-body-blue text-sm leading-7">
-          <h2 className="text-heading font-extrabold text-lg mb-2">
-            تعليمات العملية
-          </h2>
-          <ol className="list-decimal pr-5 space-y-1">
-            <li>تحقق من وصول مبلغ التحويل في حساب مصرف الراجحي.</li>
-            <li>أدخل اسم الطالب كما أرسله لك عبر واتساب بدقة تامة.</li>
-            <li>اختر الباقة المتفق عليها (فصل دراسي أو سنة كاملة).</li>
-            <li>ولّد الرمز ثم انسخه وأرسله للطالب عبر واتساب.</li>
-            <li>سيُدخل الطالب الرمز في صفحة الاشتراك ليتم تفعيل حسابه فوراً.</li>
-          </ol>
+          {rows.map((row) => {
+            const isActive = row.status === "active";
+            return (
+              <article
+                key={row.id}
+                className={`neu-card p-4 flex flex-col sm:flex-row sm:items-center gap-3 border-2 ${
+                  isActive ? "border-primary/40 bg-primary/5" : "border-border"
+                }`}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-heading font-extrabold text-lg truncate">{row.student_name}</h3>
+                    <span
+                      className={`text-[11px] font-extrabold px-2 py-0.5 rounded-full ${
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-matte-gold/20 text-matte-gold border border-matte-gold/40"
+                      }`}
+                    >
+                      {isActive ? "مشترك نشط" : "قيد الانتظار"}
+                    </span>
+                    <span className="text-xs font-bold text-muted-foreground">
+                      {PLAN_PRICES[row.plan].label} · {PLAN_PRICES[row.plan].price} ريال
+                    </span>
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1 leading-6">
+                    <span>تاريخ الطلب: {formatDate(row.requested_at)}</span>
+                    {isActive && (
+                      <span className="block">تاريخ التفعيل: {formatDate(row.activated_at)}</span>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => handleActivate(row)}
+                  disabled={isActive || activatingId === row.id}
+                  className={`shrink-0 py-3 px-4 rounded-2xl font-extrabold text-base flex items-center justify-center gap-2 transition active:scale-[0.98] ${
+                    isActive
+                      ? "bg-muted text-muted-foreground cursor-not-allowed"
+                      : "gradient-emerald text-primary-foreground shadow-emerald"
+                  } disabled:opacity-70`}
+                >
+                  <CheckCircle2 className="w-5 h-5" />
+                  {isActive
+                    ? "مُفعّل"
+                    : activatingId === row.id
+                      ? "جارٍ التفعيل..."
+                      : "تفعيل الحساب مباشرة"}
+                </button>
+              </article>
+            );
+          })}
         </section>
       </div>
     </main>
