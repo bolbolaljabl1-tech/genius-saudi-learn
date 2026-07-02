@@ -38,10 +38,13 @@ const BENEFITS = [
 
 const STUDENT_NAME_KEY = "genius_student_name";
 
-const Checkout = ({ onBack, onPaymentSuccess, expired }: CheckoutProps) => {
+const Checkout = ({ onBack, onPaymentSuccess: _onPaymentSuccess, expired }: CheckoutProps) => {
   const [selected, setSelected] = useState<PlanId>("yearly");
-  const [activationCode, setActivationCode] = useState("");
-  const [verifying, setVerifying] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [confirmed, setConfirmed] = useState(false);
+
+  // suppress unused warning; kept for API compatibility
+  void _onPaymentSuccess;
 
   const copyIban = async () => {
     try {
@@ -61,28 +64,23 @@ const Checkout = ({ onBack, onPaymentSuccess, expired }: CheckoutProps) => {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  const handleActivate = async () => {
-    const code = activationCode.trim();
-    if (!code) {
-      toast.error("يرجى إدخال رمز التفعيل الذي وصلك من الإدارة");
-      return;
-    }
+  const handleConfirmTransfer = async () => {
     const studentName = localStorage.getItem(STUDENT_NAME_KEY);
     if (!studentName) {
       toast.error("يرجى تسجيل اسم الطالب أولاً من الصفحة الرئيسية");
       return;
     }
-    setVerifying(true);
+    setSubmitting(true);
     try {
-      const res = await verifyActivationCode(studentName, selected, code);
-      if (res.ok && res.plan) {
-        toast.success("تم تفعيل اشتراكك بنجاح، نتمنى لك رحلة تعليمية ممتعة");
-        onPaymentSuccess(res.plan);
-      } else {
-        toast.error("رمز التفعيل غير صحيح، يرجى التأكد من الإدارة");
+      const res = await requestSubscription(studentName, selected);
+      if (!res.ok) {
+        toast.error("تعذّر إرسال طلبك، يرجى المحاولة مرة أخرى");
+        return;
       }
+      setConfirmed(true);
+      openWhatsApp();
     } finally {
-      setVerifying(false);
+      setSubmitting(false);
     }
   };
 
