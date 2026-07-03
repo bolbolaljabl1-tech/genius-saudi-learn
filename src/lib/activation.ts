@@ -90,14 +90,14 @@ export interface SubscriptionRequestRow {
 export async function requestSubscription(
   studentName: string,
   plan: PlanId,
-): Promise<{ ok: boolean; duplicate?: boolean }> {
+): Promise<{ ok: boolean; duplicate?: boolean; token?: string }> {
   try {
-    const res = await invoke<{ ok?: boolean; duplicate?: boolean }>({
+    const res = await invoke<{ ok?: boolean; duplicate?: boolean; token?: string }>({
       action: "request_subscription",
       studentName,
       plan,
     });
-    return { ok: !!res?.ok, duplicate: !!res?.duplicate };
+    return { ok: !!res?.ok, duplicate: !!res?.duplicate, token: res?.token };
   } catch {
     return { ok: false };
   }
@@ -105,11 +105,14 @@ export async function requestSubscription(
 
 export async function checkSubscriptionStatus(
   studentName: string,
+  token: string,
 ): Promise<{ status: "none" | "pending" | "active"; plan: PlanId | null }> {
+  if (!token) return { status: "none", plan: null };
   try {
     const res = await invoke<{ ok?: boolean; status?: string; plan?: PlanId }>({
       action: "check_status",
       studentName,
+      token,
     });
     const status = (res?.status ?? "none") as "none" | "pending" | "active";
     return { status, plan: (res?.plan as PlanId | undefined) ?? null };
@@ -117,6 +120,7 @@ export async function checkSubscriptionStatus(
     return { status: "none", plan: null };
   }
 }
+
 
 export async function listSubscriptionRequests(): Promise<SubscriptionRequestRow[]> {
   const adminToken = getAdminToken();
