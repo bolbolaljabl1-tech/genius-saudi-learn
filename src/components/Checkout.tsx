@@ -3,6 +3,8 @@ import { useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import { BANK_INFO, ADMIN_WHATSAPP, PLAN_PRICES, type PlanId } from "@/lib/payment-config";
 import { requestSubscription } from "@/lib/activation";
+import { useTrial } from "@/hooks/useTrial";
+
 
 interface CheckoutProps {
   onBack: () => void;
@@ -42,9 +44,11 @@ const Checkout = ({ onBack, onPaymentSuccess: _onPaymentSuccess, expired }: Chec
   const [selected, setSelected] = useState<PlanId>("yearly");
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const { saveSubToken } = useTrial();
 
   // suppress unused warning; kept for API compatibility
   void _onPaymentSuccess;
+
 
   const copyIban = async () => {
     try {
@@ -77,12 +81,14 @@ const Checkout = ({ onBack, onPaymentSuccess: _onPaymentSuccess, expired }: Chec
         toast.error("تعذّر إرسال طلبك، يرجى المحاولة مرة أخرى");
         return;
       }
+      if (res.token) saveSubToken(res.token);
       setConfirmed(true);
       openWhatsApp();
     } finally {
       setSubmitting(false);
     }
   };
+
 
   return (
     <div className="min-h-screen px-4 py-6">

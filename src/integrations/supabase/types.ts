@@ -145,6 +145,7 @@ export type Database = {
           activated_at: string | null
           id: string
           plan: string
+          request_token: string
           requested_at: string
           status: string
           student_name: string
@@ -153,6 +154,7 @@ export type Database = {
           activated_at?: string | null
           id?: string
           plan: string
+          request_token: string
           requested_at?: string
           status?: string
           student_name: string
@@ -161,6 +163,7 @@ export type Database = {
           activated_at?: string | null
           id?: string
           plan?: string
+          request_token?: string
           requested_at?: string
           status?: string
           student_name?: string

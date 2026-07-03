@@ -34,7 +34,7 @@ const HIDE_GEAR_SCREENS: Screen[] = ["quiz", "selftest", "camera", "checkout"];
 
 const Index = () => {
   const [screen, setScreenRaw] = useState<Screen>("stage");
-  const { daysLeft, expired, subscribed, subscribe } = useTrial();
+  const { daysLeft, expired, subscribed, subToken, applyServerStatus } = useTrial();
 
   const setScreen = (next: Screen) => {
     if (expired && LOCKED_SCREENS.includes(next)) {
@@ -54,16 +54,19 @@ const Index = () => {
   useIdleNotify(4);
   useOvertakeNotify(studentName, 60);
 
-  // Poll the server for admin activation so the student's account unlocks
-  // automatically once the admin approves their bank transfer.
+  // Server-verify entitlement. The token is unguessable and issued only to the
+  // paying student's browser at request time, so copying another student's
+  // public display name is not enough to unlock the app.
   useEffect(() => {
-    if (!studentName || subscribed) return;
+    if (!studentName || !subToken) return;
     let cancelled = false;
+    let wasActive = false;
     const tick = async () => {
-      const res = await checkSubscriptionStatus(studentName);
+      const res = await checkSubscriptionStatus(studentName, subToken);
       if (cancelled) return;
-      if (res.status === "active" && res.plan) {
-        subscribe(res.plan);
+      applyServerStatus(res.status, res.plan);
+      if (res.status === "active" && !wasActive) {
+        wasActive = true;
         toast.success("تم تفعيل اشتراكك من قِبَل الإدارة، نتمنى لك رحلة تعليمية ممتعة");
       }
     };
@@ -73,7 +76,8 @@ const Index = () => {
       cancelled = true;
       window.clearInterval(id);
     };
-  }, [studentName, subscribed, subscribe]);
+  }, [studentName, subToken, applyServerStatus]);
+
 
   const handleStageSelect = (s: string) => { setStage(s); setScreen("subject"); };
   const handleSubjectSelect = (s: string) => { setSubject(s); setScreen("search"); };
@@ -109,13 +113,15 @@ const Index = () => {
         <Checkout
           expired={expired}
           onBack={() => setScreenRaw("stage")}
-          onPaymentSuccess={(selectedPlan) => {
-            subscribe(selectedPlan);
-            toast.success("تم تفعيل اشتراكك بنجاح، نتمنى لك رحلة تعليمية ممتعة");
+          onPaymentSuccess={() => {
+            // Actual entitlement flip only happens after the server confirms
+            // activation for this student's private token (see polling above).
+            toast.success("تم إرسال طلبك، سيتم تفعيل الحساب بعد مراجعة الإدارة");
             setScreenRaw("stage");
           }}
         />
       )}
+
 
       {screen === "stage" && (
         <StageSelection
