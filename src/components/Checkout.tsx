@@ -44,9 +44,11 @@ const Checkout = ({ onBack, onPaymentSuccess: _onPaymentSuccess, expired }: Chec
   const [selected, setSelected] = useState<PlanId>("yearly");
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const { saveSubToken } = useTrial();
 
   // suppress unused warning; kept for API compatibility
   void _onPaymentSuccess;
+
 
   const copyIban = async () => {
     try {
