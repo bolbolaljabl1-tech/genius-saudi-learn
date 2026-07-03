@@ -3,6 +3,8 @@ import { useState } from "react";
 import { toast } from "@/components/ui/sonner";
 import { BANK_INFO, ADMIN_WHATSAPP, PLAN_PRICES, type PlanId } from "@/lib/payment-config";
 import { requestSubscription } from "@/lib/activation";
+import { useTrial } from "@/hooks/useTrial";
+
 
 interface CheckoutProps {
   onBack: () => void;
