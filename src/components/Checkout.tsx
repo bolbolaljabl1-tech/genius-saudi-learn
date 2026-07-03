@@ -81,12 +81,14 @@ const Checkout = ({ onBack, onPaymentSuccess: _onPaymentSuccess, expired }: Chec
         toast.error("تعذّر إرسال طلبك، يرجى المحاولة مرة أخرى");
         return;
       }
+      if (res.token) saveSubToken(res.token);
       setConfirmed(true);
       openWhatsApp();
     } finally {
       setSubmitting(false);
     }
   };
+
 
   return (
     <div className="min-h-screen px-4 py-6">
