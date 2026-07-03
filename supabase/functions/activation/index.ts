@@ -160,41 +160,60 @@ async function handle(req: Request): Promise<Response> {
     const name = typeof body.studentName === "string" ? normName(body.studentName) : "";
     const plan = body.plan;
     if (!name || !isPlan(plan)) return json({ error: "invalid_input" }, 400);
-    // Avoid stacking duplicate pending requests for the same name+plan
+    if (name.length > 80) return json({ error: "invalid_input" }, 400);
+    // Reuse the outstanding token if the same name already has a pending/active
+    // request for this plan — prevents stacking and lets the same browser keep
+    // its token across accidental resubmits (the token stays in localStorage).
     const { data: existing } = await admin
       .from("subscription_requests")
-      .select("id,status")
+      .select("id,status,request_token")
       .ilike("student_name", name)
       .eq("plan", plan)
       .in("status", ["pending", "active"])
       .limit(1);
     if (existing && existing.length > 0) {
-      return json({ ok: true, duplicate: true, status: existing[0].status });
+      return json({
+        ok: true,
+        duplicate: true,
+        status: existing[0].status,
+        token: existing[0].request_token,
+      });
     }
+    const token = b64url(crypto.getRandomValues(new Uint8Array(24)));
     const { error } = await admin.from("subscription_requests").insert({
       student_name: name,
       plan,
       status: "pending",
+      request_token: token,
     });
     if (error) return json({ error: "db_error" }, 500);
-    return json({ ok: true });
+    return json({ ok: true, token });
   }
 
   if (action === "check_status") {
     const name = typeof body.studentName === "string" ? normName(body.studentName) : "";
-    if (!name) return json({ error: "invalid_input" }, 400);
+    const token = typeof body.token === "string" ? body.token.trim() : "";
+    if (!name || !token) return json({ error: "invalid_input" }, 400);
+    // Status is bound to the private request token, NOT the free-text name.
+    // Copying another student's public display name is not enough to unlock.
     const { data } = await admin
       .from("subscription_requests")
-      .select("plan,status,activated_at,requested_at")
-      .ilike("student_name", name)
-      .order("requested_at", { ascending: false })
-      .limit(20);
-    const active = (data ?? []).find((r) => r.status === "active");
-    if (active) return json({ ok: true, status: "active", plan: active.plan, activated_at: active.activated_at });
-    const pending = (data ?? []).find((r) => r.status === "pending");
-    if (pending) return json({ ok: true, status: "pending", plan: pending.plan });
+      .select("plan,status,activated_at,student_name")
+      .eq("request_token", token)
+      .maybeSingle();
+    if (!data) return json({ ok: true, status: "none" });
+    if (normName(data.student_name).toLowerCase() !== name.toLowerCase()) {
+      return json({ ok: true, status: "none" });
+    }
+    if (data.status === "active") {
+      return json({ ok: true, status: "active", plan: data.plan, activated_at: data.activated_at });
+    }
+    if (data.status === "pending") {
+      return json({ ok: true, status: "pending", plan: data.plan });
+    }
     return json({ ok: true, status: "none" });
   }
+
 
   if (action === "list_requests") {
     const token = typeof body.adminToken === "string" ? body.adminToken : "";
