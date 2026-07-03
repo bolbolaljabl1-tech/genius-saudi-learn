@@ -113,13 +113,15 @@ const Index = () => {
         <Checkout
           expired={expired}
           onBack={() => setScreenRaw("stage")}
-          onPaymentSuccess={(selectedPlan) => {
-            subscribe(selectedPlan);
-            toast.success("تم تفعيل اشتراكك بنجاح، نتمنى لك رحلة تعليمية ممتعة");
+          onPaymentSuccess={() => {
+            // Actual entitlement flip only happens after the server confirms
+            // activation for this student's private token (see polling above).
+            toast.success("تم إرسال طلبك، سيتم تفعيل الحساب بعد مراجعة الإدارة");
             setScreenRaw("stage");
           }}
         />
       )}
+
 
       {screen === "stage" && (
         <StageSelection
