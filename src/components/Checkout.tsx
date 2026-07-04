@@ -78,11 +78,14 @@ const Checkout = ({ onBack, onPaymentSuccess: _onPaymentSuccess, expired }: Chec
   };
 
   const handleConfirmTransfer = async () => {
-    const studentName = localStorage.getItem(STUDENT_NAME_KEY);
-    if (!studentName) {
-      toast.error("يرجى تسجيل اسم الطالب أولاً من الصفحة الرئيسية");
+    if (!isNameValid) {
+      toast.error("يرجى كتابة اسم الطالب الثلاثي كاملاً بالعربية");
       return;
     }
+    const studentName = fullName.trim().replace(/\s+/g, " ");
+    // Persist the verified real name so the WhatsApp message and future
+    // sessions use the documented identity instead of the temp display name.
+    localStorage.setItem(STUDENT_NAME_KEY, studentName);
     setSubmitting(true);
     try {
       const res = await requestSubscription(studentName, selected);
