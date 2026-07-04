@@ -69,7 +69,10 @@ const Checkout = ({ onBack, onPaymentSuccess: _onPaymentSuccess, expired }: Chec
   };
 
   const openWhatsApp = () => {
-    const studentName = localStorage.getItem(STUDENT_NAME_KEY) || "الطالب";
+    const studentName =
+      fullName.trim().replace(/\s+/g, " ") ||
+      localStorage.getItem(STUDENT_NAME_KEY) ||
+      "الطالب";
     const planLabel = PLAN_PRICES[selected].label;
     const price = PLAN_PRICES[selected].price;
     const msg = `مرحباً أستاذ جابر، أنا الطالب ${studentName}. لقد قمت بالتحويل البنكي بمبلغ ${price} ريالاً للاشتراك في "${planLabel}" بمنصة الطالب العبقري، ومرفق لكم إيصال التحويل لتفعيل الحساب.`;
