@@ -192,7 +192,7 @@ const Index = () => {
         راسل إدارة المنصة
       </button>
 
-      <AppFooter />
+      {screen !== "checkout" && <AppFooter />}
     </main>
   );
 };
