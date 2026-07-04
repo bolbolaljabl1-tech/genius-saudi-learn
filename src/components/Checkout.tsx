@@ -44,10 +44,19 @@ const Checkout = ({ onBack, onPaymentSuccess: _onPaymentSuccess, expired }: Chec
   const [selected, setSelected] = useState<PlanId>("yearly");
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [fullName, setFullName] = useState<string>(() => {
+    const stored = localStorage.getItem(STUDENT_NAME_KEY) || "";
+    // Ignore the auto-generated temporary display name (e.g. "طالب-1234")
+    // so the user is prompted to enter their real triple name.
+    return /^طالب-\d+$/.test(stored) ? "" : stored;
+  });
   const { saveSubToken } = useTrial();
 
-  // suppress unused warning; kept for API compatibility
-  void _onPaymentSuccess;
+  // A valid Saudi triple name: at least three Arabic word tokens.
+  const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
+  const isNameValid =
+    nameParts.length >= 3 &&
+    nameParts.every((p) => /^[\u0600-\u06FF]{2,}$/.test(p));
 
 
   const copyIban = async () => {
