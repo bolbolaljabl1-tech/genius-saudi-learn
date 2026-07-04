@@ -44,10 +44,19 @@ const Checkout = ({ onBack, onPaymentSuccess: _onPaymentSuccess, expired }: Chec
   const [selected, setSelected] = useState<PlanId>("yearly");
   const [submitting, setSubmitting] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [fullName, setFullName] = useState<string>(() => {
+    const stored = localStorage.getItem(STUDENT_NAME_KEY) || "";
+    // Ignore the auto-generated temporary display name (e.g. "طالب-1234")
+    // so the user is prompted to enter their real triple name.
+    return /^طالب-\d+$/.test(stored) ? "" : stored;
+  });
   const { saveSubToken } = useTrial();
 
-  // suppress unused warning; kept for API compatibility
-  void _onPaymentSuccess;
+  // A valid Saudi triple name: at least three Arabic word tokens.
+  const nameParts = fullName.trim().split(/\s+/).filter(Boolean);
+  const isNameValid =
+    nameParts.length >= 3 &&
+    nameParts.every((p) => /^[\u0600-\u06FF]{2,}$/.test(p));
 
 
   const copyIban = async () => {
@@ -60,7 +69,10 @@ const Checkout = ({ onBack, onPaymentSuccess: _onPaymentSuccess, expired }: Chec
   };
 
   const openWhatsApp = () => {
-    const studentName = localStorage.getItem(STUDENT_NAME_KEY) || "الطالب";
+    const studentName =
+      fullName.trim().replace(/\s+/g, " ") ||
+      localStorage.getItem(STUDENT_NAME_KEY) ||
+      "الطالب";
     const planLabel = PLAN_PRICES[selected].label;
     const price = PLAN_PRICES[selected].price;
     const msg = `مرحباً أستاذ جابر، أنا الطالب ${studentName}. لقد قمت بالتحويل البنكي بمبلغ ${price} ريالاً للاشتراك في "${planLabel}" بمنصة الطالب العبقري، ومرفق لكم إيصال التحويل لتفعيل الحساب.`;
@@ -69,11 +81,14 @@ const Checkout = ({ onBack, onPaymentSuccess: _onPaymentSuccess, expired }: Chec
   };
 
   const handleConfirmTransfer = async () => {
-    const studentName = localStorage.getItem(STUDENT_NAME_KEY);
-    if (!studentName) {
-      toast.error("يرجى تسجيل اسم الطالب أولاً من الصفحة الرئيسية");
+    if (!isNameValid) {
+      toast.error("يرجى كتابة اسم الطالب الثلاثي كاملاً بالعربية");
       return;
     }
+    const studentName = fullName.trim().replace(/\s+/g, " ");
+    // Persist the verified real name so the WhatsApp message and future
+    // sessions use the documented identity instead of the temp display name.
+    localStorage.setItem(STUDENT_NAME_KEY, studentName);
     setSubmitting(true);
     try {
       const res = await requestSubscription(studentName, selected);
@@ -202,10 +217,35 @@ const Checkout = ({ onBack, onPaymentSuccess: _onPaymentSuccess, expired }: Chec
             </div>
           </div>
 
+          {/* Real triple-name gate — the confirm button stays locked until the
+              student writes a valid Arabic three-part name so the admin can
+              document the account before verifying the bank transfer. */}
+          <div className="mt-5 rounded-2xl border-2 border-primary/30 bg-primary/5 p-4">
+            <label htmlFor="full-name" className="block text-sm font-extrabold text-heading mb-2 leading-7">
+              يرجى كتابة اسم الطالب الثلاثي هنا لتوثيق حسابه في الإدارة قبل تأكيد التحويل البنكي
+            </label>
+            <input
+              id="full-name"
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="مثال: محمد أحمد عبدالله"
+              dir="rtl"
+              maxLength={80}
+              autoComplete="name"
+              className="w-full px-4 py-3 rounded-xl border-2 border-border bg-card text-heading placeholder:text-muted-foreground text-right text-base font-bold focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            {!isNameValid && fullName.trim().length > 0 && (
+              <p className="mt-2 text-xs font-bold text-destructive leading-6">
+                يرجى إدخال ثلاثة أسماء عربية على الأقل (الاسم، اسم الأب، اسم الجد).
+              </p>
+            )}
+          </div>
+
           <button
             onClick={handleConfirmTransfer}
-            disabled={submitting}
-            className="w-full mt-5 py-4 rounded-2xl bg-[#25D366] text-white font-extrabold text-lg flex items-center justify-center gap-3 active:scale-[0.98] transition shadow-lg disabled:opacity-60"
+            disabled={submitting || !isNameValid}
+            className="w-full mt-4 py-4 rounded-2xl bg-[#25D366] text-white font-extrabold text-lg flex items-center justify-center gap-3 active:scale-[0.98] transition shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="تأكيد التحويل وتفعيل الحساب عبر واتساب"
           >
             <MessageCircle className="w-6 h-6" />

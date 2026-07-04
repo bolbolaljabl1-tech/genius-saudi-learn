@@ -18,7 +18,16 @@ export function useXP() {
     const saved = localStorage.getItem(XP_KEY);
     return saved ? parseInt(saved, 10) : 0;
   });
-  const [studentName, setStudentName] = useState(() => localStorage.getItem(NAME_KEY) || "");
+  const [studentName, setStudentName] = useState(() => {
+    const existing = localStorage.getItem(NAME_KEY);
+    if (existing) return existing;
+    // Frictionless onboarding: generate a temporary display name in the
+    // background so features that need a name (XP, leaderboards previews)
+    // work without forcing the user through a modal on first entry.
+    const temp = `طالب-${Math.floor(1000 + Math.random() * 9000)}`;
+    localStorage.setItem(NAME_KEY, temp);
+    return temp;
+  });
   const [badges, setBadges] = useState<string[]>(() => {
     const saved = localStorage.getItem(BADGES_KEY);
     return saved ? JSON.parse(saved) : [];
