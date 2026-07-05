@@ -48,6 +48,7 @@ const Index = () => {
   const [subject, setSubject] = useState("");
   const [lessonTitle, setLessonTitle] = useState("");
   const { xp, studentName, badges, streak, addXP, awardBadge, saveStudentName } = useXP();
+  const { speak } = useTTS();
   const [showNameModal, setShowNameModal] = useState(false);
   const [showWhisper, setShowWhisper] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
