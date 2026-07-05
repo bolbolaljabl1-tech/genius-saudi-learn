@@ -182,7 +182,7 @@ const Index = () => {
           speak("أهلاً بك في منصة الطالب العبقري. اختر مرحلتك الدراسية، ثم المادة والدرس الذي تريده. استخدم صور سؤالك لحل التمارين بالكاميرا، وتحدى أصدقاءك في ألعاب العباقرة، وتابع تقدمك عبر نقاط الخبرة والأوسمة. نتمنى لك رحلة تعليمية ممتعة.");
           setShowSupport(true);
         }}
-        className="fixed top-10 left-1/2 -translate-x-1/2 z-50 h-8 px-3 inline-flex items-center gap-1.5 rounded-full bg-royal-blue text-matte-gold border border-matte-gold/30 shadow-sm text-xs font-extrabold active:scale-95 transition"
+        className="fixed top-12 left-1/2 -translate-x-1/2 z-[70] h-8 px-3 inline-flex items-center gap-1.5 rounded-full bg-royal-blue text-matte-gold border border-matte-gold/30 shadow-sm text-xs font-extrabold active:scale-95 transition"
         aria-label="دليل استكشاف المنصة"
         title="دليل استكشاف المنصة"
       >
