@@ -1,5 +1,5 @@
 import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, ClipboardCheck } from "lucide-react";
-import appIcon from "@/assets/app-icon.png";
+import AnimatedLogo from "@/components/AnimatedLogo";
 import heroBanner from "@/assets/hero-banner.png";
 
 interface StageSelectionProps {
@@ -43,7 +43,7 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery,
               )}
             </span>
           )}
-          <img src={appIcon} alt="منصة الطالب العبقري" className="w-12 h-12 rounded-xl shadow-emerald" />
+          <AnimatedLogo xp={xp} studentName={studentName} size="md" />
         </div>
 
         {/* Hero Banner - main identity (enlarged 30%) */}
