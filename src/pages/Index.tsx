@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { MessageCircleHeart, LifeBuoy, Settings } from "lucide-react";
+import { MessageCircleHeart, LifeBuoy, Settings, Map } from "lucide-react";
 import StageSelection from "@/components/StageSelection";
 import SubjectSelection from "@/components/SubjectSelection";
 import LessonSearch from "@/components/LessonSearch";
@@ -20,6 +20,7 @@ import Checkout from "@/components/Checkout";
 import SubscriptionSettings from "@/components/SubscriptionSettings";
 import { useXP } from "@/hooks/useXP";
 import { useTrial } from "@/hooks/useTrial";
+import { useTTS } from "@/hooks/useTTS";
 import { useIdleNotify } from "@/hooks/useIdleNotify";
 import { useOvertakeNotify } from "@/hooks/useOvertakeNotify";
 import { checkSubscriptionStatus } from "@/lib/activation";
@@ -47,6 +48,7 @@ const Index = () => {
   const [subject, setSubject] = useState("");
   const [lessonTitle, setLessonTitle] = useState("");
   const { xp, studentName, badges, streak, addXP, awardBadge, saveStudentName } = useXP();
+  const { speak } = useTTS();
   const [showNameModal, setShowNameModal] = useState(false);
   const [showWhisper, setShowWhisper] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
@@ -174,14 +176,18 @@ const Index = () => {
 
       <ShareButton />
 
-      {/* Top guide button — golden neon */}
+      {/* Compact top guide banner — single-line, emoji-free, voice-guided. */}
       <button
-        onClick={() => setShowSupport(true)}
-        className="fixed top-3 left-1/2 -translate-x-1/2 z-50 bg-royal-blue text-matte-gold rounded-full px-4 py-2 flex items-center gap-2 text-sm font-extrabold animate-gold-neon"
+        onClick={() => {
+          speak("أهلاً بك في منصة الطالب العبقري. اختر مرحلتك الدراسية، ثم المادة والدرس الذي تريده. استخدم صور سؤالك لحل التمارين بالكاميرا، وتحدى أصدقاءك في ألعاب العباقرة، وتابع تقدمك عبر نقاط الخبرة والأوسمة. نتمنى لك رحلة تعليمية ممتعة.");
+          setShowSupport(true);
+        }}
+        className="fixed top-12 left-1/2 -translate-x-1/2 z-[70] h-8 px-3 inline-flex items-center gap-1.5 rounded-full bg-royal-blue text-matte-gold border border-matte-gold/30 shadow-sm text-xs font-extrabold active:scale-95 transition"
         aria-label="دليل استكشاف المنصة"
+        title="دليل استكشاف المنصة"
       >
-        <LifeBuoy className="w-5 h-5" />
-        <span>🗺️ دليل استكشاف المنصة</span>
+        <Map className="w-3.5 h-3.5" />
+        <span className="whitespace-nowrap">دليل استكشاف المنصة</span>
       </button>
 
       <button
