@@ -164,10 +164,14 @@ async function handle(req: Request): Promise<Response> {
     // Reuse the outstanding token if the same name already has a pending/active
     // request for this plan — prevents stacking and lets the same browser keep
     // its token across accidental resubmits (the token stays in localStorage).
+    // Escape LIKE wildcards in the caller-supplied name so a request like
+    // `studentName: "%"` cannot match another student's row and leak their
+    // private request_token. `\`, `%`, and `_` are all special to ILIKE.
+    const escapedName = name.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_");
     const { data: existing } = await admin
       .from("subscription_requests")
       .select("id,status,request_token")
-      .ilike("student_name", name)
+      .ilike("student_name", escapedName)
       .eq("plan", plan)
       .in("status", ["pending", "active"])
       .limit(1);
