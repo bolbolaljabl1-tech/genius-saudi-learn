@@ -1,0 +1,87 @@
+// Streams TTS audio from Lovable AI Gateway (openai/gpt-4o-mini-tts)
+// with a deep, confident Arabic teacher tone. Returns SSE PCM chunks.
+import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+
+const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
+
+const TEACHER_INSTRUCTIONS =
+  "You are speaking Modern Standard Arabic (الفصحى) as a confident, warm, and motivating Saudi male teacher. " +
+  "Deliver every phrase with a deep, resonant chest voice, a natural, dignified rasp, and slow, precise articulation. " +
+  "Honor full Arabic tashkeel and correct مخارج الحروف, especially ح خ ع غ ق ض ظ ص. " +
+  "No robotic monotone. Keep the pacing calm, majestic, and encouraging — a mentor, not a narrator.";
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  if (req.method !== "POST") {
+    return new Response(JSON.stringify({ error: "method_not_allowed" }), {
+      status: 405,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  if (!LOVABLE_API_KEY) {
+    return new Response(JSON.stringify({ error: "server_misconfigured" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  let body: { text?: unknown };
+  try {
+    body = await req.json();
+  } catch {
+    return new Response(JSON.stringify({ error: "invalid_json" }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  const text = typeof body.text === "string" ? body.text.trim() : "";
+  if (!text || text.length > 1200) {
+    return new Response(JSON.stringify({ error: "invalid_input" }), {
+      status: 400,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+
+  try {
+    const upstream = await fetch("https://ai.gateway.lovable.dev/v1/audio/speech", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "openai/gpt-4o-mini-tts",
+        input: text,
+        // "onyx" = deep, resonant male voice; closest match to the requested
+        // "صوت جهوري قوي ممتزج ببحة طبيعية" teacher tone.
+        voice: "onyx",
+        instructions: TEACHER_INSTRUCTIONS,
+        stream_format: "sse",
+        response_format: "pcm",
+        speed: 0.95,
+      }),
+      signal: req.signal,
+    });
+
+    if (!upstream.ok) {
+      const msg = await upstream.text().catch(() => "");
+      return new Response(JSON.stringify({ error: "tts_failed", status: upstream.status, msg }), {
+        status: upstream.status,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(upstream.body, {
+      headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
+    });
+  } catch (err) {
+    if ((err as { name?: string })?.name === "AbortError") {
+      return new Response(null, { status: 499, headers: corsHeaders });
+    }
+    console.error("tts error", err);
+    return new Response(JSON.stringify({ error: "internal_error" }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+});
