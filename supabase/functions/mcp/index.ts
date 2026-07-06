@@ -35,7 +35,14 @@ var get_platform_info_default = defineTool({
 
 // src/lib/mcp/tools/list-subscription-plans.ts
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.0";
-import { PLAN_PRICES } from "npm:@/lib/payment-config";
+
+// src/lib/payment-config.ts
+var PLAN_PRICES = {
+  semester: { price: 30, label: "\u0627\u0634\u062A\u0631\u0627\u0643 \u0641\u0635\u0644 \u062F\u0631\u0627\u0633\u064A \u0648\u0627\u062D\u062F", period: "\u0644\u0644\u0641\u0635\u0644 \u0627\u0644\u0648\u0627\u062D\u062F" },
+  yearly: { price: 50, label: "\u0627\u0634\u062A\u0631\u0627\u0643 \u0633\u0646\u0629 \u0643\u0627\u0645\u0644\u0629 - \u0639\u0631\u0636 \u062E\u0627\u0635", period: "\u0633\u0646\u0648\u064A\u0627\u064B" }
+};
+
+// src/lib/mcp/tools/list-subscription-plans.ts
 var list_subscription_plans_default = defineTool2({
   name: "list_subscription_plans",
   title: "List subscription plans",

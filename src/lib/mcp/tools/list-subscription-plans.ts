@@ -1,5 +1,5 @@
 import { defineTool } from "@lovable.dev/mcp-js";
-import { PLAN_PRICES } from "@/lib/payment-config";
+import { PLAN_PRICES } from "../../payment-config";
 
 export default defineTool({
   name: "list_subscription_plans",
