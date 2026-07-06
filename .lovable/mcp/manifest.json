@@ -1,0 +1,49 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.0",
+  "path": "/functions/v1/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "genius-student-mcp",
+      "version": "0.1.0",
+      "title": "منصة الطالب العبقري MCP"
+    },
+    "tools": [
+      {
+        "name": "get_platform_info",
+        "title": "Get platform info",
+        "description": "Return an overview of منصة الطالب العبقري: name, target stages (ابتدائي/متوسط), and main features.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_subscription_plans",
+        "title": "List subscription plans",
+        "description": "Return the available subscription plans for منصة الطالب العبقري with price in SAR and duration.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {}
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
