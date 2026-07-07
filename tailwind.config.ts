@@ -125,6 +125,19 @@ export default {
           "60%": { transform: "translateY(0) scale(0.97)" },
           "80%": { transform: "translateY(-4px) scale(1.03)" },
         },
+        "neon-spin": {
+          "0%": { transform: "rotate(0deg)" },
+          "100%": { transform: "rotate(360deg)" },
+        },
+        "neon-shimmer": {
+          "0%, 100%": { opacity: "0.75", filter: "drop-shadow(0 0 6px hsl(var(--matte-gold)))" },
+          "50%": { opacity: "1", filter: "drop-shadow(0 0 14px hsl(var(--matte-gold)))" },
+        },
+        "spark-fly": {
+          "0%": { transform: "translate(0,0) scale(0.6)", opacity: "0" },
+          "20%": { opacity: "1" },
+          "100%": { transform: "translate(var(--sx), var(--sy)) scale(1.2)", opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -133,6 +146,9 @@ export default {
         "logo-soft-pulse": "logo-soft-pulse 2.6s ease-in-out infinite",
         "logo-tap": "logo-tap 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)",
         "logo-bounce": "logo-bounce 1.4s cubic-bezier(0.34, 1.56, 0.64, 1)",
+        "neon-spin": "neon-spin 6s linear infinite",
+        "neon-shimmer": "neon-shimmer 2.4s ease-in-out infinite",
+        "spark-fly": "spark-fly 1.2s ease-out forwards",
       },
     },
   },

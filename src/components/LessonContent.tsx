@@ -1,6 +1,7 @@
 import { ArrowRight, Play, FileText, Loader2, ExternalLink, Gamepad2, Volume2, VolumeX } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTTS } from "@/hooks/useTTS";
 
 interface LessonContentProps {
   lessonTitle: string;
@@ -30,14 +31,14 @@ const LessonContent = ({ lessonTitle, subject, stage, onStartQuiz, onBack, onVid
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const { speak, stop } = useTTS();
 
   const subjectDisplayName = subjectNames[subject] || subject;
   const ainSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(lessonTitle + " عين التعليمية")}`;
   const fahemSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(lessonTitle + " فاهم")}`;
   const wordwallUrl = `https://www.google.com/search?q=site:wordwall.net+${encodeURIComponent(subjectDisplayName + " " + lessonTitle)}`;
 
-  useEffect(() => { generateSummary(); return () => { window.speechSynthesis.cancel(); }; }, [lessonTitle, subject]);
+  useEffect(() => { generateSummary(); return () => { stop(); }; }, [lessonTitle, subject]);
 
   const generateSummary = async () => {
     setLoading(true);
@@ -56,21 +57,19 @@ const LessonContent = ({ lessonTitle, subject, stage, onStartQuiz, onBack, onVid
     }
   };
 
-  const toggleSpeech = () => {
+  const toggleSpeech = async () => {
     if (isSpeaking) {
-      window.speechSynthesis.cancel();
+      stop();
       setIsSpeaking(false);
       return;
     }
     if (!summary) return;
-    const utterance = new SpeechSynthesisUtterance(summary);
-    utterance.lang = "ar-SA";
-    utterance.rate = 0.9;
-    utterance.onend = () => setIsSpeaking(false);
-    utterance.onerror = () => setIsSpeaking(false);
-    utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
     setIsSpeaking(true);
+    try {
+      await speak(summary);
+    } finally {
+      setIsSpeaking(false);
+    }
   };
 
   return (
