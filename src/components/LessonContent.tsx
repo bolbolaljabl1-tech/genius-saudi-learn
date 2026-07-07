@@ -1,6 +1,7 @@
 import { ArrowRight, Play, FileText, Loader2, ExternalLink, Gamepad2, Volume2, VolumeX } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useTTS } from "@/hooks/useTTS";
 
 interface LessonContentProps {
   lessonTitle: string;
