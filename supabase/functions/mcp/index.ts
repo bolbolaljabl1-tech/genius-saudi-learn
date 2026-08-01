@@ -3,7 +3,7 @@
 // supabase function: mcp
 // Bundled from src/lib/mcp/index.ts by @lovable.dev/mcp-js.
 // src/lib/mcp/index.ts
-import { defineMcp } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { defineMcp, auth } from "npm:@lovable.dev/mcp-js@0.20.0";
 
 // src/lib/mcp/tools/get-platform-info.ts
 import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.0";
@@ -64,11 +64,17 @@ var list_subscription_plans_default = defineTool2({
 });
 
 // src/lib/mcp/index.ts
+var SUPABASE_ISSUER = "https://kjubpaflsffnioixbfec.supabase.co/auth/v1";
 var mcp_default = defineMcp({
   name: "genius-student-mcp",
   title: "\u0645\u0646\u0635\u0629 \u0627\u0644\u0637\u0627\u0644\u0628 \u0627\u0644\u0639\u0628\u0642\u0631\u064A MCP",
   version: "0.1.0",
   instructions: "Tools for \u0645\u0646\u0635\u0629 \u0627\u0644\u0637\u0627\u0644\u0628 \u0627\u0644\u0639\u0628\u0642\u0631\u064A, the Arabic learning platform for primary and middle school students. Use `get_platform_info` for a platform overview, and `list_subscription_plans` to fetch available plans and pricing in SAR.",
+  auth: auth.oauth.issuer({
+    issuer: SUPABASE_ISSUER,
+    acceptedAudiences: ["authenticated"],
+    resourceName: "\u0645\u0646\u0635\u0629 \u0627\u0644\u0637\u0627\u0644\u0628 \u0627\u0644\u0639\u0628\u0642\u0631\u064A MCP"
+  }),
   tools: [get_platform_info_default, list_subscription_plans_default]
 });
 
