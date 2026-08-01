@@ -28,6 +28,7 @@ const ALLOWED_HOST_SUFFIXES = [
   ".lovable.app",
   ".lovableproject.com",
   ".lovable.dev",
+  "abqarai.com",
   "localhost",
   "127.0.0.1",
 ];

@@ -77,7 +77,8 @@ const DomainGuard = ({ children }: Props) => {
         {error && <p className="mt-3 text-sm font-bold text-destructive">{error}</p>}
         <button
           type="submit"
-          className="mt-4 w-full h-11 rounded-lg bg-matte-gold text-royal-blue font-extrabold active:scale-95 transition"
+          disabled={busy}
+          className="mt-4 w-full h-11 rounded-lg bg-matte-gold text-royal-blue font-extrabold active:scale-95 transition disabled:opacity-60"
         >
           دخول
         </button>
