@@ -1,8 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Lock } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const ALLOWED_HOSTS = ["abqarai.com", "www.abqarai.com"];
-const ADMIN_CODE = "3bqari2026";
 const STORAGE_KEY = "abqari_admin_gate_ok";
 
 interface Props {
@@ -13,6 +13,7 @@ const DomainGuard = ({ children }: Props) => {
   const [unlocked, setUnlocked] = useState(false);
   const [code, setCode] = useState("");
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
   useEffect(() => {
     const host = window.location.hostname;
@@ -27,15 +28,29 @@ const DomainGuard = ({ children }: Props) => {
 
   if (unlocked) return <>{children}</>;
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (code.trim() === ADMIN_CODE) {
-      sessionStorage.setItem(STORAGE_KEY, "1");
-      setUnlocked(true);
-    } else {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      // The access code is verified server-side; it is never present in the bundle.
+      const { data } = await supabase.functions.invoke("activation", {
+        body: { action: "preview_gate", code: code.trim() },
+      });
+      if ((data as { ok?: boolean } | null)?.ok) {
+        sessionStorage.setItem(STORAGE_KEY, "1");
+        setUnlocked(true);
+        return;
+      }
       setError("الرمز غير صحيح");
+    } catch {
+      setError("تعذر التحقق، حاول مرة أخرى");
+    } finally {
+      setBusy(false);
     }
   };
+
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-royal-blue p-6" dir="rtl">
