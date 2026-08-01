@@ -1,6 +1,7 @@
 // Streams TTS audio from Lovable AI Gateway (openai/gpt-4o-mini-tts)
 // with a deep, confident Arabic teacher tone. Returns SSE PCM chunks.
 import { corsHeaders } from "npm:@supabase/supabase-js@2/cors";
+import { abuseCheck } from "../_shared/abuse-guard.ts";
 
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
 
@@ -18,6 +19,16 @@ Deno.serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
+
+  // Paid AI Gateway usage: allowlist origins and throttle per IP.
+  const blocked = abuseCheck(req, {
+    limit: 12,
+    windowMs: 60_000,
+    requireOrigin: true,
+    corsHeaders,
+  });
+  if (blocked) return blocked;
+
   if (!LOVABLE_API_KEY) {
     return new Response(JSON.stringify({ error: "server_misconfigured" }), {
       status: 500,

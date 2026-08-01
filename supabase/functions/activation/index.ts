@@ -9,6 +9,7 @@ const enc = new TextEncoder();
 const ADMIN_PASSPHRASE = Deno.env.get("ADMIN_PASSPHRASE") ?? "";
 const ACTIVATION_SALT = Deno.env.get("ACTIVATION_SALT") ?? "";
 const ADMIN_SESSION_SECRET = Deno.env.get("ADMIN_SESSION_SECRET") ?? "";
+const PREVIEW_ACCESS_CODE = Deno.env.get("PREVIEW_ACCESS_CODE") ?? "";
 const ADMIN_TOKEN_TTL_SECONDS = 60 * 60 * 4; // 4h
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
@@ -113,6 +114,17 @@ async function handle(req: Request): Promise<Response> {
     return json({ error: "invalid_json" }, 400);
   }
   const action = body.action;
+
+  if (action === "preview_gate") {
+    // Verifies the non-production preview access code entirely server-side so
+    // the code never ships in the client bundle.
+    const code = typeof body.code === "string" ? body.code.trim() : "";
+    if (!PREVIEW_ACCESS_CODE) return json({ error: "server_misconfigured" }, 500);
+    const a = await hmac(ADMIN_SESSION_SECRET, `g:${code}`);
+    const b = await hmac(ADMIN_SESSION_SECRET, `g:${PREVIEW_ACCESS_CODE}`);
+    if (!timingSafeEqual(a, b)) return json({ ok: false }, 401);
+    return json({ ok: true });
+  }
 
   if (action === "admin_login") {
     const passphrase = typeof body.passphrase === "string" ? body.passphrase : "";
