@@ -163,9 +163,20 @@ const Index = () => {
           onGames={() => setScreen("games")}
           onGallery={() => setScreen("gallery")}
           onSelfTest={() => setScreen("selftest")}
+          onFoundation={() => setScreen("foundation")}
           xp={xp}
           studentName={studentName}
           streak={streak}
+        />
+      )}
+      {screen === "foundation" && (
+        <SubjectSelection
+          stage={stage}
+          onlyIds={["arabic", "english", "math", "science"]}
+          title="التأسيس"
+          subtitle="مواد نافس الأربع: اللغة العربية، اللغة الإنجليزية، الرياضيات، العلوم"
+          onSelect={handleSubjectSelect}
+          onBack={() => setScreen("stage")}
         />
       )}
       {screen === "subject" && <SubjectSelection stage={stage} onSelect={handleSubjectSelect} onBack={() => setScreen("stage")} />}
