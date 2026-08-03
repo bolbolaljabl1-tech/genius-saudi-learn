@@ -5,11 +5,15 @@ interface SubjectSelectionProps {
   stage: string;
   onSelect: (subject: string) => void;
   onBack: () => void;
+  /** حصر المواد المعروضة (يستخدم في قسم التأسيس) */
+  onlyIds?: string[];
+  title?: string;
+  subtitle?: string;
 }
 
-const SubjectSelection = ({ stage, onSelect, onBack }: SubjectSelectionProps) => {
+const SubjectSelection = ({ stage, onSelect, onBack, onlyIds, title, subtitle }: SubjectSelectionProps) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const stageTitle = stage === "elementary" ? "المرحلة الابتدائية" : "المرحلة المتوسطة";
+  const stageTitle = title ?? (stage === "elementary" ? "المرحلة الابتدائية" : "المرحلة المتوسطة");
 
   const subjects = [
     { id: "arabic", title: "لغتي", icon: BookOpen, color: "from-emerald-500 to-teal-600" },
@@ -25,7 +29,9 @@ const SubjectSelection = ({ stage, onSelect, onBack }: SubjectSelectionProps) =>
     { id: "quran", title: "القرآن الكريم", icon: Landmark, color: "from-yellow-600 to-amber-700" },
   ];
 
-  const filteredSubjects = subjects.filter(s =>
+  const visibleSubjects = onlyIds ? subjects.filter((s) => onlyIds.includes(s.id)) : subjects;
+
+  const filteredSubjects = visibleSubjects.filter(s =>
     s.title.includes(searchQuery.trim())
   );
 
@@ -38,8 +44,9 @@ const SubjectSelection = ({ stage, onSelect, onBack }: SubjectSelectionProps) =>
 
       <div className="text-center mb-6 animate-slide-up">
         <h2 className="text-3xl font-extrabold text-heading mb-2">{stageTitle}</h2>
-        <p className="text-muted-foreground text-xl">اختر المادة التي تريد مراجعتها</p>
+        <p className="text-muted-foreground text-xl">{subtitle ?? "اختر المادة التي تريد مراجعتها"}</p>
       </div>
+
 
       {/* Search Bar */}
       <div className="max-w-md mx-auto w-full mb-6 animate-scale-in">

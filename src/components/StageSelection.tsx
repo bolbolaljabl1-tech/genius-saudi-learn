@@ -1,4 +1,4 @@
-import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, ClipboardCheck } from "lucide-react";
+import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, ClipboardCheck, Blocks } from "lucide-react";
 import AnimatedLogo from "@/components/AnimatedLogo";
 import heroBanner from "@/assets/hero-banner.png";
 
@@ -9,12 +9,13 @@ interface StageSelectionProps {
   onGames: () => void;
   onGallery: () => void;
   onSelfTest: () => void;
+  onFoundation: () => void;
   xp: number;
   studentName: string;
   streak?: number;
 }
 
-const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery, onSelfTest, xp, studentName, streak = 0 }: StageSelectionProps) => {
+const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery, onSelfTest, onFoundation, xp, studentName, streak = 0 }: StageSelectionProps) => {
   const stages = [
     { id: "elementary", title: "المرحلة الابتدائية", description: "من الصف الأول إلى السادس", icon: BookOpen, delay: "0.1s" },
     { id: "middle", title: "المرحلة المتوسطة", description: "من الصف الأول إلى الثالث", icon: GraduationCap, delay: "0.3s" },
@@ -77,6 +78,26 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery,
           <ClipboardCheck className="w-7 h-7" />
           اختبر نفسك
         </button>
+
+        {/* قسم التأسيس — مواد نافس الأربع */}
+        <button
+          onClick={onFoundation}
+          className="w-full max-w-xl mb-4 p-5 rounded-2xl neu-card border-2 border-gold/50 text-right active:scale-[0.98] transition-all animate-scale-in hover:shadow-gold"
+          style={{ animationDelay: "0.18s" }}
+          aria-label="قسم التأسيس لمواد نافس الأربع"
+        >
+          <span className="flex items-center gap-3 mb-2">
+            <span className="inline-flex items-center justify-center w-14 h-14 rounded-xl gradient-gold shadow-gold shrink-0">
+              <Blocks className="w-8 h-8 text-gold-foreground" />
+            </span>
+            <span className="text-3xl font-extrabold text-heading">التأسيس</span>
+          </span>
+          <span className="block text-base sm:text-lg font-bold text-muted-foreground leading-relaxed">
+            (سجل يسجل المواد الرئيسية التي سوف يكون التأسيس منصباً ومركزاً عليها وهي مواد نافس الأربع: اللغة العربية، اللغة الإنجليزية، الرياضيات، العلوم)
+          </span>
+        </button>
+
+
 
 
         {/* Stage Label */}
