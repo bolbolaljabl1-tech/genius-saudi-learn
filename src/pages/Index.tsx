@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MessageCircleHeart, LifeBuoy, Settings, Map } from "lucide-react";
 import StageSelection from "@/components/StageSelection";
 import SubjectSelection from "@/components/SubjectSelection";
