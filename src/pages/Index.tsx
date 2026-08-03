@@ -139,7 +139,7 @@ const Index = () => {
         />
       )}
       {screen === "subject" && <SubjectSelection stage={stage} onSelect={handleSubjectSelect} onBack={() => setScreen("stage")} />}
-      {screen === "search" && <LessonSearch subject={subject} onSearch={handleLessonSearch} onBack={() => setScreen("subject")} />}
+      {screen === "search" && <LessonSearch subject={subject} stage={stage} onSearch={handleLessonSearch} onBack={() => setScreen("subject")} />}
       {screen === "lesson" && <LessonContent lessonTitle={lessonTitle} subject={subject} stage={stage} onStartQuiz={() => setScreen("quiz")} onBack={() => setScreen("search")} onVideoXP={() => addXP(10)} />}
       {screen === "quiz" && <QuizModule lessonTitle={lessonTitle} subject={subject} stage={stage} onBack={() => setScreen("lesson")} onRestart={() => { setScreen("lesson"); setTimeout(() => setScreen("quiz"), 100); }} onQuizComplete={handleQuizComplete} />}
       {screen === "camera" && <CameraSolver onBack={() => setScreen("stage")} onXP={() => addXP(20)} />}
