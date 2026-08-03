@@ -26,7 +26,7 @@ import { useOvertakeNotify } from "@/hooks/useOvertakeNotify";
 import { checkSubscriptionStatus } from "@/lib/activation";
 import { toast } from "@/components/ui/sonner";
 
-type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery" | "selftest" | "checkout";
+type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery" | "selftest" | "checkout" | "foundation";
 
 const LOCKED_SCREENS: Screen[] = ["lesson", "quiz", "selftest", "camera", "games"];
 // Distraction-free screens: hide the settings gear so it never sits near
@@ -37,6 +37,11 @@ const Index = () => {
   const [screen, setScreenRaw] = useState<Screen>("stage");
   const { daysLeft, expired, subscribed, subToken, applyServerStatus } = useTrial();
 
+  // مكدّس التنقل الداخلي: يجعل زر رجوع الجوال يتنقل بين شاشات التطبيق
+  // بدلاً من إغلاقه، ويستقر بأمان في الصفحة الرئيسية.
+  const historyRef = useRef<Screen[]>([]);
+  const backRef = useRef(false);
+
   const setScreen = (next: Screen) => {
     if (expired && LOCKED_SCREENS.includes(next)) {
       setScreenRaw("checkout");
@@ -44,6 +49,32 @@ const Index = () => {
     }
     setScreenRaw(next);
   };
+
+  useEffect(() => {
+    // حارس ثابت في سجل المتصفح حتى لا يخرج المستخدم من التطبيق.
+    window.history.pushState({ appGuard: true }, "");
+    const onPop = () => {
+      window.history.pushState({ appGuard: true }, "");
+      backRef.current = true;
+      const prev = historyRef.current.pop();
+      setScreenRaw(prev ?? "stage");
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  useEffect(() => {
+    if (backRef.current) {
+      backRef.current = false;
+      return;
+    }
+    const stack = historyRef.current;
+    if (stack[stack.length - 1] !== screen) {
+      const prev = stack[stack.length - 1];
+      if (prev !== screen) stack.push(screen);
+    }
+  }, [screen]);
+
   const [stage, setStage] = useState("");
   const [subject, setSubject] = useState("");
   const [lessonTitle, setLessonTitle] = useState("");
