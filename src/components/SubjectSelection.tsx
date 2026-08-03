@@ -5,11 +5,15 @@ interface SubjectSelectionProps {
   stage: string;
   onSelect: (subject: string) => void;
   onBack: () => void;
+  /** حصر المواد المعروضة (يستخدم في قسم التأسيس) */
+  onlyIds?: string[];
+  title?: string;
+  subtitle?: string;
 }
 
-const SubjectSelection = ({ stage, onSelect, onBack }: SubjectSelectionProps) => {
+const SubjectSelection = ({ stage, onSelect, onBack, onlyIds, title, subtitle }: SubjectSelectionProps) => {
   const [searchQuery, setSearchQuery] = useState("");
-  const stageTitle = stage === "elementary" ? "المرحلة الابتدائية" : "المرحلة المتوسطة";
+  const stageTitle = title ?? (stage === "elementary" ? "المرحلة الابتدائية" : "المرحلة المتوسطة");
 
   const subjects = [
     { id: "arabic", title: "لغتي", icon: BookOpen, color: "from-emerald-500 to-teal-600" },
