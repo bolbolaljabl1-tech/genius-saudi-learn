@@ -63,17 +63,16 @@ const Index = () => {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
+  const prevScreenRef = useRef<Screen>("stage");
   useEffect(() => {
     if (backRef.current) {
       backRef.current = false;
-      return;
+    } else if (prevScreenRef.current !== screen) {
+      historyRef.current.push(prevScreenRef.current);
     }
-    const stack = historyRef.current;
-    if (stack[stack.length - 1] !== screen) {
-      const prev = stack[stack.length - 1];
-      if (prev !== screen) stack.push(screen);
-    }
+    prevScreenRef.current = screen;
   }, [screen]);
+
 
   const [stage, setStage] = useState("");
   const [subject, setSubject] = useState("");
