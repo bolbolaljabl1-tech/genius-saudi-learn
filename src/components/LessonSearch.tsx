@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Sparkles, Loader2, BookOpen, Rocket, X, ExternalLink } from "lucide-react";
+import { ArrowRight, Sparkles, Loader2, BookOpen, Rocket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 
@@ -54,7 +54,6 @@ const LessonSearch = ({ subject, stage, onSearch, onBack }: LessonSearchProps) =
   const [lesson, setLesson] = useState("");
   const [lessons, setLessons] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showBook, setShowBook] = useState(false);
 
   const subjectLabel = subjectNames[selSubject] ?? "";
   const ready = Boolean(selStage && grade && selSubject && semester);

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircleHeart, LifeBuoy, Settings, Map } from "lucide-react";
 import StageSelection from "@/components/StageSelection";
+import FoundationHub from "@/components/FoundationHub";
 import SubjectSelection from "@/components/SubjectSelection";
 import LessonSearch from "@/components/LessonSearch";
 import LessonContent from "@/components/LessonContent";
@@ -170,12 +171,12 @@ const Index = () => {
         />
       )}
       {screen === "foundation" && (
-        <SubjectSelection
-          stage={stage}
-          onlyIds={["arabic", "english", "math", "science"]}
-          title="التأسيس"
-          subtitle="مواد نافس الأربع: اللغة العربية، اللغة الإنجليزية، الرياضيات، العلوم"
-          onSelect={handleSubjectSelect}
+        <FoundationHub
+          onSelectSkill={(subj, skill) => {
+            setSubject(subj);
+            setLessonTitle(skill);
+            setScreen("lesson");
+          }}
           onBack={() => setScreen("stage")}
         />
       )}
