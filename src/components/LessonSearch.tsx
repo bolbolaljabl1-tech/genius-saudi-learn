@@ -182,13 +182,14 @@ const LessonSearch = ({ subject, stage, onSearch, onBack }: LessonSearchProps) =
           </div>
 
           <button
-            onClick={() => setShowBook(true)}
+            onClick={() => window.open(bookUrl, "_blank", "noopener,noreferrer")}
             disabled={!ready}
             className="w-full py-5 rounded-2xl neu-btn text-foreground font-extrabold text-xl flex items-center justify-center gap-3 active:scale-[0.98] transition disabled:opacity-50"
           >
             <BookOpen className="w-6 h-6 text-gold" />
             تصفح كتاب المادة
           </button>
+
 
           <button
             onClick={() => lesson && onSearch(lesson)}
