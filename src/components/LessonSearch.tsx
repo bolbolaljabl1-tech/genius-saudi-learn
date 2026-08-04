@@ -202,28 +202,8 @@ const LessonSearch = ({ subject, stage, onSearch, onBack }: LessonSearchProps) =
         </div>
       </div>
 
-      {showBook && (
-        <div className="fixed inset-0 z-[100] bg-black/80 flex flex-col">
-          <div className="flex items-center justify-between p-3 bg-card">
-            <span className="font-extrabold text-lg text-heading">كتاب {subjectLabel}</span>
-            <div className="flex items-center gap-2">
-              <a
-                href={bookUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-full neu-btn"
-                aria-label="فتح الكتاب في نافذة جديدة"
-              >
-                <ExternalLink className="w-5 h-5" />
-              </a>
-              <button onClick={() => setShowBook(false)} className="p-2 rounded-full neu-btn" aria-label="إغلاق">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-          <iframe src={bookUrl} title="عارض كتاب المادة" className="flex-1 w-full bg-white" />
-        </div>
-      )}
+
+
     </div>
   );
 };
