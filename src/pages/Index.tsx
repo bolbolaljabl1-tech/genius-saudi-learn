@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircleHeart, LifeBuoy, Settings, Map } from "lucide-react";
 import StageSelection from "@/components/StageSelection";
+import FoundationHub from "@/components/FoundationHub";
 import SubjectSelection from "@/components/SubjectSelection";
 import LessonSearch from "@/components/LessonSearch";
 import LessonContent from "@/components/LessonContent";
@@ -77,6 +78,7 @@ const Index = () => {
   const [stage, setStage] = useState("");
   const [subject, setSubject] = useState("");
   const [lessonTitle, setLessonTitle] = useState("");
+  const [fromFoundation, setFromFoundation] = useState(false);
   const { xp, studentName, badges, streak, addXP, awardBadge, saveStudentName } = useXP();
   const { speak } = useTTS();
   const [showNameModal, setShowNameModal] = useState(false);
@@ -113,7 +115,7 @@ const Index = () => {
 
   const handleStageSelect = (s: string) => { setStage(s); setScreen("subject"); };
   const handleSubjectSelect = (s: string) => { setSubject(s); setScreen("search"); };
-  const handleLessonSearch = (title: string) => { setLessonTitle(title); setScreen("lesson"); };
+  const handleLessonSearch = (title: string) => { setLessonTitle(title); setFromFoundation(false); setScreen("lesson"); };
 
   const handleQuizComplete = (score: number, total: number) => {
     if (score === total) { addXP(100); awardBadge("وسام العبقري"); }
@@ -170,18 +172,19 @@ const Index = () => {
         />
       )}
       {screen === "foundation" && (
-        <SubjectSelection
-          stage={stage}
-          onlyIds={["arabic", "english", "math", "science"]}
-          title="التأسيس"
-          subtitle="مواد نافس الأربع: اللغة العربية، اللغة الإنجليزية، الرياضيات، العلوم"
-          onSelect={handleSubjectSelect}
+        <FoundationHub
+          onSelectSkill={(subj, skill) => {
+            setSubject(subj);
+            setLessonTitle(skill);
+            setFromFoundation(true);
+            setScreen("lesson");
+          }}
           onBack={() => setScreen("stage")}
         />
       )}
       {screen === "subject" && <SubjectSelection stage={stage} onSelect={handleSubjectSelect} onBack={() => setScreen("stage")} />}
       {screen === "search" && <LessonSearch subject={subject} stage={stage} onSearch={handleLessonSearch} onBack={() => setScreen("subject")} />}
-      {screen === "lesson" && <LessonContent lessonTitle={lessonTitle} subject={subject} stage={stage} onStartQuiz={() => setScreen("quiz")} onBack={() => setScreen("search")} onVideoXP={() => addXP(10)} />}
+      {screen === "lesson" && <LessonContent lessonTitle={lessonTitle} subject={subject} stage={stage} onStartQuiz={() => setScreen("quiz")} onBack={() => setScreen(fromFoundation ? "foundation" : "search")} onVideoXP={() => addXP(10)} />}
       {screen === "quiz" && <QuizModule lessonTitle={lessonTitle} subject={subject} stage={stage} onBack={() => setScreen("lesson")} onRestart={() => { setScreen("lesson"); setTimeout(() => setScreen("quiz"), 100); }} onQuizComplete={handleQuizComplete} />}
       {screen === "camera" && <CameraSolver onBack={() => setScreen("stage")} onXP={() => addXP(20)} />}
       {screen === "leaderboard" && <Leaderboard onBack={() => setScreen("stage")} currentName={studentName} currentXP={xp} />}

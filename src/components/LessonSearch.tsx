@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Sparkles, Loader2, BookOpen, Rocket, X, ExternalLink } from "lucide-react";
+import { ArrowRight, Sparkles, Loader2, BookOpen, Rocket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 
@@ -54,7 +54,6 @@ const LessonSearch = ({ subject, stage, onSearch, onBack }: LessonSearchProps) =
   const [lesson, setLesson] = useState("");
   const [lessons, setLessons] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showBook, setShowBook] = useState(false);
 
   const subjectLabel = subjectNames[selSubject] ?? "";
   const ready = Boolean(selStage && grade && selSubject && semester);
@@ -182,13 +181,14 @@ const LessonSearch = ({ subject, stage, onSearch, onBack }: LessonSearchProps) =
           </div>
 
           <button
-            onClick={() => setShowBook(true)}
+            onClick={() => window.open(bookUrl, "_blank", "noopener,noreferrer")}
             disabled={!ready}
             className="w-full py-5 rounded-2xl neu-btn text-foreground font-extrabold text-xl flex items-center justify-center gap-3 active:scale-[0.98] transition disabled:opacity-50"
           >
             <BookOpen className="w-6 h-6 text-gold" />
             تصفح كتاب المادة
           </button>
+
 
           <button
             onClick={() => lesson && onSearch(lesson)}
@@ -201,28 +201,8 @@ const LessonSearch = ({ subject, stage, onSearch, onBack }: LessonSearchProps) =
         </div>
       </div>
 
-      {showBook && (
-        <div className="fixed inset-0 z-[100] bg-black/80 flex flex-col">
-          <div className="flex items-center justify-between p-3 bg-card">
-            <span className="font-extrabold text-lg text-heading">كتاب {subjectLabel}</span>
-            <div className="flex items-center gap-2">
-              <a
-                href={bookUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="p-2 rounded-full neu-btn"
-                aria-label="فتح الكتاب في نافذة جديدة"
-              >
-                <ExternalLink className="w-5 h-5" />
-              </a>
-              <button onClick={() => setShowBook(false)} className="p-2 rounded-full neu-btn" aria-label="إغلاق">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-          <iframe src={bookUrl} title="عارض كتاب المادة" className="flex-1 w-full bg-white" />
-        </div>
-      )}
+
+
     </div>
   );
 };

@@ -93,8 +93,9 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery,
             <span className="text-3xl font-extrabold text-heading">التأسيس</span>
           </span>
           <span className="block text-base sm:text-lg font-bold text-muted-foreground leading-relaxed">
-            (سجل يسجل المواد الرئيسية التي سوف يكون التأسيس منصباً ومركزاً عليها وهي مواد نافس الأربع: اللغة العربية، اللغة الإنجليزية، الرياضيات، العلوم)
+            (المهارات الأساسية للمواد المستهدفة في الاختبارات الوطنية)
           </span>
+
         </button>
 
 
