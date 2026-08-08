@@ -695,7 +695,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       await supabase.functions.invoke("send-telegram", {
         body: {
           student_name: name,
-          message: `🏆 بطل جديد يسيطر على ساحة العباقرة!\n👤 الفائز: ${name}\n🔥 هل تجرؤ على تحديه؟\n🔗 https://genius-saudi-learn.lovable.app`,
+          message: `🏆 بطل جديد يسيطر على ساحة العباقرة!\n👤 الفائز: ${name}\n🔥 هل تجرؤ على تحديه؟\n🔗 https://abqarai.com`,
         },
       });
     } catch {
