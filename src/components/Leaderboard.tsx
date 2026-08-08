@@ -55,7 +55,7 @@ const Leaderboard = ({ onBack, currentName, currentXP }: LeaderboardProps) => {
           <Trophy className="w-10 h-10 text-gold-foreground" />
         </div>
         <h2 className="text-3xl font-extrabold text-foreground">🏆 لوحة الشرف — أفضل 10 عباقرة</h2>
-        <p className="text-sm text-muted-foreground mt-2 text-glow-gold">منصة الطالب العبقري 2026</p>
+        <p className="text-sm mt-2 brand-name">منصة الطالب العبقري 2026</p>
       </div>
 
       {loading ? (
