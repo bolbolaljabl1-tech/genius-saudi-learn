@@ -695,7 +695,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
       await supabase.functions.invoke("send-telegram", {
         body: {
           student_name: name,
-          message: `🏆 بطل جديد يسيطر على ساحة العباقرة!\n👤 الفائز: ${name}\n🔥 هل تجرؤ على تحديه؟\n🔗 https://genius-saudi-learn.lovable.app`,
+          message: `🏆 بطل جديد يسيطر على ساحة العباقرة!\n👤 الفائز: ${name}\n🔥 هل تجرؤ على تحديه؟\n🔗 https://abqarai.com`,
         },
       });
     } catch {
@@ -835,7 +835,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
             </button>
           ))}
         </div>
-        <p className="text-center mt-6 text-glow-gold text-base">منصة الطالب العبقري 2026 ✨</p>
+        <p className="text-center mt-6 brand-name text-base">منصة الطالب العبقري 2026 ✨</p>
       </div>
     );
   }
@@ -876,7 +876,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
             </button>
           ))}
         </div>
-        <p className="text-center mt-6 text-glow-gold text-base">منصة الطالب العبقري 2026 ✨</p>
+        <p className="text-center mt-6 brand-name text-base">منصة الطالب العبقري 2026 ✨</p>
       </div>
     );
   }
@@ -953,7 +953,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
               className="w-full px-5 py-4 rounded-2xl border-2 border-input bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-center text-2xl font-bold mb-4"
               dir="rtl"
             />
-            <p className="text-glow-gold text-base mb-4">منصة الطالب العبقري 2026 ✨</p>
+            <p className="brand-name text-base mb-4">منصة الطالب العبقري 2026 ✨</p>
             {sendingTelegram && <p className="text-sm text-muted-foreground mb-2">جارٍ إرسال التحدي...</p>}
             <div className="flex gap-3">
               <button

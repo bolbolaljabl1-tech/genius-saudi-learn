@@ -2,6 +2,7 @@ import { Share2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import { toast } from "@/hooks/use-toast";
+import { SITE_URL } from "@/lib/site";
 
 interface ShareButtonProps {
   context?: "camera" | "video" | "win" | "global";
@@ -46,7 +47,7 @@ const ShareButton = ({ context = "global", resultContainerRef }: ShareButtonProp
 
   const handleShare = async () => {
     const msg = shareMessages[context];
-    const url = "https://genius-saudi-learn.lovable.app";
+    const url = SITE_URL;
 
     let files: File[] = [];
     if (resultContainerRef?.current) {

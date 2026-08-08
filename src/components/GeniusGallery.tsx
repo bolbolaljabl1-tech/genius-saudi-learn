@@ -50,7 +50,7 @@ const GeniusGallery = ({ onBack }: GeniusGalleryProps) => {
   };
 
   const handleShare = async (entry: GalleryEntry) => {
-    const text = `لقد حصلتُ على ${medalEmoji[entry.medal]} ${medalLabel[entry.medal]} في #منصة_الطالب_العبقري بزمن قياسي! هل تستطيع تحدي سرعتي؟\nhttps://genius-saudi-learn.lovable.app`;
+    const text = `لقد حصلتُ على ${medalEmoji[entry.medal]} ${medalLabel[entry.medal]} في #منصة_الطالب_العبقري بزمن قياسي! هل تستطيع تحدي سرعتي؟\nhttps://abqarai.com`;
     if (navigator.share) {
       try {
         await navigator.share({ title: "منصة الطالب العبقري", text });

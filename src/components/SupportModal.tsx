@@ -95,7 +95,7 @@ const SupportModal = ({ onClose }: SupportModalProps) => {
         </div>
 
         <a
-          href="https://wa.me/966500000000"
+          href="https://wa.me/966538583621"
           target="_blank"
           rel="noopener noreferrer"
           className="w-full mb-3 py-3 rounded-2xl bg-green-600 text-white font-extrabold flex items-center justify-center gap-2 active:scale-95 transition-all"

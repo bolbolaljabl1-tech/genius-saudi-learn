@@ -262,4 +262,27 @@
     animation: goldGlow 2.4s ease-in-out infinite;
     font-weight: 800;
   }
+
+  /* اسم المنصة: تدرّج لوني نابض متعاقب بين الأخضر والذهبي */
+  @keyframes brandGradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .brand-name {
+    background-image: linear-gradient(
+      90deg,
+      hsl(160 84% 39%),
+      hsl(45 100% 60%),
+      hsl(220 70% 45%),
+      hsl(160 84% 39%)
+    );
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: brandGradientShift 4s ease-in-out infinite;
+    font-weight: 800;
+  }
 }
