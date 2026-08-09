@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { ArrowRight, BookOpen, Calculator, FlaskConical, Languages, Blocks, Rocket } from "lucide-react";
+import { ArrowRight, BookOpen, Calculator, FlaskConical, Languages, Blocks, Rocket, PenLine } from "lucide-react";
+import SmartBoard from "./SmartBoard";
 
 interface FoundationHubProps {
   onSelectSkill: (subject: string, skill: string) => void;
