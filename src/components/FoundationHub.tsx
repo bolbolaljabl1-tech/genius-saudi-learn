@@ -78,6 +78,17 @@ const FOUNDATION_SUBJECTS: FoundationSubject[] = [
 
 const FoundationHub = ({ onSelectSkill, onBack }: FoundationHubProps) => {
   const [openId, setOpenId] = useState<string>("");
+  const [board, setBoard] = useState<{ subject: string; skill: string } | null>(null);
+
+  if (board) {
+    return (
+      <SmartBoard
+        onBack={() => setBoard(null)}
+        initialSubject={board.subject}
+        initialSkill={board.skill}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col px-4 py-6 pb-32">
@@ -99,7 +110,18 @@ const FoundationHub = ({ onSelectSkill, onBack }: FoundationHubProps) => {
         </p>
       </div>
 
+      <div className="max-w-md mx-auto w-full mb-4">
+        <button
+          onClick={() => setBoard({ subject: "arabic", skill: "" })}
+          className="w-full py-4 px-4 rounded-2xl gradient-gold text-gold-foreground font-extrabold text-lg flex items-center justify-center gap-2 shadow-gold active:scale-[0.98] transition"
+        >
+          <PenLine className="w-5 h-5" />
+          السبورة التفاعلية الذكية
+        </button>
+      </div>
+
       <div className="max-w-md mx-auto w-full space-y-4" dir="rtl">
+
         {FOUNDATION_SUBJECTS.map((s, i) => {
           const open = openId === s.id;
           return (
