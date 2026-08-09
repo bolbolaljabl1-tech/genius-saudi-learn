@@ -18,3 +18,6 @@ verify_jwt = false
 [functions.list-lessons]
 verify_jwt = false
 
+
+[functions.smart-board]
+verify_jwt = false
