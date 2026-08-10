@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, Lock } from "lucide-react";
+import { Mail, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { adminLogin } from "@/lib/activation";
@@ -33,10 +33,11 @@ const AppFooter = () => {
         <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-matte-gold to-transparent opacity-90" />
         <button
           onClick={() => setOpen(true)}
-          aria-label="دخول الإدارة"
+          aria-label="إدارة الموافقات"
+          title="إدارة الموافقات"
           className="absolute left-3 bottom-3 w-7 h-7 rounded-full flex items-center justify-center text-matte-gold/50 hover:text-matte-gold active:scale-90 transition"
         >
-          <Lock className="w-3.5 h-3.5" />
+          <ShieldCheck className="w-4 h-4" />
         </button>
         <p className="font-amiri font-bold text-lg animate-footer-pulse">
           <span className="brand-name">منصة الطالب العبقري</span>
