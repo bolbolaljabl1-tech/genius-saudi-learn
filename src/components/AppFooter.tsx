@@ -47,6 +47,17 @@ const AppFooter = () => {
           <Mail className="w-3 h-3" />
           <span style={{ fontFamily: "'Courier New', monospace" }}>tchjaber@gmail.com</span>
         </p>
+        <a
+          href="/privacy"
+          onClick={(e) => {
+            e.preventDefault();
+            navigate("/privacy");
+          }}
+          className="mt-1 inline-flex items-center gap-1 text-xs font-extrabold text-matte-gold underline underline-offset-4 decoration-matte-gold/50 hover:decoration-matte-gold active:scale-95 transition"
+        >
+          <ShieldCheck className="w-3 h-3" />
+          سياسة الخصوصية
+        </a>
       </footer>
 
       {open && (
