@@ -17,6 +17,7 @@ import WhisperModal from "@/components/WhisperModal";
 import SupportModal from "@/components/SupportModal";
 import AppFooter from "@/components/AppFooter";
 import TrialBanner from "@/components/TrialBanner";
+import ThanksBoard from "@/components/ThanksBoard";
 import Checkout from "@/components/Checkout";
 import SubscriptionSettings from "@/components/SubscriptionSettings";
 import { useXP } from "@/hooks/useXP";
