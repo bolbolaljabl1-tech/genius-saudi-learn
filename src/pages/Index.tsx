@@ -143,6 +143,7 @@ const Index = () => {
         onSubscribe={() => setScreenRaw("checkout")}
       />
       {showNameModal && <StudentNameModal onSave={handleNameSave} />}
+      <ThanksBoard />
 
       {screen === "checkout" && (
         <Checkout
