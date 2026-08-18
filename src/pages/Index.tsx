@@ -28,9 +28,10 @@ import { useOvertakeNotify } from "@/hooks/useOvertakeNotify";
 import { checkSubscriptionStatus } from "@/lib/activation";
 import { toast } from "@/components/ui/sonner";
 
-type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery" | "selftest" | "checkout" | "foundation";
+type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery" | "selftest" | "checkout" | "foundation" | "studio";
 
-const LOCKED_SCREENS: Screen[] = ["lesson", "quiz", "selftest", "camera", "games"];
+const LOCKED_SCREENS: Screen[] = ["lesson", "quiz", "selftest", "camera", "games", "studio"];
+
 // Distraction-free screens: hide the settings gear so it never sits near
 // the back arrow or the "إنهاء" button on quizzes / self-tests / camera.
 const HIDE_GEAR_SCREENS: Screen[] = ["quiz", "selftest", "camera", "checkout"];
