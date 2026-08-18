@@ -1,4 +1,4 @@
-import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, ClipboardCheck, Blocks } from "lucide-react";
+import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, ClipboardCheck, Blocks, Sparkles } from "lucide-react";
 import AnimatedLogo from "@/components/AnimatedLogo";
 import heroBanner from "@/assets/hero-banner.png";
 
@@ -10,12 +10,14 @@ interface StageSelectionProps {
   onGallery: () => void;
   onSelfTest: () => void;
   onFoundation: () => void;
+  onStudio: () => void;
   xp: number;
   studentName: string;
   streak?: number;
 }
 
-const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery, onSelfTest, onFoundation, xp, studentName, streak = 0 }: StageSelectionProps) => {
+const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery, onSelfTest, onFoundation, onStudio, xp, studentName, streak = 0 }: StageSelectionProps) => {
+
   const stages = [
     { id: "elementary", title: "المرحلة الابتدائية", description: "من الصف الأول إلى السادس", icon: BookOpen, delay: "0.1s" },
     { id: "middle", title: "المرحلة المتوسطة", description: "من الصف الأول إلى الثالث", icon: GraduationCap, delay: "0.3s" },
@@ -72,6 +74,21 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onGallery,
           <Gamepad2 className="w-7 h-7" />
           🎮 ألعاب العباقرة
         </button>
+
+        {/* AI Quiz Studio */}
+        <button
+          onClick={onStudio}
+          className="w-full max-w-xl mb-4 py-5 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-2xl shadow-emerald-lg border-2 border-gold/60 active:scale-[0.98] transition-all flex flex-col items-center justify-center gap-1 animate-scale-in animate-gold-neon"
+          style={{ animationDelay: "0.12s" }}
+          aria-label="أنشئ اختبارك بنفسك"
+        >
+          <span className="flex items-center gap-3">
+            <Sparkles className="w-7 h-7" />
+            أنشئ اختبارك بنفسك
+          </span>
+          <span className="text-sm font-bold opacity-90">استوديو التحديات التفاعلية بالذكاء الاصطناعي</span>
+        </button>
+
 
         {/* Self Test Button */}
         <button onClick={onSelfTest} className="w-full max-w-xl mb-4 py-5 rounded-2xl bg-royal-blue text-matte-gold font-extrabold text-2xl shadow-emerald-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in animate-gold-neon" style={{ animationDelay: "0.15s" }}>
