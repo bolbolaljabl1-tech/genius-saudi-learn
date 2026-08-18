@@ -11,6 +11,7 @@ import ShareButton from "@/components/ShareButton";
 import Leaderboard from "@/components/Leaderboard";
 import GamesHub from "@/components/GamesHub";
 import GeniusGallery from "@/components/GeniusGallery";
+import QuizStudio from "@/components/QuizStudio";
 import SelfTest from "@/components/SelfTest";
 import StudentNameModal from "@/components/StudentNameModal";
 import WhisperModal from "@/components/WhisperModal";
@@ -194,6 +195,7 @@ const Index = () => {
       {screen === "camera" && <CameraSolver onBack={() => setScreen("stage")} onXP={() => addXP(20)} />}
       {screen === "leaderboard" && <Leaderboard onBack={() => setScreen("stage")} currentName={studentName} currentXP={xp} />}
       {screen === "games" && <GamesHub onBack={() => setScreen("stage")} onXP={(amount) => addXP(amount)} onBadge={(badge) => awardBadge(badge)} studentName={studentName} />}
+      {screen === "studio" && <QuizStudio onBack={() => setScreen("stage")} onXP={(n) => addXP(n)} onBadge={(b) => awardBadge(b)} studentName={studentName} stage={stage} />}
       {screen === "gallery" && <GeniusGallery onBack={() => setScreen("stage")} />}
       {screen === "selftest" && <SelfTest onBack={() => setScreen("stage")} onXP={(n) => addXP(n)} />}
 
