@@ -169,6 +169,8 @@ const Index = () => {
           onGallery={() => setScreen("gallery")}
           onSelfTest={() => setScreen("selftest")}
           onFoundation={() => setScreen("foundation")}
+          onStudio={() => setScreen("studio")}
+
           xp={xp}
           studentName={studentName}
           streak={streak}
