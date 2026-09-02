@@ -259,6 +259,29 @@ async function handle(req: Request): Promise<Response> {
     return json({ ok: true, request: data });
   }
 
+  // ===== إدارة لوحة الشرف: عرض وحذف الأسماء غير اللائقة أو التجريبية =====
+  if (action === "list_leaderboard") {
+    const token = typeof body.adminToken === "string" ? body.adminToken : "";
+    if (!(await verifyAdminToken(token))) return json({ error: "unauthorized" }, 401);
+    const { data, error } = await admin
+      .from("leaderboard")
+      .select("id,student_name,xp,badges,updated_at")
+      .order("xp", { ascending: false })
+      .limit(300);
+    if (error) return json({ error: "db_error" }, 500);
+    return json({ ok: true, entries: data ?? [] });
+  }
+
+  if (action === "delete_leaderboard_entry") {
+    const token = typeof body.adminToken === "string" ? body.adminToken : "";
+    if (!(await verifyAdminToken(token))) return json({ error: "unauthorized" }, 401);
+    const id = typeof body.id === "string" ? body.id : "";
+    if (!id) return json({ error: "invalid_input" }, 400);
+    const { error } = await admin.from("leaderboard").delete().eq("id", id);
+    if (error) return json({ error: "db_error" }, 500);
+    return json({ ok: true });
+  }
+
   return json({ error: "unknown_action" }, 400);
 }
 
