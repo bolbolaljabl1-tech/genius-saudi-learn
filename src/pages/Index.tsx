@@ -10,7 +10,6 @@ import CameraSolver from "@/components/CameraSolver";
 import ShareButton from "@/components/ShareButton";
 import Leaderboard from "@/components/Leaderboard";
 import GamesHub from "@/components/GamesHub";
-import GeniusGallery from "@/components/GeniusGallery";
 import QuizStudio from "@/components/QuizStudio";
 import SelfTest from "@/components/SelfTest";
 import StudentNameModal from "@/components/StudentNameModal";
@@ -19,6 +18,7 @@ import SupportModal from "@/components/SupportModal";
 import AppFooter from "@/components/AppFooter";
 import TrialBanner from "@/components/TrialBanner";
 import ThanksBoard from "@/components/ThanksBoard";
+import SplashIntro from "@/components/SplashIntro";
 import Checkout from "@/components/Checkout";
 import SubscriptionSettings from "@/components/SubscriptionSettings";
 import { useXP } from "@/hooks/useXP";
@@ -29,7 +29,7 @@ import { useOvertakeNotify } from "@/hooks/useOvertakeNotify";
 import { checkSubscriptionStatus } from "@/lib/activation";
 import { toast } from "@/components/ui/sonner";
 
-type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "gallery" | "selftest" | "checkout" | "foundation" | "studio";
+type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "selftest" | "checkout" | "foundation" | "studio";
 
 const LOCKED_SCREENS: Screen[] = ["lesson", "quiz", "selftest", "camera", "games", "studio"];
 
@@ -77,6 +77,16 @@ const Index = () => {
     prevScreenRef.current = screen;
   }, [screen]);
 
+
+  // المقدمة السينمائية: تعمل عند أول تحميل، وتعاد بلطف عند العودة للرئيسية.
+  const [splashKey, setSplashKey] = useState(0);
+  const [showSplash, setShowSplash] = useState(true);
+  useEffect(() => {
+    if (screen !== "stage") return;
+    if (prevScreenRef.current === "stage") return;
+    setSplashKey((k) => k + 1);
+    setShowSplash(true);
+  }, [screen]);
 
   const [stage, setStage] = useState("");
   const [subject, setSubject] = useState("");
@@ -146,6 +156,13 @@ const Index = () => {
       />
       {showNameModal && <StudentNameModal onSave={handleNameSave} />}
       <ThanksBoard />
+      {showSplash && (
+        <SplashIntro
+          playKey={splashKey}
+          duration={splashKey === 0 ? 2800 : 1800}
+          onDone={() => setShowSplash(false)}
+        />
+      )}
 
       {screen === "checkout" && (
         <Checkout
@@ -167,7 +184,6 @@ const Index = () => {
           onCamera={() => setScreen("camera")}
           onLeaderboard={openLeaderboard}
           onGames={() => setScreen("games")}
-          onGallery={() => setScreen("gallery")}
           onSelfTest={() => setScreen("selftest")}
           onFoundation={() => setScreen("foundation")}
           onStudio={() => setScreen("studio")}
@@ -196,7 +212,6 @@ const Index = () => {
       {screen === "leaderboard" && <Leaderboard onBack={() => setScreen("stage")} currentName={studentName} currentXP={xp} />}
       {screen === "games" && <GamesHub onBack={() => setScreen("stage")} onXP={(amount) => addXP(amount)} onBadge={(badge) => awardBadge(badge)} studentName={studentName} />}
       {screen === "studio" && <QuizStudio onBack={() => setScreen("stage")} onXP={(n) => addXP(n)} onBadge={(b) => awardBadge(b)} studentName={studentName} stage={stage} />}
-      {screen === "gallery" && <GeniusGallery onBack={() => setScreen("stage")} />}
       {screen === "selftest" && <SelfTest onBack={() => setScreen("stage")} onXP={(n) => addXP(n)} />}
 
       {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}

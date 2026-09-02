@@ -147,7 +147,7 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioPro
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-gold shadow-gold mb-3 animate-pulse-glow">
           <Sparkles className="w-10 h-10 text-gold-foreground" />
         </div>
-        <h1 className="text-3xl font-extrabold text-heading mb-1">أنشئ اختبارك بنفسك</h1>
+        <h1 className="text-3xl font-extrabold text-heading mb-1">صَمِّم لعبتك بنفسك</h1>
         <p className="text-muted-foreground text-lg font-bold">استوديو التحديات التفاعلية بالذكاء الاصطناعي</p>
       </div>
 
