@@ -39,12 +39,18 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+const GRADES = [
+  "الصف الأول الابتدائي", "الصف الثاني الابتدائي", "الصف الثالث الابتدائي",
+  "الصف الرابع الابتدائي", "الصف الخامس الابتدائي", "الصف السادس الابتدائي",
+  "الصف الأول المتوسط", "الصف الثاني المتوسط", "الصف الثالث المتوسط",
+];
+
 const praise = ["إجابة دقيقة، أحسنت", "ممتاز، استمر بهذا التركيز", "إتقان واضح", "أداء رائع"];
 const encourage = ["راجع المعلومة ثم واصل", "لا بأس، التعلم يبدأ من المحاولة", "ركز أكثر في المحاولة القادمة"];
 
 const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioProps) => {
   const [topic, setTopic] = useState("");
-  const [content, setContent] = useState("");
+  const [grade, setGrade] = useState("");
   const [loading, setLoading] = useState(false);
   const [pack, setPack] = useState<GamePack | null>(null);
   const [mode, setMode] = useState<Mode | null>(null);
@@ -89,15 +95,19 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioPro
   };
 
   const generate = async () => {
-    if (!topic.trim() && content.trim().length < 20) {
-      toast.error("يرجى كتابة الموضوع أو لصق محتوى دراسي كافٍ");
+    if (!topic.trim()) {
+      toast.error("يرجى كتابة الموضوع أو اسم الدرس");
+      return;
+    }
+    if (!grade) {
+      toast.error("يرجى اختيار الصف الدراسي");
       return;
     }
     setLoading(true);
     setPack(null);
     try {
       const { data, error } = await supabase.functions.invoke("generate-game", {
-        body: { topic: topic.trim(), content: content.trim(), stage: stage || "" },
+        body: { topic: topic.trim(), grade, stage: stage || "" },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
