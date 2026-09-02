@@ -705,22 +705,6 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
     }
   };
 
-  const saveToGallery = async () => {
-    if (!winnerName.trim() || finalTime === null) return;
-    const medal = getMedalInfo(finalTime);
-    try {
-      await (supabase as any).from("genius_gallery").insert({
-        student_name: winnerName.trim(),
-        medal: medal.key,
-        time_seconds: finalTime,
-        subject: subjectFilter || "all",
-        game_mode: gameMode,
-      });
-    } catch {
-      // silent
-    }
-    setShowWinModal(false);
-  };
 
   const resetGame = () => {
     setCellOwners(new Map());
