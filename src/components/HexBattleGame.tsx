@@ -929,23 +929,14 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
               <span className="font-bold">{formatTime(finalTime)}</span>
             </div>
             <p className="text-lg font-bold text-primary mb-2">+150 XP + وسام بطل الشبكة</p>
-            <input
-              type="text"
-              value={winnerName}
-              onChange={(e) => setWinnerName(e.target.value)}
-              placeholder="اسم الفائز"
-              className="w-full px-5 py-4 rounded-2xl border-2 border-input bg-card text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary text-center text-2xl font-bold mb-4"
-              dir="rtl"
-            />
-            <p className="brand-name text-base mb-4">منصة الطالب العبقري 2026 ✨</p>
+            <p className="brand-name text-base mb-4">منصة الطالب العبقري 2026</p>
             {sendingTelegram && <p className="text-sm text-muted-foreground mb-2">جارٍ إرسال التحدي...</p>}
             <div className="flex gap-3">
               <button
-                onClick={saveToGallery}
-                disabled={!winnerName.trim()}
-                className="flex-1 py-3 rounded-2xl gradient-emerald text-white font-bold text-lg shadow-emerald-lg active:scale-[0.97] transition-all disabled:opacity-50"
+                onClick={() => { setShowWinModal(false); resetGame(); }}
+                className="flex-1 py-3 rounded-2xl gradient-emerald text-primary-foreground font-bold text-lg shadow-emerald-lg active:scale-[0.97] transition-all"
               >
-                حفظ النتيجة
+                متابعة اللعب
               </button>
               <button
                 onClick={() => { setShowWinModal(false); resetGame(); }}
