@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2, RefreshCw, ShieldCheck, LogIn, Users, Clock } from "lucide-react";
+import { ArrowRight, CheckCircle2, RefreshCw, ShieldCheck, LogIn, Users, Clock, Trophy, Trash2, Search } from "lucide-react";
 import { toast } from "@/components/ui/sonner";
 import { PLAN_PRICES } from "@/lib/payment-config";
 import {
@@ -9,6 +9,9 @@ import {
   clearAdminToken,
   getAdminToken,
   listSubscriptionRequests,
+  listLeaderboardEntries,
+  deleteLeaderboardEntry,
+  type LeaderboardRow,
   type SubscriptionRequestRow,
 } from "@/lib/activation";
 
@@ -34,6 +37,10 @@ const Admin = () => {
   const [rows, setRows] = useState<SubscriptionRequestRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [activatingId, setActivatingId] = useState<string | null>(null);
+  const [board, setBoard] = useState<LeaderboardRow[]>([]);
+  const [boardLoading, setBoardLoading] = useState(false);
+  const [filter, setFilter] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -53,9 +60,48 @@ const Admin = () => {
     }
   }, []);
 
+  const loadBoard = useCallback(async () => {
+    setBoardLoading(true);
+    try {
+      setBoard(await listLeaderboardEntries());
+    } catch (err) {
+      if ((err as Error)?.message === "unauthorized") {
+        clearAdminToken();
+        setAuthed(false);
+      } else {
+        toast.error("تعذّر تحميل لوحة الشرف");
+      }
+    } finally {
+      setBoardLoading(false);
+    }
+  }, []);
+
+  const handleDeleteEntry = async (row: LeaderboardRow) => {
+    if (!window.confirm(`سيتم حذف الاسم "${row.student_name}" نهائياً من لوحة الشرف. هل تريد المتابعة؟`)) return;
+    setDeletingId(row.id);
+    try {
+      await deleteLeaderboardEntry(row.id);
+      setBoard((prev) => prev.filter((r) => r.id !== row.id));
+      toast.success("تم حذف الاسم من لوحة الشرف");
+    } catch (err) {
+      if ((err as Error)?.message === "unauthorized") {
+        clearAdminToken();
+        setAuthed(false);
+        toast.error("انتهت صلاحية جلسة الإدارة، يرجى تسجيل الدخول من جديد");
+      } else {
+        toast.error("تعذّر حذف الاسم، حاول لاحقاً");
+      }
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   useEffect(() => {
-    if (authed) void load();
-  }, [authed, load]);
+    if (authed) {
+      void load();
+      void loadBoard();
+    }
+  }, [authed, load, loadBoard]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,6 +175,9 @@ const Admin = () => {
     );
   }
 
+  const filteredBoard = board.filter((r) =>
+    r.student_name.toLowerCase().includes(filter.trim().toLowerCase()),
+  );
   const pending = rows.filter((r) => r.status === "pending");
   const active = rows.filter((r) => r.status === "active");
 
@@ -230,6 +279,63 @@ const Admin = () => {
               </article>
             );
           })}
+        </section>
+
+        {/* ===== إدارة لوحة الشرف وقائمة أفضل العباقرة ===== */}
+        <section className="space-y-3 pt-4">
+          <div className="flex items-center justify-between gap-2 flex-wrap">
+            <h2 className="text-2xl font-extrabold text-heading flex items-center gap-2">
+              <Trophy className="w-6 h-6 text-gold" />
+              إدارة لوحة الشرف
+            </h2>
+            <button
+              onClick={loadBoard}
+              disabled={boardLoading}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border-2 border-border bg-card font-extrabold text-sm active:scale-95 disabled:opacity-60"
+            >
+              <RefreshCw className={`w-4 h-4 ${boardLoading ? "animate-spin" : ""}`} />
+              تحديث
+            </button>
+          </div>
+          <p className="text-muted-foreground text-sm leading-6">
+            راجع الأسماء المسجلة واحذف أي اسم غير لائق أو تجريبي، وسيختفي فوراً من لوحة الشرف وقائمة أفضل العباقرة.
+          </p>
+          <div className="relative">
+            <Search className="w-5 h-5 absolute top-1/2 -translate-y-1/2 right-3 text-muted-foreground" />
+            <input
+              value={filter}
+              onChange={(e) => setFilter(e.target.value)}
+              placeholder="ابحث باسم الطالب"
+              className="w-full pr-11 pl-4 py-3 rounded-xl border-2 border-border bg-card font-bold text-base focus:outline-none focus:border-primary"
+            />
+          </div>
+
+          {filteredBoard.length === 0 && !boardLoading && (
+            <div className="neu-card p-6 text-center text-muted-foreground font-bold">
+              لا توجد أسماء مطابقة.
+            </div>
+          )}
+
+          <div className="space-y-2">
+            {filteredBoard.map((row, i) => (
+              <article key={row.id} className="neu-card p-4 flex items-center gap-3">
+                <span className="w-8 shrink-0 text-center font-extrabold text-muted-foreground">{i + 1}</span>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-extrabold text-heading text-base truncate">{row.student_name}</h3>
+                  <span className="text-xs font-bold text-muted-foreground">{row.xp} نقطة خبرة</span>
+                </div>
+                <button
+                  onClick={() => handleDeleteEntry(row)}
+                  disabled={deletingId === row.id}
+                  className="shrink-0 py-2.5 px-3 rounded-xl bg-destructive text-destructive-foreground font-extrabold text-sm inline-flex items-center gap-2 active:scale-95 transition disabled:opacity-60"
+                  aria-label={`حذف ${row.student_name}`}
+                >
+                  <Trash2 className="w-4 h-4" />
+                  حذف
+                </button>
+              </article>
+            ))}
+          </div>
         </section>
       </div>
     </main>

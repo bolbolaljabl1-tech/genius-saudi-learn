@@ -39,12 +39,18 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
+const GRADES = [
+  "الصف الأول الابتدائي", "الصف الثاني الابتدائي", "الصف الثالث الابتدائي",
+  "الصف الرابع الابتدائي", "الصف الخامس الابتدائي", "الصف السادس الابتدائي",
+  "الصف الأول المتوسط", "الصف الثاني المتوسط", "الصف الثالث المتوسط",
+];
+
 const praise = ["إجابة دقيقة، أحسنت", "ممتاز، استمر بهذا التركيز", "إتقان واضح", "أداء رائع"];
 const encourage = ["راجع المعلومة ثم واصل", "لا بأس، التعلم يبدأ من المحاولة", "ركز أكثر في المحاولة القادمة"];
 
 const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioProps) => {
   const [topic, setTopic] = useState("");
-  const [content, setContent] = useState("");
+  const [grade, setGrade] = useState("");
   const [loading, setLoading] = useState(false);
   const [pack, setPack] = useState<GamePack | null>(null);
   const [mode, setMode] = useState<Mode | null>(null);
@@ -89,15 +95,19 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioPro
   };
 
   const generate = async () => {
-    if (!topic.trim() && content.trim().length < 20) {
-      toast.error("يرجى كتابة الموضوع أو لصق محتوى دراسي كافٍ");
+    if (!topic.trim()) {
+      toast.error("يرجى كتابة الموضوع أو اسم الدرس");
+      return;
+    }
+    if (!grade) {
+      toast.error("يرجى اختيار الصف الدراسي");
       return;
     }
     setLoading(true);
     setPack(null);
     try {
       const { data, error } = await supabase.functions.invoke("generate-game", {
-        body: { topic: topic.trim(), content: content.trim(), stage: stage || "" },
+        body: { topic: topic.trim(), grade, stage: stage || "" },
       });
       if (error) throw error;
       if ((data as any)?.error) throw new Error((data as any).error);
@@ -147,7 +157,7 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioPro
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-gold shadow-gold mb-3 animate-pulse-glow">
           <Sparkles className="w-10 h-10 text-gold-foreground" />
         </div>
-        <h1 className="text-3xl font-extrabold text-heading mb-1">أنشئ اختبارك بنفسك</h1>
+        <h1 className="text-3xl font-extrabold text-heading mb-1">صَمِّم لعبتك بنفسك</h1>
         <p className="text-muted-foreground text-lg font-bold">استوديو التحديات التفاعلية بالذكاء الاصطناعي</p>
       </div>
 
@@ -164,17 +174,20 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioPro
             placeholder="مثال: الكسور العشرية، دورة الماء في الطبيعة"
             className="w-full rounded-2xl border-2 border-border bg-background px-4 py-3 text-lg font-bold outline-none focus:border-primary transition"
           />
-          <label className="block text-base font-extrabold text-heading mt-4 mb-2" htmlFor="qs-content">
-            المحتوى الدراسي (اختياري)
+          <label className="block text-base font-extrabold text-heading mt-4 mb-2" htmlFor="qs-grade">
+            الصف الدراسي
           </label>
-          <textarea
-            id="qs-content"
-            value={content}
-            onChange={(e) => setContent(e.target.value.slice(0, 6000))}
-            rows={4}
-            placeholder="الصق هنا نص الدرس أو الملخص ليولد النظام أسئلة دقيقة منه"
-            className="w-full rounded-2xl border-2 border-border bg-background px-4 py-3 text-base font-bold outline-none focus:border-primary transition resize-y"
-          />
+          <select
+            id="qs-grade"
+            value={grade}
+            onChange={(e) => setGrade(e.target.value)}
+            className="w-full rounded-2xl border-2 border-border bg-background px-4 py-3 text-lg font-bold outline-none focus:border-primary transition"
+          >
+            <option value="">اختر الصف الدراسي</option>
+            {GRADES.map((g) => (
+              <option key={g} value={g}>{g}</option>
+            ))}
+          </select>
           <button
             onClick={generate}
             disabled={loading}

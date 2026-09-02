@@ -24,6 +24,7 @@ serve(async (req) => {
     const topic = String(body?.topic ?? "").slice(0, 200).trim();
     const content = String(body?.content ?? "").slice(0, 6000).trim();
     const stage = String(body?.stage ?? "").slice(0, 40).trim();
+    const grade = String(body?.grade ?? "").slice(0, 60).trim();
     if (!topic && !content) {
       return new Response(JSON.stringify({ error: "يرجى إدخال الموضوع أو المحتوى الدراسي" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -48,11 +49,13 @@ serve(async (req) => {
 - لا تستخدم أي عبارات تحدد الجنس أو العمر.
 - الأسئلة دقيقة علمياً ومرتبطة مباشرة بالموضوع أو المحتوى المرسل.
 - اجعل الصياغة قصيرة وواضحة تناسب العرض على شاشة الجوال.
-${stage === "elementary" ? "- الطالب في المرحلة الابتدائية: استخدم كلمات سهلة وجملاً قصيرة." : ""}`,
+${stage === "elementary" ? "- الطالب في المرحلة الابتدائية: استخدم كلمات سهلة وجملاً قصيرة." : ""}
+${grade ? `- الطالب في ${grade}: اضبط مستوى الصعوبة والمفردات والمفاهيم لتناسب هذا الصف تماماً وفق المنهج السعودي.` : ""}`,
           },
           {
             role: "user",
             content: `صمم حزمة ألعاب تعليمية متكاملة عن: "${topic || "المحتوى المرفق"}".
+${grade ? `الصف الدراسي المستهدف: ${grade}.` : ""}
 ${content ? `المحتوى الدراسي المرجعي:\n${content}` : ""}
 
 المطلوب أربع صيغ:

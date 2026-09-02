@@ -151,3 +151,40 @@ export async function activateSubscriptionRequest(id: string): Promise<Subscript
   if (!res?.ok || !res.request) throw new Error("failed");
   return res.request;
 }
+
+export interface LeaderboardRow {
+  id: string;
+  student_name: string;
+  xp: number;
+  badges: string[] | null;
+  updated_at: string | null;
+}
+
+export async function listLeaderboardEntries(): Promise<LeaderboardRow[]> {
+  const adminToken = getAdminToken();
+  if (!adminToken) throw new Error("unauthorized");
+  const res = await invoke<{ ok?: boolean; entries?: LeaderboardRow[]; error?: string }>({
+    action: "list_leaderboard",
+    adminToken,
+  });
+  if (res?.error === "unauthorized") {
+    clearAdminToken();
+    throw new Error("unauthorized");
+  }
+  return res?.entries ?? [];
+}
+
+export async function deleteLeaderboardEntry(id: string): Promise<void> {
+  const adminToken = getAdminToken();
+  if (!adminToken) throw new Error("unauthorized");
+  const res = await invoke<{ ok?: boolean; error?: string }>({
+    action: "delete_leaderboard_entry",
+    adminToken,
+    id,
+  });
+  if (res?.error === "unauthorized") {
+    clearAdminToken();
+    throw new Error("unauthorized");
+  }
+  if (!res?.ok) throw new Error("failed");
+}
