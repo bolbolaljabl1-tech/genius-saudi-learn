@@ -961,7 +961,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
                 disabled={!winnerName.trim()}
                 className="flex-1 py-3 rounded-2xl gradient-emerald text-white font-bold text-lg shadow-emerald-lg active:scale-[0.97] transition-all disabled:opacity-50"
               >
-                حفظ في المعرض ✨
+                حفظ النتيجة
               </button>
               <button
                 onClick={() => { setShowWinModal(false); resetGame(); }}
