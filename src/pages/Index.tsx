@@ -68,10 +68,12 @@ const Index = () => {
   }, []);
 
   const prevScreenRef = useRef<Screen>("stage");
+  const returningHomeRef = useRef(false);
   useEffect(() => {
     if (backRef.current) {
       backRef.current = false;
     } else if (prevScreenRef.current !== screen) {
+      returningHomeRef.current = screen === "stage";
       historyRef.current.push(prevScreenRef.current);
     }
     prevScreenRef.current = screen;
@@ -82,8 +84,8 @@ const Index = () => {
   const [splashKey, setSplashKey] = useState(0);
   const [showSplash, setShowSplash] = useState(true);
   useEffect(() => {
-    if (screen !== "stage") return;
-    if (prevScreenRef.current === "stage") return;
+    if (screen !== "stage" || !returningHomeRef.current) return;
+    returningHomeRef.current = false;
     setSplashKey((k) => k + 1);
     setShowSplash(true);
   }, [screen]);
