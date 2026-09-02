@@ -164,17 +164,20 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioPro
             placeholder="مثال: الكسور العشرية، دورة الماء في الطبيعة"
             className="w-full rounded-2xl border-2 border-border bg-background px-4 py-3 text-lg font-bold outline-none focus:border-primary transition"
           />
-          <label className="block text-base font-extrabold text-heading mt-4 mb-2" htmlFor="qs-content">
-            المحتوى الدراسي (اختياري)
+          <label className="block text-base font-extrabold text-heading mt-4 mb-2" htmlFor="qs-grade">
+            الصف الدراسي
           </label>
-          <textarea
-            id="qs-content"
-            value={content}
-            onChange={(e) => setContent(e.target.value.slice(0, 6000))}
-            rows={4}
-            placeholder="الصق هنا نص الدرس أو الملخص ليولد النظام أسئلة دقيقة منه"
-            className="w-full rounded-2xl border-2 border-border bg-background px-4 py-3 text-base font-bold outline-none focus:border-primary transition resize-y"
-          />
+          <select
+            id="qs-grade"
+            value={grade}
+            onChange={(e) => setGrade(e.target.value)}
+            className="w-full rounded-2xl border-2 border-border bg-background px-4 py-3 text-lg font-bold outline-none focus:border-primary transition"
+          >
+            <option value="">اختر الصف الدراسي</option>
+            {GRADES.map((g) => (
+              <option key={g} value={g}>{g}</option>
+            ))}
+          </select>
           <button
             onClick={generate}
             disabled={loading}
