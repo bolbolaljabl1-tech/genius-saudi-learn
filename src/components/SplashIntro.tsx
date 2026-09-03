@@ -32,17 +32,22 @@ const SplashIntro = ({ playKey, duration = 2600, onDone }: SplashIntroProps) => 
     [playKey],
   );
 
+  // نحتفظ بالمُنادى في مرجع ثابت حتى لا تُعاد المؤقتات مع كل إعادة رسم
+  // للصفحة الأم، فتبقى المقدمة معلّقة على الشاشة.
+  const onDoneRef = useRef(onDone);
+  onDoneRef.current = onDone;
+
   useEffect(() => {
     setClosing(false);
     const fade = window.setTimeout(() => setClosing(true), Math.max(600, duration - 450));
-    const end = window.setTimeout(() => onDone?.(), duration);
+    const end = window.setTimeout(() => onDoneRef.current?.(), duration);
     return () => {
       window.clearTimeout(fade);
       window.clearTimeout(end);
     };
-  }, [playKey, duration, onDone]);
+  }, [playKey, duration]);
 
-  const skip = () => onDone?.();
+  const skip = () => onDoneRef.current?.();
 
   return (
     <div
