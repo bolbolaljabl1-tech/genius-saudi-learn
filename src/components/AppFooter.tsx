@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mail, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { adminLogin } from "@/lib/activation";
@@ -64,10 +64,6 @@ const AppFooter = () => {
             </button>
           </div>
 
-          <p className="hidden" aria-hidden="true">
-            <Mail className="w-3 h-3" />
-            <span style={{ fontFamily: "'Courier New', monospace" }}>tchjaber@gmail.com</span>
-          </p>
         </div>
       </footer>
 

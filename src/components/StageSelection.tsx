@@ -23,10 +23,10 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
   ];
 
   return (
-    <div className="min-h-screen flex flex-col items-center pt-4">
+    <div className="min-h-screen flex flex-col items-center pt-2">
       <div className="w-full px-4 flex flex-col items-center">
         {/* Top bar with XP */}
-        <div className="w-full max-w-xl flex items-center justify-between mb-4 animate-slide-up">
+        <div className="w-full max-w-xl flex items-center justify-between mb-2 animate-slide-up">
           <button onClick={onLeaderboard} className="flex items-center gap-2 neu-btn px-5 py-3 hover:shadow-emerald transition-all active:scale-[0.98]" aria-label="عرض لوحة الشرف">
             <Trophy className="w-5 h-5 text-gold" />
             <span className="text-foreground font-extrabold text-lg">{xp} XP</span>
@@ -50,7 +50,7 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
 
         {/* Hero Banner - main identity (enlarged 30%) */}
         <h1 className="sr-only">منصة الطالب العبقري — مراجعة وتحديات ذكية</h1>
-        <div className="w-full max-w-3xl mb-8 animate-scale-in px-0">
+        <div className="w-full max-w-3xl mb-5 animate-scale-in px-0">
           <img
             src={heroBanner}
             alt="منصة الطالب العبقري — شعار الواجهة الرئيسية"
