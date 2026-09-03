@@ -29,35 +29,46 @@ const AppFooter = () => {
 
   return (
     <>
-      <footer className="fixed bottom-0 inset-x-0 py-3 text-center bg-royal-blue/60 backdrop-blur-2xl z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.25)] border-t-0 isolate">
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-matte-gold to-transparent opacity-90" />
-        <button
-          onClick={() => setOpen(true)}
-          aria-label="إدارة الموافقات"
-          title="إدارة الموافقات"
-          className="absolute left-3 bottom-3 w-7 h-7 rounded-full flex items-center justify-center text-matte-gold/50 hover:text-matte-gold active:scale-90 transition"
-        >
-          <ShieldCheck className="w-4 h-4" />
-        </button>
-        <p className="font-amiri font-bold text-lg animate-footer-pulse">
-          <span className="brand-name">منصة الطالب العبقري</span>
-          <span className="text-matte-gold"> - 2026 🎓</span>
-        </p>
-        <p className="text-xs font-bold mt-1 flex items-center justify-center gap-1 text-matte-gold/70">
-          <Mail className="w-3 h-3" />
-          <span style={{ fontFamily: "'Courier New', monospace" }}>tchjaber@gmail.com</span>
-        </p>
-        <a
-          href="/privacy"
-          onClick={(e) => {
-            e.preventDefault();
-            navigate("/privacy");
-          }}
-          className="mt-1 inline-flex items-center gap-1 text-xs font-extrabold text-matte-gold underline underline-offset-4 decoration-matte-gold/50 hover:decoration-matte-gold active:scale-95 transition"
-        >
-          <ShieldCheck className="w-3 h-3" />
-          سياسة الخصوصية
-        </a>
+      <footer className="fixed bottom-0 inset-x-0 z-50 bg-royal-blue/80 backdrop-blur-2xl border-t border-matte-gold/20 shadow-[0_-2px_16px_rgba(0,0,0,0.18)]">
+        <div className="max-w-3xl mx-auto px-3 py-2 sm:py-2.5">
+          <div className="flex items-center justify-between gap-2">
+            <a
+              href="/privacy"
+              onClick={(e) => {
+                e.preventDefault();
+                navigate("/privacy");
+              }}
+              className="shrink-0 inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-matte-gold/80 hover:text-matte-gold underline underline-offset-2 decoration-matte-gold/40 hover:decoration-matte-gold active:scale-95 transition"
+            >
+              <ShieldCheck className="w-3 h-3" />
+              سياسة الخصوصية
+            </a>
+
+            <div className="flex flex-col items-center leading-none">
+              <p className="font-amiri font-bold text-sm sm:text-base animate-footer-pulse">
+                <span className="brand-name">منصة الطالب العبقري</span>
+                <span className="text-matte-gold"> - 2026 🎓</span>
+              </p>
+              <p className="text-[10px] font-bold text-matte-gold/60 mt-0.5">
+                جميع الحقوق محفوظة — حقوق الملكية الفكرية
+              </p>
+            </div>
+
+            <button
+              onClick={() => setOpen(true)}
+              aria-label="إدارة الموافقات"
+              title="إدارة الموافقات"
+              className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-matte-gold/40 hover:text-matte-gold active:scale-90 transition"
+            >
+              <ShieldCheck className="w-3 h-3" />
+            </button>
+          </div>
+
+          <p className="hidden" aria-hidden="true">
+            <Mail className="w-3 h-3" />
+            <span style={{ fontFamily: "'Courier New', monospace" }}>tchjaber@gmail.com</span>
+          </p>
+        </div>
       </footer>
 
       {open && (
