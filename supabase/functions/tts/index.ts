@@ -63,13 +63,13 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         model: "openai/gpt-4o-mini-tts",
         input: text,
-        // "onyx" = deep, resonant male voice; closest match to the requested
-        // "صوت جهوري قوي ممتزج ببحة طبيعية" teacher tone.
-        voice: "onyx",
+        // "nova" = bright, warm, youthful voice; matches the requested
+        // cheerful high-energy welcome tone.
+        voice: "nova",
         instructions: TEACHER_INSTRUCTIONS,
         stream_format: "sse",
         response_format: "pcm",
-        speed: 1.18,
+        speed: 1.25,
       }),
       signal: req.signal,
     });
