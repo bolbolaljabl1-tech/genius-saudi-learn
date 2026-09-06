@@ -32,8 +32,8 @@ export const useTTS = () => {
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = "ar-SA";
-    utterance.rate = 0.92;
-    utterance.pitch = 0.9;
+    utterance.rate = 1.1;
+    utterance.pitch = 1.05;
     const voices = window.speechSynthesis.getVoices();
     const arabicVoice = voices.find((v) => v.lang.startsWith("ar"));
     if (arabicVoice) utterance.voice = arabicVoice;

@@ -6,10 +6,10 @@ import { abuseCheck } from "../_shared/abuse-guard.ts";
 const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY") ?? "";
 
 const TEACHER_INSTRUCTIONS =
-  "You are speaking Modern Standard Arabic (الفصحى) as a confident, warm, and motivating Saudi male teacher. " +
-  "Deliver every phrase with a deep, resonant chest voice, a natural, dignified rasp, and slow, precise articulation. " +
-  "Honor full Arabic tashkeel and correct مخارج الحروف, especially ح خ ع غ ق ض ظ ص. " +
-  "No robotic monotone. Keep the pacing calm, majestic, and encouraging — a mentor, not a narrator.";
+  "You are speaking Modern Standard Arabic (الفصحى) as an energetic, lively, and highly motivating Saudi male teacher. " +
+  "Deliver every phrase with a bright, upbeat, fast-paced rhythm full of enthusiasm and warmth, like a coach rallying his star student. " +
+  "Honor full Arabic tashkeel and correct مخارج الحروف, especially ح خ ع غ ق ض ظ ص, while keeping articulation crisp at speed. " +
+  "No robotic monotone and no slow dragging. Sound excited, welcoming, and playful — an energetic mentor celebrating the student.";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
         instructions: TEACHER_INSTRUCTIONS,
         stream_format: "sse",
         response_format: "pcm",
-        speed: 0.95,
+        speed: 1.18,
       }),
       signal: req.signal,
     });

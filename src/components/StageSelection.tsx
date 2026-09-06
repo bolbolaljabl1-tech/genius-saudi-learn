@@ -125,12 +125,17 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
         {/* Stage Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-xl">
           {stages.map((stage) => (
-            <button key={stage.id} onClick={() => onSelect(stage.id)} className="group neu-card p-8 text-center transition-all duration-300 hover:shadow-emerald-lg hover:scale-[1.03] active:scale-[0.98] animate-scale-in cursor-pointer" style={{ animationDelay: stage.delay }}>
-              <div className="inline-flex items-center justify-center w-[4.5rem] h-[4.5rem] rounded-2xl gradient-emerald shadow-emerald mb-5 transition-transform duration-300 group-hover:scale-110">
-                <stage.icon className="w-9 h-9 text-primary-foreground" />
+            <button
+              key={stage.id}
+              onClick={() => onSelect(stage.id)}
+              className="group bg-card rounded-2xl p-4 text-center border border-border/60 transition-all duration-300 hover:-translate-y-1 hover:shadow-emerald-lg active:scale-[0.97] animate-scale-in cursor-pointer stage-card-3d"
+              style={{ animationDelay: stage.delay }}
+            >
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl gradient-emerald shadow-emerald mb-2.5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                <stage.icon className="w-6 h-6 text-primary-foreground" />
               </div>
-              <h2 className="text-2xl font-extrabold text-heading mb-2">{stage.title}</h2>
-              <p className="text-muted-foreground text-base">{stage.description}</p>
+              <h2 className="text-lg font-extrabold text-heading mb-0.5">{stage.title}</h2>
+              <p className="text-muted-foreground text-sm font-medium">{stage.description}</p>
             </button>
           ))}
         </div>
