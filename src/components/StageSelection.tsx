@@ -98,44 +98,45 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
         {/* قسم التأسيس — مواد نافس الأربع */}
         <button
           onClick={onFoundation}
-          className="w-full max-w-xl mb-4 p-5 rounded-2xl neu-card border-2 border-gold/50 text-right active:scale-[0.98] transition-all animate-scale-in hover:shadow-gold"
+          className="w-full max-w-xl mb-4 px-4 py-3 rounded-2xl neu-card border-2 border-gold/50 text-right active:scale-[0.98] transition-all animate-scale-in hover:shadow-gold stage-card-3d"
           style={{ animationDelay: "0.18s" }}
           aria-label="قسم التأسيس لمواد نافس الأربع"
         >
-          <span className="flex items-center gap-3 mb-2">
-            <span className="inline-flex items-center justify-center w-14 h-14 rounded-xl gradient-gold shadow-gold shrink-0">
-              <Blocks className="w-8 h-8 text-gold-foreground" />
+          <span className="flex items-center gap-3">
+            <span className="inline-flex items-center justify-center w-10 h-10 rounded-xl gradient-gold shadow-gold shrink-0">
+              <Blocks className="w-6 h-6 text-gold-foreground" />
             </span>
-            <span className="text-3xl font-extrabold text-heading">التأسيس</span>
+            <span>
+              <span className="block text-xl font-extrabold text-heading">التأسيس</span>
+              <span className="block text-xs sm:text-sm font-bold text-muted-foreground leading-snug">
+                (المهارات الأساسية للمواد المستهدفة في الاختبارات الوطنية)
+              </span>
+            </span>
           </span>
-          <span className="block text-base sm:text-lg font-bold text-muted-foreground leading-relaxed">
-            (المهارات الأساسية للمواد المستهدفة في الاختبارات الوطنية)
-          </span>
-
         </button>
 
 
 
 
         {/* Stage Label */}
-        <div className="text-center mb-6 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-          <p className="text-muted-foreground text-xl font-bold">اختر مرحلتك الدراسية للبدء</p>
+        <div className="text-center mb-4 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+          <p className="text-muted-foreground text-base font-bold">اختر مرحلتك الدراسية للبدء</p>
         </div>
 
         {/* Stage Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 w-full max-w-xl">
+        <div className="grid grid-cols-2 gap-3 w-full max-w-xl">
           {stages.map((stage) => (
             <button
               key={stage.id}
               onClick={() => onSelect(stage.id)}
-              className="group bg-card rounded-2xl p-4 text-center border border-border/60 transition-all duration-300 hover:-translate-y-1 hover:shadow-emerald-lg active:scale-[0.97] animate-scale-in cursor-pointer stage-card-3d"
+              className="group bg-card rounded-xl px-2 py-3 text-center border border-border/60 transition-all duration-300 hover:-translate-y-1 hover:shadow-emerald-lg active:scale-[0.97] animate-scale-in cursor-pointer stage-card-3d"
               style={{ animationDelay: stage.delay }}
             >
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl gradient-emerald shadow-emerald mb-2.5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
-                <stage.icon className="w-6 h-6 text-primary-foreground" />
+              <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg gradient-emerald shadow-emerald mb-1.5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
+                <stage.icon className="w-5 h-5 text-primary-foreground" />
               </div>
-              <h2 className="text-lg font-extrabold text-heading mb-0.5">{stage.title}</h2>
-              <p className="text-muted-foreground text-sm font-medium">{stage.description}</p>
+              <h2 className="text-base font-extrabold text-heading mb-0">{stage.title}</h2>
+              <p className="text-muted-foreground text-xs font-medium">{stage.description}</p>
             </button>
           ))}
         </div>
