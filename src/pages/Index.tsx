@@ -21,6 +21,7 @@ import ThanksBoard from "@/components/ThanksBoard";
 import SplashIntro from "@/components/SplashIntro";
 import Checkout from "@/components/Checkout";
 import SubscriptionSettings from "@/components/SubscriptionSettings";
+import WeeklyCompetitionBanner from "@/components/WeeklyCompetitionBanner";
 import { useXP } from "@/hooks/useXP";
 import { useTrial } from "@/hooks/useTrial";
 import { useTTS } from "@/hooks/useTTS";
@@ -164,6 +165,10 @@ const Index = () => {
           duration={splashKey === 0 ? 2800 : 1800}
           onDone={() => setShowSplash(false)}
         />
+      )}
+
+      {screen === "stage" && !showSplash && (
+        <WeeklyCompetitionBanner onOpenLeaderboard={openLeaderboard} />
       )}
 
       {screen === "checkout" && (
