@@ -352,10 +352,9 @@
 
   /* إعلان مسابقة العباقرة الأسبوعية */
   .weekly-competition-shell {
-    position: fixed;
-    inset-inline: 0;
-    top: 5.5rem;
-    z-index: 65;
+    position: relative;
+    z-index: 40;
+    margin-bottom: 0.75rem;
     pointer-events: none;
   }
 
