@@ -349,4 +349,61 @@
     to { opacity: 0; transform: scale(1.06); }
   }
   .animate-splash-out { animation: splashOut 0.45s ease-in forwards; pointer-events: none; }
+
+  /* إعلان مسابقة العباقرة الأسبوعية */
+  .weekly-competition-shell {
+    position: relative;
+    z-index: 40;
+    margin-bottom: 0.75rem;
+    pointer-events: none;
+  }
+
+  .weekly-competition-shell > div {
+    pointer-events: auto;
+  }
+
+  @keyframes weeklyCompetitionIn {
+    from { opacity: 0; transform: translateY(-18px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes weeklyCompetitionOut {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(-14px) scale(0.97); }
+  }
+
+  @keyframes weeklyCompetitionShimmer {
+    0% { transform: translateX(120%) skewX(-18deg); }
+    55%, 100% { transform: translateX(-170%) skewX(-18deg); }
+  }
+
+  @keyframes weeklyCompetitionParticle {
+    0%, 100% { opacity: 0.2; transform: scale(0.65); box-shadow: 0 0 3px hsl(var(--matte-gold)); }
+    50% { opacity: 1; transform: scale(1.35); box-shadow: 0 0 12px hsl(var(--matte-gold)); }
+  }
+
+  @keyframes weeklyCompetitionStar {
+    0%, 100% { opacity: 0.65; transform: rotate(-8deg) scale(0.9); }
+    50% { opacity: 1; transform: rotate(10deg) scale(1.18); }
+  }
+
+  .weekly-competition-in { animation: weeklyCompetitionIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .weekly-competition-out { animation: weeklyCompetitionOut 0.45s ease-in both; }
+  .weekly-competition-shimmer {
+    width: 42%;
+    background: linear-gradient(90deg, transparent, hsl(var(--matte-gold) / 0.2), transparent);
+    animation: weeklyCompetitionShimmer 3.2s ease-in-out infinite;
+  }
+  .weekly-competition-particle { animation: weeklyCompetitionParticle 1.8s ease-in-out infinite; }
+  .weekly-competition-star { animation: weeklyCompetitionStar 1.4s ease-in-out infinite; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .weekly-competition-in,
+    .weekly-competition-out,
+    .weekly-competition-shimmer,
+    .weekly-competition-particle,
+    .weekly-competition-star {
+      animation: none;
+    }
+  }
 }
