@@ -22,6 +22,7 @@ import SplashIntro from "@/components/SplashIntro";
 import Checkout from "@/components/Checkout";
 import SubscriptionSettings from "@/components/SubscriptionSettings";
 import WeeklyCompetitionBanner from "@/components/WeeklyCompetitionBanner";
+import GuideMascot from "@/components/GuideMascot";
 import { useXP } from "@/hooks/useXP";
 import { useTrial } from "@/hooks/useTrial";
 import { useTTS } from "@/hooks/useTTS";
@@ -248,6 +249,16 @@ const Index = () => {
       )}
 
       <ShareButton />
+
+      {!showSplash && ["stage", "subject", "search", "lesson", "camera", "foundation", "studio", "selftest"].includes(screen) && (
+        <GuideMascot
+          screen={screen as "stage" | "subject" | "search" | "lesson" | "camera" | "foundation" | "studio" | "selftest"}
+          xp={xp}
+          studentName={studentName}
+          onCamera={() => setScreen("camera")}
+          onStudio={() => setScreen("studio")}
+        />
+      )}
 
       {/* Compact top guide banner — single-line, emoji-free, voice-guided. */}
       <button

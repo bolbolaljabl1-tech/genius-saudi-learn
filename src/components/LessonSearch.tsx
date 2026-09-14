@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, Sparkles, Loader2, BookOpen, Rocket } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
+import CurriculumReader from "./CurriculumReader";
+import { Button } from "@/components/ui/button";
 
 interface LessonSearchProps {
   subject: string;
@@ -54,17 +56,10 @@ const LessonSearch = ({ subject, stage, onSearch, onBack }: LessonSearchProps) =
   const [lesson, setLesson] = useState("");
   const [lessons, setLessons] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [readerOpen, setReaderOpen] = useState(false);
 
   const subjectLabel = subjectNames[selSubject] ?? "";
   const ready = Boolean(selStage && grade && selSubject && semester);
-
-  const bookUrl = useMemo(
-    () =>
-      `https://ien.edu.sa/#/search?q=${encodeURIComponent(
-        `${subjectLabel} ${grade} ${semester}`.trim(),
-      )}`,
-    [subjectLabel, grade, semester],
-  );
 
   useEffect(() => {
     setGrade("");
@@ -180,14 +175,15 @@ const LessonSearch = ({ subject, stage, onSearch, onBack }: LessonSearchProps) =
             )}
           </div>
 
-          <button
-            onClick={() => window.open(bookUrl, "_blank", "noopener,noreferrer")}
-            disabled={!ready}
+          <Button
+            type="button"
+            onClick={() => setReaderOpen(true)}
+            disabled={!lesson}
             className="w-full py-5 rounded-2xl neu-btn text-foreground font-extrabold text-xl flex items-center justify-center gap-3 active:scale-[0.98] transition disabled:opacity-50"
           >
             <BookOpen className="w-6 h-6 text-gold" />
-            تصفح كتاب المادة
-          </button>
+            افتح كتاب المادة داخل المنصة
+          </Button>
 
 
           <button
@@ -200,6 +196,17 @@ const LessonSearch = ({ subject, stage, onSearch, onBack }: LessonSearchProps) =
           </button>
         </div>
       </div>
+
+      <CurriculumReader
+        open={readerOpen}
+        onOpenChange={setReaderOpen}
+        stage={STAGES.find((item) => item.id === selStage)?.label ?? ""}
+        grade={grade}
+        subject={subjectLabel}
+        semester={semester}
+        initialLesson={lesson}
+        lessons={lessons}
+      />
 
 
 
