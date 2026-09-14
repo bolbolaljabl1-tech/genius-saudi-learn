@@ -37,6 +37,7 @@ const CurriculumReader = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [speaking, setSpeaking] = useState(false);
+  const [loadNonce, setLoadNonce] = useState(0);
   const { speak, stop } = useTTS();
 
   const orderedLessons = useMemo(() => {
@@ -80,7 +81,7 @@ const CurriculumReader = ({
     return () => {
       cancelled = true;
     };
-  }, [open, selectedLesson, stage, grade, subject, semester, stop]);
+  }, [open, selectedLesson, stage, grade, subject, semester, stop, loadNonce]);
 
   const toggleSpeech = async () => {
     if (speaking) {
@@ -156,7 +157,7 @@ const CurriculumReader = ({
               ) : error ? (
                 <div className="flex min-h-64 flex-col items-center justify-center gap-4 text-center">
                   <p className="text-base font-bold text-destructive">{error}</p>
-                  <Button type="button" onClick={() => setSelectedLesson((value) => `${value} ` .trim())}>
+                  <Button type="button" onClick={() => setLoadNonce((value) => value + 1)}>
                     <RefreshCw className="h-4 w-4" /> إعادة المحاولة
                   </Button>
                 </div>
