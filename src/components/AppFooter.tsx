@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Twitter, Music2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { adminLogin } from "@/lib/activation";
@@ -52,6 +52,28 @@ const AppFooter = () => {
               <p className="text-[10px] font-bold text-matte-gold/60 mt-0.5">
                 جميع الحقوق محفوظة — حقوق الملكية الفكرية
               </p>
+              <div className="flex items-center gap-2 mt-1">
+                <a
+                  href="https://x.com/tchjaber"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="حساب المنصة على منصة إكس"
+                  title="تابعنا على إكس"
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-matte-gold/70 hover:text-matte-gold active:scale-90 transition"
+                >
+                  <Twitter className="w-3 h-3" />
+                </a>
+                <a
+                  href="https://www.tiktok.com/@.al71393"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="حساب المنصة على تيك توك"
+                  title="تابعنا على تيك توك"
+                  className="w-5 h-5 rounded-full flex items-center justify-center text-matte-gold/70 hover:text-matte-gold active:scale-90 transition"
+                >
+                  <Music2 className="w-3 h-3" />
+                </a>
+              </div>
             </div>
 
             <button
