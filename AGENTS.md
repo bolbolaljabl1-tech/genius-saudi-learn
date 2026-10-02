@@ -1,0 +1,2 @@
+Keep the first-visit splash state in localStorage at the main page entry, so navigation and refresh never replay it after the first arrival.
+Keep official social follow links in the home page's bottom section rather than the fixed footer, so they remain prominent without obscuring navigation.
