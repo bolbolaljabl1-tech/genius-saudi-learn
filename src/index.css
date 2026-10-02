@@ -458,6 +458,7 @@
     .weekly-competition-shimmer,
     .weekly-competition-particle,
     .weekly-competition-star,
+    .social-follow-link::before,
     .guide-celebrate {
       animation: none;
     }
