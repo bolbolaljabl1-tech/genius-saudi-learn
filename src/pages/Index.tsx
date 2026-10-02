@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MessageCircleHeart, LifeBuoy, Settings, Map } from "lucide-react";
+import { MessageCircleHeart, Settings, Map } from "lucide-react";
 import StageSelection from "@/components/StageSelection";
 import FoundationHub from "@/components/FoundationHub";
 import SubjectSelection from "@/components/SubjectSelection";
@@ -17,12 +17,9 @@ import WhisperModal from "@/components/WhisperModal";
 import SupportModal from "@/components/SupportModal";
 import AppFooter from "@/components/AppFooter";
 import TrialBanner from "@/components/TrialBanner";
-import ThanksBoard from "@/components/ThanksBoard";
 import SplashIntro from "@/components/SplashIntro";
 import Checkout from "@/components/Checkout";
 import SubscriptionSettings from "@/components/SubscriptionSettings";
-import WeeklyCompetitionBanner from "@/components/WeeklyCompetitionBanner";
-import GuideMascot from "@/components/GuideMascot";
 import { useXP } from "@/hooks/useXP";
 import { useTrial } from "@/hooks/useTrial";
 import { useTTS } from "@/hooks/useTTS";
@@ -70,27 +67,25 @@ const Index = () => {
   }, []);
 
   const prevScreenRef = useRef<Screen>("stage");
-  const returningHomeRef = useRef(false);
   useEffect(() => {
     if (backRef.current) {
       backRef.current = false;
     } else if (prevScreenRef.current !== screen) {
-      returningHomeRef.current = screen === "stage";
       historyRef.current.push(prevScreenRef.current);
     }
     prevScreenRef.current = screen;
   }, [screen]);
 
-
-  // المقدمة السينمائية: تعمل عند أول تحميل، وتعاد بلطف عند العودة للرئيسية.
-  const [splashKey, setSplashKey] = useState(0);
-  const [showSplash, setShowSplash] = useState(true);
-  useEffect(() => {
-    if (screen !== "stage" || !returningHomeRef.current) return;
-    returningHomeRef.current = false;
-    setSplashKey((k) => k + 1);
-    setShowSplash(true);
-  }, [screen]);
+  // حفظ الظهور فور الدخول الأول حتى لا تعاد المقدمة بعد تحديث الصفحة.
+  const [showSplash, setShowSplash] = useState(() => {
+    try {
+      if (window.localStorage.getItem("abqari_splash_seen") === "1") return false;
+      window.localStorage.setItem("abqari_splash_seen", "1");
+    } catch {
+      // تبقى المقدمة قابلة للإغلاق إذا عطّل المتصفح التخزين.
+    }
+    return true;
+  });
 
   const [stage, setStage] = useState("");
   const [subject, setSubject] = useState("");
@@ -159,17 +154,12 @@ const Index = () => {
         onSubscribe={() => setScreenRaw("checkout")}
       />
       {showNameModal && <StudentNameModal onSave={handleNameSave} />}
-      <ThanksBoard />
       {showSplash && (
         <SplashIntro
-          playKey={splashKey}
-          duration={splashKey === 0 ? 2800 : 1800}
+          playKey={0}
+          duration={2800}
           onDone={() => setShowSplash(false)}
         />
-      )}
-
-      {screen === "stage" && !showSplash && (
-        <WeeklyCompetitionBanner onOpenLeaderboard={openLeaderboard} />
       )}
 
       {screen === "checkout" && (
@@ -249,16 +239,6 @@ const Index = () => {
       )}
 
       <ShareButton />
-
-      {!showSplash && ["stage", "subject", "search", "lesson", "camera", "foundation", "studio", "selftest"].includes(screen) && (
-        <GuideMascot
-          screen={screen as "stage" | "subject" | "search" | "lesson" | "camera" | "foundation" | "studio" | "selftest"}
-          xp={xp}
-          studentName={studentName}
-          onCamera={() => setScreen("camera")}
-          onStudio={() => setScreen("studio")}
-        />
-      )}
 
       {/* Compact top guide banner — single-line, emoji-free, voice-guided. */}
       <button

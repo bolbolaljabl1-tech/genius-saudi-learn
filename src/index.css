@@ -202,6 +202,23 @@
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
   }
+
+  .social-follow-link {
+    @apply relative isolate overflow-hidden min-h-20 flex flex-wrap items-center justify-center gap-2 px-2 py-4 rounded-lg border-2 border-matte-gold bg-royal-blue text-matte-gold shadow-gold transition-transform duration-300 hover:-translate-y-1 hover:shadow-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2;
+  }
+
+  .social-follow-link::before {
+    content: "";
+    @apply absolute inset-0 -z-10 pointer-events-none opacity-50;
+    background: linear-gradient(110deg, transparent 20%, hsl(var(--matte-gold) / 0.28) 48%, transparent 75%);
+    transform: translateX(110%);
+    animation: social-sheen 5s ease-in-out infinite;
+  }
+
+  @keyframes social-sheen {
+    0%, 20% { transform: translateX(110%); }
+    55%, 100% { transform: translateX(-110%); }
+  }
   @keyframes fallIn {
     0% { transform: translateY(-60px); opacity: 0; }
     100% { transform: translateY(0); opacity: 1; }

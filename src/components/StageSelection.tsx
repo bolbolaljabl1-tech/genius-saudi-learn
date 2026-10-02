@@ -1,6 +1,7 @@
 import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, ClipboardCheck, Blocks, Sparkles } from "lucide-react";
 import AnimatedLogo from "@/components/AnimatedLogo";
 import heroBanner from "@/assets/hero-banner.png";
+import { Music2, Twitter, ExternalLink } from "lucide-react";
 
 interface StageSelectionProps {
   onSelect: (stage: string) => void;
@@ -33,7 +34,7 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
           </button>
           {studentName && (
             <span className="text-muted-foreground text-base font-bold flex items-center gap-2">
-              مرحباً {studentName} 👋
+              {studentName}
               {streak > 0 && (
                 <span
                   className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-orange-100 text-orange-700 text-sm font-extrabold shadow-sm animate-pulse-glow"
@@ -146,6 +147,22 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
           <Trophy className="w-6 h-6 text-gold" />
           🏆 لوحة المتصدرين
         </button>
+
+        <section aria-label="حسابات المنصة الرسمية" className="w-full max-w-xl mt-10 mb-28 text-center">
+          <h2 className="font-aref text-2xl font-bold text-heading mb-4">تابع حسابات المنصة الرسمية</h2>
+          <div className="grid grid-cols-2 gap-3">
+            <a href="https://x.com/tchjaber" target="_blank" rel="noopener noreferrer" aria-label="تابع منصة الطالب العبقري على إكس" className="social-follow-link group">
+              <Twitter className="w-7 h-7 sm:w-8 sm:h-8 transition-transform group-hover:scale-110" aria-hidden="true" />
+              <span className="text-lg font-extrabold">إكس</span>
+              <ExternalLink className="w-4 h-4 opacity-70" aria-hidden="true" />
+            </a>
+            <a href="https://www.tiktok.com/@.al71393" target="_blank" rel="noopener noreferrer" aria-label="تابع منصة الطالب العبقري على تيك توك" className="social-follow-link group">
+              <Music2 className="w-7 h-7 sm:w-8 sm:h-8 transition-transform group-hover:scale-110" aria-hidden="true" />
+              <span className="text-lg font-extrabold">تيك توك</span>
+              <ExternalLink className="w-4 h-4 opacity-70" aria-hidden="true" />
+            </a>
+          </div>
+        </section>
 
       </div>
     </div>
