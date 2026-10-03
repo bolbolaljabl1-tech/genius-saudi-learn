@@ -5,6 +5,18 @@ const NAME_KEY = "genius_student_name";
 const BADGES_KEY = "genius_badges";
 const STREAK_KEY = "genius_streak";
 const STREAK_DATE_KEY = "genius_streak_date";
+const PROGRESS_KEY = "genius_activity_progress";
+
+export type ActivityKind = "quiz" | "selftest" | "game" | "studio" | "camera";
+export interface ActivityProgress {
+  quiz: number;
+  selftest: number;
+  game: number;
+  studio: number;
+  camera: number;
+  recent: { kind: ActivityKind; at: string }[];
+}
+const emptyProgress = (): ActivityProgress => ({ quiz: 0, selftest: 0, game: 0, studio: 0, camera: 0, recent: [] });
 
 const todayKey = () => new Date().toISOString().slice(0, 10);
 const daysBetween = (a: string, b: string) => {
@@ -14,6 +26,20 @@ const daysBetween = (a: string, b: string) => {
 };
 
 export function useXP() {
+  const [progress, setProgress] = useState<ActivityProgress>(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(PROGRESS_KEY) || "null");
+      if (saved && typeof saved === "object") {
+        const base = emptyProgress();
+        for (const kind of ["quiz", "selftest", "game", "studio", "camera"] as ActivityKind[]) {
+          base[kind] = Number.isSafeInteger(saved[kind]) && saved[kind] >= 0 ? saved[kind] : 0;
+        }
+        base.recent = Array.isArray(saved.recent) ? saved.recent.filter((item: any) => item && typeof item.at === "string" && ["quiz", "selftest", "game", "studio", "camera"].includes(item.kind)).slice(0, 4) : [];
+        return base;
+      }
+    } catch { /* No prior activity yet. */ }
+    return emptyProgress();
+  });
   const [xp, setXp] = useState(() => {
     const saved = localStorage.getItem(XP_KEY);
     return saved ? parseInt(saved, 10) : 0;
@@ -54,12 +80,20 @@ export function useXP() {
   useEffect(() => { localStorage.setItem(XP_KEY, String(xp)); }, [xp]);
   useEffect(() => { localStorage.setItem(NAME_KEY, studentName); }, [studentName]);
   useEffect(() => { localStorage.setItem(BADGES_KEY, JSON.stringify(badges)); }, [badges]);
+  useEffect(() => { localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress)); }, [progress]);
 
   const addXP = useCallback((amount: number) => setXp(prev => prev + amount), []);
   const awardBadge = useCallback((badge: string) => {
     setBadges(prev => (prev.includes(badge) ? prev : [...prev, badge]));
   }, []);
   const saveStudentName = useCallback((name: string) => setStudentName(name), []);
+  const recordCompletion = useCallback((kind: ActivityKind) => {
+    setProgress(prev => ({
+      ...prev,
+      [kind]: prev[kind] + 1,
+      recent: [{ kind, at: new Date().toISOString() }, ...prev.recent].slice(0, 4),
+    }));
+  }, []);
 
-  return { xp, studentName, badges, streak, addXP, awardBadge, saveStudentName };
+  return { xp, studentName, badges, streak, progress, addXP, awardBadge, saveStudentName, recordCompletion };
 }
