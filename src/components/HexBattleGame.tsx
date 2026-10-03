@@ -928,7 +928,7 @@ const HexBattleGame = ({ onBack, onXP, onBadge, studentName, subjectFilter }: He
               <Clock className="w-4 h-4" />
               <span className="font-bold">{formatTime(finalTime)}</span>
             </div>
-            <p className="text-lg font-bold text-primary mb-2">+150 XP + وسام بطل الشبكة</p>
+             <p className="text-lg font-bold text-primary mb-2">+150 ⭐ + وسام بطل الشبكة</p>
             <p className="brand-name text-base mb-4">منصة الطالب العبقري 2026</p>
             {sendingTelegram && <p className="text-sm text-muted-foreground mb-2">جارٍ إرسال التحدي...</p>}
             <div className="flex gap-3">

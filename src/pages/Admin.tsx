@@ -322,7 +322,7 @@ const Admin = () => {
                 <span className="w-8 shrink-0 text-center font-extrabold text-muted-foreground">{i + 1}</span>
                 <div className="flex-1 min-w-0">
                   <h3 className="font-extrabold text-heading text-base truncate">{row.student_name}</h3>
-                  <span className="text-xs font-bold text-muted-foreground">{row.xp} نقطة خبرة</span>
+                   <span className="text-xs font-bold text-muted-foreground">{row.xp} نجمة ⭐</span>
                 </div>
                 <button
                   onClick={() => handleDeleteEntry(row)}

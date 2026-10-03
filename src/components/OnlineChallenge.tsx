@@ -363,7 +363,7 @@ const OnlineChallenge = ({ onBack, onXP, studentName }: OnlineChallengeProps) =>
               <Clock className="w-4 h-4" />
               <span className="font-bold">{formatTime(elapsed)}</span>
             </div>
-            {winner === myColor && <p className="text-lg font-bold text-primary mb-4">+200 XP 🔥</p>}
+             {winner === myColor && <p className="text-lg font-bold text-primary mb-4">+200 ⭐</p>}
             <button onClick={onBack} className="w-full py-3 rounded-2xl gradient-emerald text-primary-foreground font-bold text-lg">
               رجوع 🏠
             </button>

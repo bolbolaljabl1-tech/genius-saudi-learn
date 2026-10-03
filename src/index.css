@@ -452,7 +452,30 @@
     animation: guideCelebrate 0.75s ease-in-out 3;
   }
 
+  /* Only opacity and transforms are animated during ordinary navigation. */
+  @keyframes motionEnter {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .motion-screen-in { animation: motionEnter 0.32s ease-out both; }
+  .motion-stagger > * { animation: motionEnter 0.4s ease-out both; }
+  .motion-stagger > :nth-child(2) { animation-delay: 55ms; }
+  .motion-stagger > :nth-child(3) { animation-delay: 110ms; }
+  .motion-stagger > :nth-child(4) { animation-delay: 165ms; }
+  .motion-fade-in { transition: transform 180ms ease, opacity 180ms ease; }
+  .motion-fade-in:hover { transform: translateY(-2px); }
+  @keyframes starSoftPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.07); opacity: 0.85; }
+  }
+  .star-soft-pulse { animation: starSoftPulse 3.6s ease-in-out infinite; }
+
   @media (prefers-reduced-motion: reduce) {
+    .motion-screen-in,
+    .motion-stagger > *,
+    .star-soft-pulse { animation: none; }
+    .motion-fade-in { transition: none; }
+    .motion-fade-in:hover { transform: none; }
     .weekly-competition-in,
     .weekly-competition-out,
     .weekly-competition-shimmer,

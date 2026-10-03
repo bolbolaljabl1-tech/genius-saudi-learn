@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowRight, Trophy, Medal, Loader2 } from "lucide-react";
+import { ArrowRight, Trophy, Medal, Loader2, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import appIcon from "@/assets/app-icon.png";
 
@@ -75,7 +75,7 @@ const Leaderboard = ({ onBack, currentName, currentXP }: LeaderboardProps) => {
               {getRankIcon(i)}
               <span className="flex-1 font-extrabold text-foreground text-xl">{entry.student_name}</span>
               {entry.badges?.includes("وسام العبقري") && <img src={appIcon} alt="وسام الطالب العبقري" className="w-8 h-8 rounded-lg" />}
-              <span className="text-primary font-extrabold text-xl">{entry.xp} XP</span>
+              <span className="inline-flex items-center gap-1.5 text-foreground font-extrabold text-xl tabular-nums"><span>{entry.xp.toLocaleString("ar-SA")}</span><Star className="star-soft-pulse w-5 h-5 fill-gold text-gold" aria-label="نجمة" /></span>
             </div>
           ))}
         </div>
