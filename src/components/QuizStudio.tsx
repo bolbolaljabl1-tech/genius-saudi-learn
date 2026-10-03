@@ -258,7 +258,7 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioPro
           </div>
           <h2 className="text-2xl font-extrabold text-heading mb-2">انتهى التحدي</h2>
           <p className="text-lg font-bold text-foreground">النقاط: {score} · أطول سلسلة: {bestCombo}</p>
-          <p className="text-muted-foreground font-bold mt-1">تمت إضافة نقاط الخبرة إلى سجلك</p>
+          <p className="text-muted-foreground font-bold mt-1">أُضيفت النجوم إلى رصيدك</p>
           <div className="flex gap-3 mt-5">
             <button onClick={() => { resetRound(); }} className="flex-1 py-3 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-lg active:scale-[0.98] transition flex items-center justify-center gap-2">
               <RotateCcw className="w-5 h-5" /> إعادة المحاولة
@@ -285,7 +285,7 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioPro
                 className={`flex items-center justify-between px-4 py-2 rounded-2xl font-extrabold ${b.student_name === studentName ? "gradient-gold text-gold-foreground shadow-gold" : "bg-muted text-foreground"}`}
               >
                 <span>{i + 1}. {b.student_name}</span>
-                <span>{b.xp} XP</span>
+                <span>{b.xp} ⭐</span>
               </li>
             ))}
           </ul>

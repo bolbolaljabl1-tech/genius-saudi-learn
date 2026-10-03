@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowRight, Trophy, Medal, Loader2 } from "lucide-react";
+import { ArrowRight, Trophy, Medal, Loader2, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import appIcon from "@/assets/app-icon.png";
 

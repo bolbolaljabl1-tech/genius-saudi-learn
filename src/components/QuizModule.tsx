@@ -151,7 +151,7 @@ const QuizModule = ({ lessonTitle, subject, stage, onBack, onRestart, onQuizComp
           </div>
 
           <p className="text-foreground font-extrabold text-xl mb-6">{motivation.text}</p>
-          {score === questions.length && <p className="text-gold font-extrabold text-lg mb-4">🏅 +100 XP + وسام العبقري</p>}
+          {score === questions.length && <p className="text-gold font-extrabold text-lg mb-4">⭐ +100 نجمة + وسام العبقري</p>}
           <p className="font-ruqaa text-matte-gold text-sm mb-4">منصة الطالب العبقري</p>
 
           <div className="flex flex-col gap-3">
