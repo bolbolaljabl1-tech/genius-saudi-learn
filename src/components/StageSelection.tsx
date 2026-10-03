@@ -1,4 +1,5 @@
-import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, ClipboardCheck, Blocks, Sparkles } from "lucide-react";
+import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, ClipboardCheck, Blocks, Sparkles, Star, LayoutDashboard } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import AnimatedLogo from "@/components/AnimatedLogo";
 import heroBanner from "@/assets/hero-banner.png";
 import { Music2, Twitter, ExternalLink } from "lucide-react";
@@ -11,12 +12,13 @@ interface StageSelectionProps {
   onSelfTest: () => void;
   onFoundation: () => void;
   onStudio: () => void;
+  onDashboard: () => void;
   xp: number;
   studentName: string;
   streak?: number;
 }
 
-const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest, onFoundation, onStudio, xp, studentName, streak = 0 }: StageSelectionProps) => {
+const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest, onFoundation, onStudio, onDashboard, xp, studentName, streak = 0 }: StageSelectionProps) => {
 
   const stages = [
     { id: "elementary", title: "المرحلة الابتدائية", description: "من الصف الأول إلى السادس", icon: BookOpen, delay: "0.1s" },
@@ -26,12 +28,14 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
   return (
     <div className="min-h-screen flex flex-col items-center pt-2">
       <div className="w-full px-4 flex flex-col items-center">
-        {/* Top bar with XP */}
+        {/* Student stars and quick progress */}
         <div className="w-full max-w-xl flex items-center justify-between mb-2 animate-slide-up">
-          <button onClick={onLeaderboard} className="flex items-center gap-2 neu-btn px-5 py-3 hover:shadow-emerald transition-all active:scale-[0.98]" aria-label="عرض لوحة الشرف">
-            <Trophy className="w-5 h-5 text-gold" />
-            <span className="text-foreground font-extrabold text-lg">{xp} XP</span>
-          </button>
+          <Button onClick={onDashboard} variant="outline" className="flex items-center gap-2 h-12 px-3 sm:px-5 border-gold/50 font-extrabold text-base sm:text-lg" aria-label={`لوحة إنجازاتي، ${xp} نجمة`}>
+            <Star className="star-soft-pulse fill-gold text-gold" aria-hidden="true" />
+            <span className="text-foreground tabular-nums">{xp.toLocaleString("ar-SA")}</span>
+            <LayoutDashboard className="text-primary" aria-hidden="true" />
+            <span className="hidden sm:inline">إنجازاتي</span>
+          </Button>
           {studentName && (
             <span className="text-muted-foreground text-base font-bold flex items-center gap-2">
               {studentName}

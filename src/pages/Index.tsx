@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircleHeart, Settings, Map } from "lucide-react";
 import StageSelection from "@/components/StageSelection";
+import StudentDashboard from "@/components/StudentDashboard";
 import FoundationHub from "@/components/FoundationHub";
 import SubjectSelection from "@/components/SubjectSelection";
 import LessonSearch from "@/components/LessonSearch";
@@ -28,7 +29,7 @@ import { useOvertakeNotify } from "@/hooks/useOvertakeNotify";
 import { checkSubscriptionStatus } from "@/lib/activation";
 import { toast } from "@/components/ui/sonner";
 
-type Screen = "stage" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "selftest" | "checkout" | "foundation" | "studio";
+type Screen = "stage" | "dashboard" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "selftest" | "checkout" | "foundation" | "studio";
 
 const LOCKED_SCREENS: Screen[] = ["lesson", "quiz", "selftest", "camera", "games", "studio"];
 
@@ -87,11 +88,11 @@ const Index = () => {
     return true;
   });
 
-  const [stage, setStage] = useState("");
+  const [stage, setStage] = useState(() => localStorage.getItem("genius_selected_stage") || "");
   const [subject, setSubject] = useState("");
   const [lessonTitle, setLessonTitle] = useState("");
   const [fromFoundation, setFromFoundation] = useState(false);
-  const { xp, studentName, badges, streak, addXP, awardBadge, saveStudentName } = useXP();
+  const { xp, studentName, streak, progress, addXP, awardBadge, saveStudentName, recordCompletion } = useXP();
   const { speak } = useTTS();
   const [showNameModal, setShowNameModal] = useState(false);
   const [showWhisper, setShowWhisper] = useState(false);
@@ -125,11 +126,12 @@ const Index = () => {
   }, [studentName, subToken, applyServerStatus]);
 
 
-  const handleStageSelect = (s: string) => { setStage(s); setScreen("subject"); };
+  const handleStageSelect = (s: string) => { setStage(s); localStorage.setItem("genius_selected_stage", s); setScreen("subject"); };
   const handleSubjectSelect = (s: string) => { setSubject(s); setScreen("search"); };
   const handleLessonSearch = (title: string) => { setLessonTitle(title); setFromFoundation(false); setScreen("lesson"); };
 
   const handleQuizComplete = (score: number, total: number) => {
+    recordCompletion("quiz");
     if (score === total) { addXP(100); awardBadge("وسام العبقري"); }
     else { addXP(Math.round((score / total) * 50)); }
   };
@@ -177,6 +179,7 @@ const Index = () => {
 
 
       {screen === "stage" && (
+        <div key="stage" className="motion-screen-in">
         <StageSelection
           onSelect={handleStageSelect}
           onCamera={() => setScreen("camera")}
@@ -185,12 +188,15 @@ const Index = () => {
           onSelfTest={() => setScreen("selftest")}
           onFoundation={() => setScreen("foundation")}
           onStudio={() => setScreen("studio")}
+          onDashboard={() => setScreen("dashboard")}
 
           xp={xp}
           studentName={studentName}
           streak={streak}
         />
+        </div>
       )}
+      {screen === "dashboard" && <div key="dashboard" className="motion-screen-in"><StudentDashboard onBack={() => setScreen("stage")} studentName={studentName} stage={stage} stars={xp} progress={progress} /></div>}
       {screen === "foundation" && (
         <FoundationHub
           onSelectSkill={(subj, skill) => {
@@ -202,15 +208,15 @@ const Index = () => {
           onBack={() => setScreen("stage")}
         />
       )}
-      {screen === "subject" && <SubjectSelection stage={stage} onSelect={handleSubjectSelect} onBack={() => setScreen("stage")} />}
-      {screen === "search" && <LessonSearch subject={subject} stage={stage} onSearch={handleLessonSearch} onBack={() => setScreen("subject")} />}
-      {screen === "lesson" && <LessonContent lessonTitle={lessonTitle} subject={subject} stage={stage} onStartQuiz={() => setScreen("quiz")} onBack={() => setScreen(fromFoundation ? "foundation" : "search")} onVideoXP={() => addXP(10)} />}
-      {screen === "quiz" && <QuizModule lessonTitle={lessonTitle} subject={subject} stage={stage} onBack={() => setScreen("lesson")} onRestart={() => { setScreen("lesson"); setTimeout(() => setScreen("quiz"), 100); }} onQuizComplete={handleQuizComplete} />}
-      {screen === "camera" && <CameraSolver onBack={() => setScreen("stage")} onXP={() => addXP(20)} />}
+      {screen === "subject" && <div className="motion-screen-in"><SubjectSelection stage={stage} onSelect={handleSubjectSelect} onBack={() => setScreen("stage")} /></div>}
+      {screen === "search" && <div className="motion-screen-in"><LessonSearch subject={subject} stage={stage} onSearch={handleLessonSearch} onBack={() => setScreen("subject")} /></div>}
+      {screen === "lesson" && <div className="motion-screen-in"><LessonContent lessonTitle={lessonTitle} subject={subject} stage={stage} onStartQuiz={() => setScreen("quiz")} onBack={() => setScreen(fromFoundation ? "foundation" : "search")} onVideoXP={() => addXP(10)} /></div>}
+      {screen === "quiz" && <div className="motion-screen-in"><QuizModule lessonTitle={lessonTitle} subject={subject} stage={stage} onBack={() => setScreen("lesson")} onRestart={() => { setScreen("lesson"); setTimeout(() => setScreen("quiz"), 100); }} onQuizComplete={handleQuizComplete} /></div>}
+      {screen === "camera" && <div className="motion-screen-in"><CameraSolver onBack={() => setScreen("stage")} onXP={() => { addXP(20); recordCompletion("camera"); }} /></div>}
       {screen === "leaderboard" && <Leaderboard onBack={() => setScreen("stage")} currentName={studentName} currentXP={xp} />}
-      {screen === "games" && <GamesHub onBack={() => setScreen("stage")} onXP={(amount) => addXP(amount)} onBadge={(badge) => awardBadge(badge)} studentName={studentName} />}
-      {screen === "studio" && <QuizStudio onBack={() => setScreen("stage")} onXP={(n) => addXP(n)} onBadge={(b) => awardBadge(b)} studentName={studentName} stage={stage} />}
-      {screen === "selftest" && <SelfTest onBack={() => setScreen("stage")} onXP={(n) => addXP(n)} />}
+      {screen === "games" && <div className="motion-screen-in"><GamesHub onBack={() => setScreen("stage")} onXP={(amount) => { addXP(amount); recordCompletion("game"); }} onBadge={(badge) => awardBadge(badge)} studentName={studentName} /></div>}
+      {screen === "studio" && <div className="motion-screen-in"><QuizStudio onBack={() => setScreen("stage")} onXP={(n) => { addXP(n); recordCompletion("studio"); }} onBadge={(b) => awardBadge(b)} studentName={studentName} stage={stage} /></div>}
+      {screen === "selftest" && <div className="motion-screen-in"><SelfTest onBack={() => setScreen("stage")} onXP={(n) => { addXP(n); recordCompletion("selftest"); }} /></div>}
 
       {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}
       {showSupport && <SupportModal onClose={() => setShowSupport(false)} />}
@@ -243,7 +249,7 @@ const Index = () => {
       {/* Compact top guide banner — single-line, emoji-free, voice-guided. */}
       <button
         onClick={() => {
-          speak("أهلاً بك في منصة الطالب العبقري. اختر مرحلتك الدراسية، ثم المادة والدرس الذي تريده. استخدم صور سؤالك لحل التمارين بالكاميرا، وتحدى أصدقاءك في ألعاب العباقرة، وتابع تقدمك عبر نقاط الخبرة والأوسمة. نتمنى لك رحلة تعليمية ممتعة.");
+          speak("أهلاً بك في منصة الطالب العبقري. اختر مرحلتك الدراسية، ثم المادة والدرس الذي تريده. استخدم صور سؤالك لحل التمارين بالكاميرا، وتحدى أصدقاءك في ألعاب العباقرة، وتابع تقدمك عبر النجوم والأوسمة. نتمنى لك رحلة تعليمية ممتعة.");
           setShowSupport(true);
         }}
         className="fixed top-12 left-1/2 -translate-x-1/2 z-[70] h-8 px-3 inline-flex items-center gap-1.5 rounded-full bg-royal-blue text-matte-gold border border-matte-gold/30 shadow-sm text-xs font-extrabold active:scale-95 transition"
