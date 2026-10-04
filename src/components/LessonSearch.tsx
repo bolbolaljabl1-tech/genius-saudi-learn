@@ -146,7 +146,14 @@ const LessonSearch = ({ subject, stage, onSearch, onBack }: LessonSearchProps) =
             ))}
           </select>
 
-          <select value={selSubject} onChange={(e) => setSelSubject(e.target.value)} className={selectClass}>
+          <select
+            value={selSubject}
+            onChange={(e) => {
+              setSelSubject(e.target.value);
+              resetLessons();
+            }}
+            className={selectClass}
+          >
             <option value="">اختر المادة</option>
             {Object.entries(subjectNames).map(([id, label]) => (
               <option key={id} value={id}>
@@ -155,7 +162,14 @@ const LessonSearch = ({ subject, stage, onSearch, onBack }: LessonSearchProps) =
             ))}
           </select>
 
-          <select value={semester} onChange={(e) => setSemester(e.target.value)} className={selectClass}>
+          <select
+            value={semester}
+            onChange={(e) => {
+              setSemester(e.target.value);
+              resetLessons();
+            }}
+            className={selectClass}
+          >
             <option value="">اختر الفصل الدراسي</option>
             {SEMESTERS.map((s) => (
               <option key={s} value={s}>
