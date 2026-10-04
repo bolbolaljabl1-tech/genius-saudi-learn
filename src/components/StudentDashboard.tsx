@@ -39,7 +39,7 @@ const StudentDashboard = ({ onBack, studentName, stage, stars, progress }: Stude
           <div className="flex items-center justify-between gap-4 border-b border-border pb-7" aria-label={`رصيد النجوم ${stars}`}>
             <div>
               <p className="text-base font-bold text-muted-foreground">رصيد النجوم</p>
-              <p className="text-5xl font-extrabold text-heading tabular-nums mt-1">{stars.toLocaleString("ar-SA")}</p>
+              <p className="text-5xl font-extrabold text-heading tabular-nums mt-1">{stars.toLocaleString("en-US")}</p>
             </div>
             <Star className="star-soft-pulse w-16 h-16 shrink-0 fill-gold text-gold" aria-hidden="true" />
           </div>
@@ -47,7 +47,7 @@ const StudentDashboard = ({ onBack, studentName, stage, stars, progress }: Stude
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-extrabold text-heading">الأنشطة المكتملة</h2>
-              <span className="text-lg font-extrabold text-primary tabular-nums" aria-label={`${total} أنشطة مكتملة`}>{total.toLocaleString("ar-SA")}</span>
+              <span className="text-lg font-extrabold text-primary tabular-nums" aria-label={`${total} أنشطة مكتملة`}>{total.toLocaleString("en-US")}</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               {activities.map(({ kind, label, icon: Icon }) => (
@@ -55,7 +55,7 @@ const StudentDashboard = ({ onBack, studentName, stage, stars, progress }: Stude
                   <Icon className="w-6 h-6 text-primary" aria-hidden="true" />
                   <div className="mt-3 flex items-end justify-between gap-2">
                     <span className="text-sm font-bold text-foreground leading-5">{label}</span>
-                    <span className="text-xl font-extrabold text-heading tabular-nums">{progress[kind].toLocaleString("ar-SA")}</span>
+                    <span className="text-xl font-extrabold text-heading tabular-nums">{progress[kind].toLocaleString("en-US")}</span>
                   </div>
                 </div>
               ))}

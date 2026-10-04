@@ -32,7 +32,7 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
         <div className="w-full max-w-xl flex items-center justify-between mb-2 animate-slide-up">
           <Button onClick={onDashboard} variant="outline" className="flex items-center gap-2 h-12 px-3 sm:px-5 border-gold/50 font-extrabold text-base sm:text-lg" aria-label={`لوحة إنجازاتي، ${xp} نجمة`}>
             <Star className="star-soft-pulse fill-gold text-gold" aria-hidden="true" />
-            <span className="text-foreground tabular-nums">{xp.toLocaleString("ar-SA")}</span>
+            <span className="text-foreground tabular-nums">{xp.toLocaleString("en-US")}</span>
             <LayoutDashboard className="text-primary" aria-hidden="true" />
             <span className="hidden sm:inline">إنجازاتي</span>
           </Button>
