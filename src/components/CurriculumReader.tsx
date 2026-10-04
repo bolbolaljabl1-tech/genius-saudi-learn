@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BookOpen, Check, Headphones, Library, Loader2, RefreshCw, VolumeX } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTTS } from "@/hooks/useTTS";
@@ -39,6 +39,8 @@ const CurriculumReader = ({
   const [speaking, setSpeaking] = useState(false);
   const [loadNonce, setLoadNonce] = useState(0);
   const { speak, stop } = useTTS();
+  const stopRef = useRef(stop);
+  stopRef.current = stop;
 
   const orderedLessons = useMemo(() => {
     if (!initialLesson || lessons.includes(initialLesson)) return lessons;
@@ -55,7 +57,7 @@ const CurriculumReader = ({
     setLoading(true);
     setError("");
     setNotes("");
-    stop();
+    stopRef.current();
     setSpeaking(false);
 
     void supabase.functions
@@ -81,7 +83,7 @@ const CurriculumReader = ({
     return () => {
       cancelled = true;
     };
-  }, [open, selectedLesson, stage, grade, subject, semester, stop, loadNonce]);
+  }, [open, selectedLesson, stage, grade, subject, semester, loadNonce]);
 
   const toggleSpeech = async () => {
     if (speaking) {
