@@ -75,7 +75,7 @@ const Leaderboard = ({ onBack, currentName, currentXP }: LeaderboardProps) => {
               {getRankIcon(i)}
               <span className="flex-1 font-extrabold text-foreground text-xl">{entry.student_name}</span>
               {entry.badges?.includes("وسام العبقري") && <img src={appIcon} alt="وسام الطالب العبقري" className="w-8 h-8 rounded-lg" />}
-              <span className="inline-flex items-center gap-1.5 text-foreground font-extrabold text-xl tabular-nums"><span>{entry.xp.toLocaleString("ar-SA")}</span><Star className="star-soft-pulse w-5 h-5 fill-gold text-gold" aria-label="نجمة" /></span>
+              <span className="inline-flex items-center gap-1.5 text-foreground font-extrabold text-xl tabular-nums"><span>{entry.xp.toLocaleString("en-US")}</span><Star className="star-soft-pulse w-5 h-5 fill-gold text-gold" aria-label="نجمة" /></span>
             </div>
           ))}
         </div>
