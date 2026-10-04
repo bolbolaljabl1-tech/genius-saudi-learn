@@ -61,13 +61,20 @@ const LessonSearch = ({ subject, stage, onSearch, onBack }: LessonSearchProps) =
   const subjectLabel = subjectNames[selSubject] ?? "";
   const ready = Boolean(selStage && grade && selSubject && semester);
 
+  // تصفير فوري للدروس والدرس المحدد عند تغيير أي اختيار
+  const resetLessons = () => {
+    setLesson("");
+    setLessons([]);
+    setLoading(false);
+  };
+
   useEffect(() => {
     setGrade("");
+    resetLessons();
   }, [selStage]);
 
   useEffect(() => {
-    setLesson("");
-    setLessons([]);
+    resetLessons();
     if (!ready) return;
     let cancelled = false;
     setLoading(true);
@@ -124,7 +131,10 @@ const LessonSearch = ({ subject, stage, onSearch, onBack }: LessonSearchProps) =
 
           <select
             value={grade}
-            onChange={(e) => setGrade(e.target.value)}
+            onChange={(e) => {
+              setGrade(e.target.value);
+              resetLessons();
+            }}
             disabled={!selStage}
             className={selectClass}
           >
