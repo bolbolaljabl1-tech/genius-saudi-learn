@@ -1,10 +1,13 @@
 import { useState, useEffect, useRef } from "react";
 import { ArrowRight, Loader2, Timer, Send, RotateCcw, CheckCircle2, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import AchievementCard from "./AchievementCard";
 
 interface SelfTestProps {
   onBack: () => void;
   onXP?: (xp: number) => void;
+  studentName: string;
+  stars: number;
 }
 
 type QType = "mcq" | "tf" | "calligraphy" | "matching" | "fill";
@@ -85,7 +88,7 @@ const TYPES = [
 
 const TEST_SECONDS = 30 * 60;
 
-const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
+const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
   const [phase, setPhase] = useState<"config" | "loading" | "test" | "result">("config");
   const [grade, setGrade] = useState(GRADES[0]);
   const [subject, setSubject] = useState(SUBJECTS[0]);
@@ -96,7 +99,7 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
   const [error, setError] = useState("");
   const [answers, setAnswers] = useState<Record<number, any>>({});
   const [seconds, setSeconds] = useState(TEST_SECONDS);
-  const [result, setResult] = useState<{ score: number; max: number; feedback: string } | null>(null);
+  const [result, setResult] = useState<{ score: number; max: number; feedback: string; earned: number } | null>(null);
   const intervalRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -158,8 +161,9 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
       : pct >= 70 ? "نتيجة جيدة جداً. راجع الأسئلة التي أخطأت بها وستصل إلى الإتقان."
       : pct >= 50 ? "نتيجة مقبولة. ركّز على الاستيعاب لا الحفظ، وأعد قراءة الشرح بعد كل خطأ."
       : "تحتاج إلى مراجعة منظمة. ابدأ بقراءة الدرس بهدوء ثم أعد المحاولة بأسئلة أقل.";
-    setResult({ score, max, feedback });
-    onXP?.(Math.round((score / max) * 30));
+    const earned = Math.round((score / max) * 30);
+    setResult({ score, max, feedback, earned });
+    onXP?.(earned);
     setPhase("result");
   };
 
@@ -346,6 +350,14 @@ const SelfTest = ({ onBack, onXP }: SelfTestProps) => {
             <p className="text-2xl font-extrabold text-gold mb-4">{pct}%</p>
             <p className="text-body-blue text-lg leading-8 font-bold">{result.feedback}</p>
           </div>
+
+          <AchievementCard
+            studentName={studentName}
+            activity={`اختبر نفسك: ${subject}`}
+            scoreLabel={`${result.score} من ${result.max} (${pct}%)`}
+            earnedStars={result.earned}
+            totalStars={stars}
+          />
 
           <h3 className="font-extrabold text-foreground text-xl mt-6">التغذية الراجعة المفصلة</h3>
           {test.questions.map((q, i) => {
