@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ConfettiCelebration from "./ConfettiCelebration";
 import ShareButton from "./ShareButton";
 import appIcon from "@/assets/app-icon.png";
+import AchievementCard from "./AchievementCard";
 
 interface QuizModuleProps {
   lessonTitle: string;
@@ -12,6 +13,8 @@ interface QuizModuleProps {
   onBack: () => void;
   onRestart: () => void;
   onQuizComplete?: (score: number, total: number) => void;
+  studentName: string;
+  stars: number;
 }
 
 interface Question {
@@ -35,7 +38,7 @@ const subjectNames: Record<string, string> = {
   quran: "القرآن الكريم",
 };
 
-const QuizModule = ({ lessonTitle, subject, stage, onBack, onRestart, onQuizComplete }: QuizModuleProps) => {
+const QuizModule = ({ lessonTitle, subject, stage, onBack, onRestart, onQuizComplete, studentName, stars }: QuizModuleProps) => {
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -130,10 +133,11 @@ const QuizModule = ({ lessonTitle, subject, stage, onBack, onRestart, onQuizComp
   if (finished) {
     const motivation = getMotivation(score, questions.length);
     const pct = Math.round((score / questions.length) * 100);
+    const earnedStars = score === questions.length ? 100 : Math.round((score / questions.length) * 50);
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
         <ConfettiCelebration trigger={celebrate} />
-        <div ref={resultRef} className="neu-card p-8 max-w-md w-full text-center animate-bounce-in">
+        <div ref={resultRef} className="neu-card p-8 max-w-md w-full text-center animate-bounce-in mb-5">
           {score === questions.length && <img src={appIcon} alt="وسام العبقري" className="w-24 h-24 mx-auto mb-4 rounded-2xl shadow-gold" />}
           <div className="text-6xl mb-4">{motivation.emoji}</div>
           <h2 className="text-3xl font-extrabold text-heading mb-2">نتيجة الاختبار</h2>
@@ -161,7 +165,13 @@ const QuizModule = ({ lessonTitle, subject, stage, onBack, onRestart, onQuizComp
             <button onClick={onBack} className="w-full py-4 rounded-2xl neu-btn text-foreground font-extrabold text-xl active:scale-[0.98]">العودة للدرس</button>
           </div>
         </div>
-        <ShareButton context="win" resultContainerRef={resultRef} />
+        <AchievementCard
+          studentName={studentName}
+          activity={`اختبار درس ${lessonTitle}`}
+          scoreLabel={`${score} من ${questions.length} (${pct}%)`}
+          earnedStars={earnedStars}
+          totalStars={stars}
+        />
       </div>
     );
   }

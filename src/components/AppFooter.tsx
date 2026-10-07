@@ -56,8 +56,8 @@ const AppFooter = () => {
 
             <button
               onClick={() => setOpen(true)}
-              aria-label="إدارة الموافقات"
-              title="إدارة الموافقات"
+              aria-label="إدارة لوحة الشرف"
+              title="إدارة لوحة الشرف"
               className="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-matte-gold/40 hover:text-matte-gold active:scale-90 transition"
             >
               <ShieldCheck className="w-3 h-3" />
@@ -80,7 +80,7 @@ const AppFooter = () => {
           >
             <h2 className="text-xl font-extrabold text-heading">دخول الإدارة</h2>
             <p className="text-body-blue text-sm font-bold leading-6">
-              أدخل كلمة السر الإدارية للوصول إلى لوحة تفعيل اشتراكات الطلاب.
+              أدخل كلمة السر الإدارية للوصول إلى إدارة لوحة الشرف.
             </p>
             <input
               type="password"

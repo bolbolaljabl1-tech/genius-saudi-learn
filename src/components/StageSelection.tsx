@@ -68,14 +68,14 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
         </div>
 
         {/* Camera Solver Button */}
-        <button onClick={onCamera} className="w-full max-w-xl mb-4 py-5 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-2xl shadow-emerald-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in" style={{ animationDelay: "0.05s" }}>
+        <button onClick={onCamera} className="adventure-interactive w-full max-w-xl mb-4 py-5 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-2xl shadow-emerald-lg flex items-center justify-center gap-3 animate-scale-in" style={{ animationDelay: "0.05s" }}>
           <Camera className="w-7 h-7" />
           📸 صور سؤالك
         </button>
 
         {/* Games Button */}
-        <button onClick={onGames} className="w-full max-w-xl mb-4 py-5 rounded-2xl gradient-gold text-gold-foreground font-extrabold text-2xl shadow-gold active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in" style={{ animationDelay: "0.1s" }}>
-          <Gamepad2 className="w-7 h-7" />
+        <button onClick={onGames} className="adventure-interactive w-full max-w-xl mb-4 py-5 rounded-2xl gradient-gold text-gold-foreground font-extrabold text-2xl shadow-gold flex items-center justify-center gap-3 animate-scale-in" style={{ animationDelay: "0.1s" }}>
+          <Gamepad2 className="w-7 h-7 adventure-pulse" />
           🎮 ألعاب العباقرة
         </button>
 

@@ -216,7 +216,7 @@ const LessonSearch = ({ subject, stage, onSearch, onBack }: LessonSearchProps) =
             className="w-full py-6 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-2xl shadow-emerald-lg flex items-center justify-center gap-3 active:scale-[0.98] transition disabled:opacity-50"
           >
             <Rocket className="w-7 h-7" />
-            ابدأ التحدي
+            ابدأ المغامرة
           </button>
         </div>
       </div>

@@ -5,6 +5,7 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
+import AchievementCard from "./AchievementCard";
 
 interface QuizStudioProps {
   onBack: () => void;
@@ -12,6 +13,7 @@ interface QuizStudioProps {
   onBadge: (badge: string) => void;
   studentName: string;
   stage?: string;
+  stars: number;
 }
 
 interface MCQ { question: string; options: string[]; correctIndex: number; explanation: string }
@@ -48,7 +50,7 @@ const GRADES = [
 const praise = ["إجابة دقيقة، أحسنت", "ممتاز، استمر بهذا التركيز", "إتقان واضح", "أداء رائع"];
 const encourage = ["راجع المعلومة ثم واصل", "لا بأس، التعلم يبدأ من المحاولة", "ركز أكثر في المحاولة القادمة"];
 
-const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioProps) => {
+const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage, stars }: QuizStudioProps) => {
   const [topic, setTopic] = useState("");
   const [grade, setGrade] = useState("");
   const [loading, setLoading] = useState(false);
@@ -61,6 +63,7 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioPro
   const [bestCombo, setBestCombo] = useState(0);
   const [flash, setFlash] = useState<{ ok: boolean; text: string } | null>(null);
   const [finished, setFinished] = useState(false);
+  const [earnedStars, setEarnedStars] = useState(0);
   const [board, setBoard] = useState<{ student_name: string; xp: number }[]>([]);
 
   const fetchBoard = useCallback(async () => {
@@ -91,7 +94,7 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioPro
   };
 
   const resetRound = () => {
-    setScore(0); setCombo(0); setBestCombo(0); setFinished(false); setFlash(null);
+    setScore(0); setCombo(0); setBestCombo(0); setFinished(false); setFlash(null); setEarnedStars(0);
   };
 
   const generate = async () => {
@@ -125,6 +128,7 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioPro
   const finishRound = async () => {
     setFinished(true);
     const earned = Math.max(5, Math.round(score / 2));
+    setEarnedStars(earned);
     onXP(earned);
     if (bestCombo >= 5) onBadge("وسام السلسلة الذهبية");
     if (studentName) {
@@ -252,11 +256,12 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioPro
 
       {/* Results */}
       {finished && (
-        <div className="w-full max-w-xl mx-auto neu-card p-6 text-center animate-scale-in mb-6">
+        <div className="w-full max-w-xl mx-auto mb-6">
+          <div className="neu-card p-6 text-center animate-scale-in mb-5">
           <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-gold shadow-gold mb-3 animate-bounce">
             <Trophy className="w-10 h-10 text-gold-foreground" />
           </div>
-          <h2 className="text-2xl font-extrabold text-heading mb-2">انتهى التحدي</h2>
+          <h2 className="text-2xl font-extrabold text-heading mb-2">اكتملت المغامرة</h2>
           <p className="text-lg font-bold text-foreground">النقاط: {score} · أطول سلسلة: {bestCombo}</p>
           <p className="text-muted-foreground font-bold mt-1">أُضيفت النجوم إلى رصيدك</p>
           <div className="flex gap-3 mt-5">
@@ -267,6 +272,14 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage }: QuizStudioPro
               اختيار نمط آخر
             </button>
           </div>
+          </div>
+          <AchievementCard
+            studentName={studentName}
+            activity={`${pack?.title || topic} — ${MODES.find((item) => item.id === mode)?.title || "لعبة تعليمية"}`}
+            scoreLabel={`${score} نقطة · سلسلة ${bestCombo}`}
+            earnedStars={earnedStars}
+            totalStars={stars}
+          />
         </div>
       )}
 
