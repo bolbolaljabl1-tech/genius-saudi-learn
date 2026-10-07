@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MessageCircleHeart, Settings, Map } from "lucide-react";
+import { MessageCircleHeart, Map } from "lucide-react";
 import StageSelection from "@/components/StageSelection";
 import StudentDashboard from "@/components/StudentDashboard";
 import FoundationHub from "@/components/FoundationHub";
@@ -17,29 +17,22 @@ import StudentNameModal from "@/components/StudentNameModal";
 import WhisperModal from "@/components/WhisperModal";
 import SupportModal from "@/components/SupportModal";
 import AppFooter from "@/components/AppFooter";
-import TrialBanner from "@/components/TrialBanner";
 import SplashIntro from "@/components/SplashIntro";
-import Checkout from "@/components/Checkout";
-import SubscriptionSettings from "@/components/SubscriptionSettings";
 import { useXP } from "@/hooks/useXP";
-import { useTrial } from "@/hooks/useTrial";
 import { useTTS } from "@/hooks/useTTS";
 import { useIdleNotify } from "@/hooks/useIdleNotify";
 import { useOvertakeNotify } from "@/hooks/useOvertakeNotify";
-import { checkSubscriptionStatus } from "@/lib/activation";
-import { toast } from "@/components/ui/sonner";
 
-type Screen = "stage" | "dashboard" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "selftest" | "checkout" | "foundation" | "studio";
-
-const LOCKED_SCREENS: Screen[] = ["lesson", "quiz", "selftest", "camera", "games", "studio"];
-
-// Distraction-free screens: hide the settings gear so it never sits near
-// the back arrow or the "إنهاء" button on quizzes / self-tests / camera.
-const HIDE_GEAR_SCREENS: Screen[] = ["quiz", "selftest", "camera", "checkout"];
+type Screen = "stage" | "dashboard" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "selftest" | "foundation" | "studio";
 
 const Index = () => {
   const [screen, setScreenRaw] = useState<Screen>("stage");
-  const { daysLeft, expired, subscribed, subToken, applyServerStatus } = useTrial();
+
+  // FREE ACCESS (October 2026): the trial, checkout, subscription banner,
+  // entitlement polling, and locked-screen redirect were removed here.
+  // To restore paid access later, reintroduce one server-verified entitlement
+  // guard at this entry point, then restore the plans screen and activation
+  // actions before placing any student screen behind that guard.
 
   // مكدّس التنقل الداخلي: يجعل زر رجوع الجوال يتنقل بين شاشات التطبيق
   // بدلاً من إغلاقه، ويستقر بأمان في الصفحة الرئيسية.
@@ -47,10 +40,6 @@ const Index = () => {
   const backRef = useRef(false);
 
   const setScreen = (next: Screen) => {
-    if (expired && LOCKED_SCREENS.includes(next)) {
-      setScreenRaw("checkout");
-      return;
-    }
     setScreenRaw(next);
   };
 
@@ -97,33 +86,8 @@ const Index = () => {
   const [showNameModal, setShowNameModal] = useState(false);
   const [showWhisper, setShowWhisper] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
-  const [showSubSettings, setShowSubSettings] = useState(false);
   useIdleNotify(4);
   useOvertakeNotify(studentName, 60);
-
-  // Server-verify entitlement. The token is unguessable and issued only to the
-  // paying student's browser at request time, so copying another student's
-  // public display name is not enough to unlock the app.
-  useEffect(() => {
-    if (!studentName || !subToken) return;
-    let cancelled = false;
-    let wasActive = false;
-    const tick = async () => {
-      const res = await checkSubscriptionStatus(studentName, subToken);
-      if (cancelled) return;
-      applyServerStatus(res.status, res.plan);
-      if (res.status === "active" && !wasActive) {
-        wasActive = true;
-        toast.success("تم تفعيل اشتراكك من قِبَل الإدارة، نتمنى لك رحلة تعليمية ممتعة");
-      }
-    };
-    void tick();
-    const id = window.setInterval(tick, 30000);
-    return () => {
-      cancelled = true;
-      window.clearInterval(id);
-    };
-  }, [studentName, subToken, applyServerStatus]);
 
 
   const handleStageSelect = (s: string) => { setStage(s); localStorage.setItem("genius_selected_stage", s); setScreen("subject"); };
@@ -148,13 +112,7 @@ const Index = () => {
   };
 
   return (
-    <main className={`${subscribed ? "pt-16" : "pt-24"} pb-16`}>
-      <TrialBanner
-        daysLeft={daysLeft}
-        expired={expired}
-        subscribed={subscribed}
-        onSubscribe={() => setScreenRaw("checkout")}
-      />
+    <main className="pt-14 pb-16">
       {showNameModal && <StudentNameModal onSave={handleNameSave} />}
       {showSplash && (
         <SplashIntro
@@ -163,20 +121,6 @@ const Index = () => {
           onDone={() => setShowSplash(false)}
         />
       )}
-
-      {screen === "checkout" && (
-        <Checkout
-          expired={expired}
-          onBack={() => setScreenRaw("stage")}
-          onPaymentSuccess={() => {
-            // Actual entitlement flip only happens after the server confirms
-            // activation for this student's private token (see polling above).
-            toast.success("تم إرسال طلبك، سيتم تفعيل الحساب بعد مراجعة الإدارة");
-            setScreenRaw("stage");
-          }}
-        />
-      )}
-
 
       {screen === "stage" && (
         <div key="stage" className="motion-screen-in">
@@ -211,39 +155,15 @@ const Index = () => {
       {screen === "subject" && <div className="motion-screen-in"><SubjectSelection stage={stage} onSelect={handleSubjectSelect} onBack={() => setScreen("stage")} /></div>}
       {screen === "search" && <div className="motion-screen-in"><LessonSearch subject={subject} stage={stage} onSearch={handleLessonSearch} onBack={() => setScreen("subject")} /></div>}
       {screen === "lesson" && <div className="motion-screen-in"><LessonContent lessonTitle={lessonTitle} subject={subject} stage={stage} onStartQuiz={() => setScreen("quiz")} onBack={() => setScreen(fromFoundation ? "foundation" : "search")} onVideoXP={() => addXP(10)} /></div>}
-      {screen === "quiz" && <div className="motion-screen-in"><QuizModule lessonTitle={lessonTitle} subject={subject} stage={stage} onBack={() => setScreen("lesson")} onRestart={() => { setScreen("lesson"); setTimeout(() => setScreen("quiz"), 100); }} onQuizComplete={handleQuizComplete} /></div>}
+      {screen === "quiz" && <div className="motion-screen-in"><QuizModule lessonTitle={lessonTitle} subject={subject} stage={stage} studentName={studentName} stars={xp} onBack={() => setScreen("lesson")} onRestart={() => { setScreen("lesson"); setTimeout(() => setScreen("quiz"), 100); }} onQuizComplete={handleQuizComplete} /></div>}
       {screen === "camera" && <div className="motion-screen-in"><CameraSolver onBack={() => setScreen("stage")} onXP={() => { addXP(20); recordCompletion("camera"); }} /></div>}
       {screen === "leaderboard" && <Leaderboard onBack={() => setScreen("stage")} currentName={studentName} currentXP={xp} />}
-      {screen === "games" && <div className="motion-screen-in"><GamesHub onBack={() => setScreen("stage")} onXP={(amount) => { addXP(amount); recordCompletion("game"); }} onBadge={(badge) => awardBadge(badge)} studentName={studentName} /></div>}
-      {screen === "studio" && <div className="motion-screen-in"><QuizStudio onBack={() => setScreen("stage")} onXP={(n) => { addXP(n); recordCompletion("studio"); }} onBadge={(b) => awardBadge(b)} studentName={studentName} stage={stage} /></div>}
-      {screen === "selftest" && <div className="motion-screen-in"><SelfTest onBack={() => setScreen("stage")} onXP={(n) => { addXP(n); recordCompletion("selftest"); }} /></div>}
+      {screen === "games" && <div className="motion-screen-in"><GamesHub onBack={() => setScreen("stage")} onXP={(amount) => { addXP(amount); recordCompletion("game"); }} onBadge={(badge) => awardBadge(badge)} studentName={studentName} stars={xp} /></div>}
+      {screen === "studio" && <div className="motion-screen-in"><QuizStudio onBack={() => setScreen("stage")} onXP={(n) => { addXP(n); recordCompletion("studio"); }} onBadge={(b) => awardBadge(b)} studentName={studentName} stage={stage} stars={xp} /></div>}
+      {screen === "selftest" && <div className="motion-screen-in"><SelfTest onBack={() => setScreen("stage")} onXP={(n) => { addXP(n); recordCompletion("selftest"); }} studentName={studentName} stars={xp} /></div>}
 
       {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}
       {showSupport && <SupportModal onClose={() => setShowSupport(false)} />}
-      {showSubSettings && (
-        <SubscriptionSettings
-          onClose={() => setShowSubSettings(false)}
-          onUpgrade={() => {
-            setShowSubSettings(false);
-            setScreenRaw("checkout");
-          }}
-        />
-      )}
-
-      {/* Subscription settings gear — pinned to the top-left, opposite the
-          RTL back arrow (top-right) and hidden entirely on distraction-free
-          screens (quizzes / self-test / camera / checkout). */}
-      {!HIDE_GEAR_SCREENS.includes(screen) && (
-        <button
-          onClick={() => setShowSubSettings(true)}
-          className="fixed top-14 left-3 z-50 bg-card border-2 border-matte-gold/30 text-matte-gold rounded-full p-2 shadow-md active:scale-95 transition"
-          aria-label="إعدادات لوحة الاشتراك"
-          title="إعدادات لوحة الاشتراك"
-        >
-          <Settings className="w-5 h-5" />
-        </button>
-      )}
-
       <ShareButton />
 
       {/* Compact top guide banner — single-line, emoji-free, voice-guided. */}
@@ -268,7 +188,7 @@ const Index = () => {
         راسل إدارة المنصة
       </button>
 
-      {screen !== "checkout" && <AppFooter />}
+      <AppFooter />
     </main>
   );
 };

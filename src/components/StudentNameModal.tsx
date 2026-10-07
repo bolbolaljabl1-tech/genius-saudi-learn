@@ -27,7 +27,7 @@ const StudentNameModal = ({ onSave }: StudentNameModalProps) => {
           disabled={!name.trim()}
           className="w-full py-4 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-xl shadow-emerald disabled:opacity-50 active:scale-[0.98] transition-all"
         >
-          ابدأ التعلم 🚀
+          ابدأ المغامرة
         </button>
       </div>
     </div>
