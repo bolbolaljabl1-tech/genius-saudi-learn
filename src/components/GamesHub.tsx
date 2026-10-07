@@ -1,116 +1,256 @@
-import { useState } from "react";
-import { ArrowRight, Gamepad2, Hexagon, BookOpen, Calculator, FlaskConical, BookOpenCheck, Landmark, Globe, Monitor, Palette, Dumbbell, Heart, Languages, Wifi } from "lucide-react";
-import HexBattleGame from "./HexBattleGame";
-import OnlineChallenge from "./OnlineChallenge";
+import { useMemo, useState } from "react";
+import {
+  ArrowDownUp,
+  ArrowRight,
+  Brain,
+  CheckCircle2,
+  Gamepad2,
+  Loader2,
+  RotateCcw,
+  Shuffle,
+  Sparkles,
+} from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/sonner";
+import { Button } from "@/components/ui/button";
+import AchievementCard from "./AchievementCard";
 
 interface GamesHubProps {
   onBack: () => void;
   onXP: (amount: number) => void;
   onBadge: (badge: string) => void;
   studentName: string;
+  stars: number;
 }
 
-interface SubjectDef {
-  id: string;
-  title: string;
-  icon: typeof BookOpen;
-  color: string;
-}
+interface Pair { left: string; right: string }
+interface Sequencing { instruction: string; items: string[] }
+interface GamePack { title: string; matching: Pair[]; sequencing: Sequencing }
+type Mode = "matching" | "sequence" | "memory";
 
-const subjects: SubjectDef[] = [
-  { id: "quran", title: "القرآن الكريم", icon: Landmark, color: "from-green-600 to-emerald-700" },
-  { id: "islamic", title: "الدراسات الإسلامية", icon: BookOpenCheck, color: "from-teal-500 to-cyan-600" },
-  { id: "math", title: "الرياضيات", icon: Calculator, color: "from-red-500 to-rose-600" },
-  { id: "science", title: "العلوم", icon: FlaskConical, color: "from-blue-500 to-indigo-600" },
-  { id: "arabic", title: "لغتي الخالدة", icon: BookOpen, color: "from-amber-500 to-orange-600" },
-  { id: "social", title: "الدراسات الاجتماعية", icon: Globe, color: "from-sky-500 to-blue-600" },
-  { id: "digital", title: "المهارات الرقمية", icon: Monitor, color: "from-indigo-500 to-blue-600" },
-  { id: "art", title: "التربية الفنية", icon: Palette, color: "from-pink-500 to-rose-600" },
-  { id: "pe", title: "التربية البدنية", icon: Dumbbell, color: "from-green-500 to-lime-600" },
-  { id: "life", title: "المهارات الحياتية", icon: Heart, color: "from-red-400 to-pink-500" },
-  { id: "english", title: "اللغة الإنجليزية", icon: Languages, color: "from-blue-500 to-indigo-600" },
+const GRADES = [
+  "الصف الأول الابتدائي", "الصف الثاني الابتدائي", "الصف الثالث الابتدائي",
+  "الصف الرابع الابتدائي", "الصف الخامس الابتدائي", "الصف السادس الابتدائي",
+  "الصف الأول المتوسط", "الصف الثاني المتوسط", "الصف الثالث المتوسط",
 ];
 
-const GamesHub = ({ onBack, onXP, onBadge, studentName }: GamesHubProps) => {
-  const [selectedSubject, setSelectedSubject] = useState<string | null>(null);
-  const [showOnline, setShowOnline] = useState(false);
+const MODES = [
+  { id: "matching" as const, title: "توصيل المفاهيم", description: "اربط كل مفهوم بمعناه الدقيق", icon: Shuffle },
+  { id: "sequence" as const, title: "مغامرة الترتيب", description: "رتّب الكلمات أو الخطوات بالترتيب الصحيح", icon: ArrowDownUp },
+  { id: "memory" as const, title: "الذاكرة المعرفية", description: "اكشف البطاقات وابحث عن الأزواج المترابطة", icon: Brain },
+];
 
-  if (showOnline) {
-    return <OnlineChallenge onBack={() => setShowOnline(false)} onXP={onXP} studentName={studentName} />;
+function shuffle<T>(items: T[]): T[] {
+  const next = [...items];
+  for (let i = next.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [next[i], next[j]] = [next[j], next[i]];
   }
+  return next;
+}
 
-  if (selectedSubject) {
+const GamesHub = ({ onBack, onXP, onBadge, studentName, stars }: GamesHubProps) => {
+  const [topic, setTopic] = useState("");
+  const [grade, setGrade] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [pack, setPack] = useState<GamePack | null>(null);
+  const [mode, setMode] = useState<Mode | null>(null);
+  const [result, setResult] = useState<{ label: string; earned: number } | null>(null);
+
+  const generate = async () => {
+    if (!grade || !topic.trim()) {
+      toast.error("اختر الصف واكتب اسم الدرس أولاً");
+      return;
+    }
+    setLoading(true);
+    setPack(null);
+    setMode(null);
+    setResult(null);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-game", {
+        body: { topic: topic.trim(), grade },
+      });
+      if (error) throw error;
+      if (data?.error || !Array.isArray(data?.matching) || !data?.sequencing?.items?.length) {
+        throw new Error(data?.error || "تعذر تجهيز المغامرات");
+      }
+      setPack(data as GamePack);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "تعذر تجهيز المغامرات حالياً");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const finish = (label: string, earned: number) => {
+    if (result) return;
+    setResult({ label, earned });
+    onXP(earned);
+    if (earned >= 40) onBadge("وسام المغامر المعرفي");
+  };
+
+  const resetAdventure = () => {
+    setMode(null);
+    setResult(null);
+  };
+
+  if (result && pack && mode) {
+    const modeTitle = MODES.find((item) => item.id === mode)?.title ?? "مغامرة تعليمية";
     return (
-      <HexBattleGame
-        onBack={() => setSelectedSubject(null)}
-        onXP={onXP}
-        onBadge={onBadge}
-        studentName={studentName}
-        subjectFilter={selectedSubject}
-      />
+      <div className="min-h-screen px-4 py-6 pb-28">
+        <AchievementCard
+          studentName={studentName}
+          activity={`${modeTitle}: ${pack.title || topic}`}
+          scoreLabel={result.label}
+          earnedStars={result.earned}
+          totalStars={stars}
+        />
+        <div className="mx-auto mt-4 grid w-full max-w-md grid-cols-2 gap-3">
+          <Button onClick={resetAdventure} className="adventure-button h-14 font-extrabold">
+            <RotateCcw /> مغامرة أخرى
+          </Button>
+          <Button onClick={onBack} variant="outline" className="h-14 font-extrabold">الرئيسية</Button>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex flex-col px-4 py-6">
-      <button onClick={onBack} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4 self-start">
-        <ArrowRight className="w-5 h-5" />
-        <span className="font-bold text-lg">رجوع</span>
-      </button>
+    <div className="min-h-screen px-4 py-6 pb-28">
+      <Button onClick={mode ? () => setMode(null) : onBack} variant="ghost" className="mb-4 text-lg font-bold">
+        <ArrowRight /> رجوع
+      </Button>
 
-      <div className="text-center mb-6 animate-slide-up">
-        <div className="inline-flex items-center justify-center w-20 h-20 rounded-full gradient-gold shadow-gold mb-4">
-          <Gamepad2 className="w-10 h-10 text-gold-foreground" />
+      <header className="mx-auto mb-6 max-w-xl text-center motion-screen-in">
+        <div className="adventure-icon mx-auto mb-4">
+          <Gamepad2 className="h-10 w-10" />
         </div>
-        <h1 className="text-3xl font-extrabold text-heading mb-2">🎮 ركن العباقرة</h1>
-        <p className="text-muted-foreground text-xl">اختر المادة للبدء في التحدي!</p>
-      </div>
+        <h1 className="text-3xl font-extrabold text-heading">ألعاب العباقرة</h1>
+        <p className="mt-2 text-lg font-bold text-muted-foreground">مغامرات معرفية قصيرة مصممة للمس والتركيز</p>
+      </header>
 
-      {/* Online Challenge */}
-      <button
-        onClick={() => setShowOnline(true)}
-        className="w-full max-w-md mx-auto mb-3 bg-white/20 backdrop-blur-xl border border-white/30 rounded-3xl p-5 flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] animate-scale-in cursor-pointer ring-2 ring-matte-gold/40"
-      >
-        <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-royal-blue shadow-lg flex items-center justify-center">
-          <Wifi className="w-9 h-9 text-matte-gold" />
-        </div>
-        <div className="flex-1 text-right">
-          <h2 className="text-xl font-extrabold text-foreground">🌐 تحدي صديقك أونلاين</h2>
-          <p className="text-muted-foreground text-sm mt-1">العب مع صديق عن بُعد! 🔥</p>
-        </div>
-        <span className="px-2 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-bold">جديد</span>
-      </button>
+      {!pack && (
+        <section className="neu-card motion-pop-in mx-auto max-w-xl space-y-4 p-5">
+          <label className="block font-extrabold text-foreground" htmlFor="adventure-grade">الصف الدراسي</label>
+          <select id="adventure-grade" value={grade} onChange={(event) => setGrade(event.target.value)} className="w-full rounded-lg border-2 border-input bg-background p-4 text-lg font-bold text-foreground">
+            <option value="">اختر الصف</option>
+            {GRADES.map((item) => <option key={item}>{item}</option>)}
+          </select>
+          <label className="block font-extrabold text-foreground" htmlFor="adventure-topic">المادة أو اسم الدرس</label>
+          <input id="adventure-topic" value={topic} onChange={(event) => setTopic(event.target.value.slice(0, 200))} placeholder="مثال: دورة الماء أو المبتدأ والخبر" className="w-full rounded-lg border-2 border-input bg-background p-4 text-lg font-bold text-foreground" />
+          <Button onClick={generate} disabled={loading} className="adventure-button h-16 w-full text-xl font-extrabold">
+            {loading ? <Loader2 className="animate-spin" /> : <Sparkles className="adventure-pulse" />}
+            {loading ? "جارٍ تجهيز المغامرات" : "ابدأ المغامرة"}
+          </Button>
+        </section>
+      )}
 
-      {/* All subjects hex battle */}
-      <button
-        onClick={() => setSelectedSubject("all")}
-        className="w-full max-w-md mx-auto mb-5 bg-white/20 backdrop-blur-xl border border-white/30 rounded-3xl p-5 flex items-center gap-4 transition-all duration-300 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] animate-scale-in cursor-pointer ring-2 ring-primary/30"
-      >
-        <div className="flex-shrink-0 w-16 h-16 rounded-2xl gradient-emerald shadow-emerald-lg flex items-center justify-center">
-          <Hexagon className="w-9 h-9 text-white" />
-        </div>
-        <div className="flex-1 text-right">
-          <h2 className="text-xl font-extrabold text-foreground">⬡ تحدي العبقري الشامل</h2>
-          <p className="text-muted-foreground text-sm mt-1">أسئلة من جميع المواد! 🔥</p>
-        </div>
-      </button>
+      {pack && !mode && (
+        <section className="motion-stagger mx-auto grid max-w-xl gap-4">
+          {MODES.map((item) => (
+            <Button key={item.id} onClick={() => setMode(item.id)} variant="outline" className="adventure-choice h-auto min-h-28 justify-start whitespace-normal p-5 text-right">
+              <span className="adventure-mode-icon"><item.icon className="h-7 w-7" /></span>
+              <span>
+                <strong className="block text-xl text-heading">{item.title}</strong>
+                <span className="mt-1 block text-sm font-bold text-muted-foreground">{item.description}</span>
+              </span>
+            </Button>
+          ))}
+        </section>
+      )}
 
-      <div className="grid grid-cols-2 gap-4 max-w-md mx-auto w-full pb-20">
-        {subjects.map((sub, i) => (
-          <button
-            key={sub.id}
-            onClick={() => setSelectedSubject(sub.id)}
-            className="group bg-white/20 backdrop-blur-xl border border-white/30 rounded-3xl p-5 text-center transition-all duration-300 hover:shadow-lg hover:scale-[1.03] active:scale-[0.98] animate-scale-in cursor-pointer"
-            style={{ animationDelay: `${i * 0.05}s` }}
-          >
-            <div className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br ${sub.color} shadow-lg mb-3 transition-transform duration-300 group-hover:scale-110`}>
-              <sub.icon className="w-7 h-7 text-white" />
-            </div>
-            <h3 className="text-sm font-extrabold text-heading leading-tight">{sub.title}</h3>
-          </button>
-        ))}
-      </div>
+      {pack && mode === "matching" && <MatchingAdventure pairs={pack.matching} onDone={(moves) => finish(`${pack.matching.length} أزواج في ${moves} محاولات`, 40)} />}
+      {pack && mode === "sequence" && <SequenceAdventure data={pack.sequencing} onDone={(mistakes) => finish(`اكتمل الترتيب مع ${mistakes} أخطاء`, 35)} />}
+      {pack && mode === "memory" && <MemoryAdventure pairs={pack.matching.slice(0, 6)} onDone={(moves) => finish(`${pack.matching.slice(0, 6).length} أزواج في ${moves} محاولات`, 45)} />}
     </div>
+  );
+};
+
+const MatchingAdventure = ({ pairs, onDone }: { pairs: Pair[]; onDone: (moves: number) => void }) => {
+  const left = useMemo(() => shuffle(pairs), [pairs]);
+  const right = useMemo(() => shuffle(pairs), [pairs]);
+  const [selected, setSelected] = useState<string | null>(null);
+  const [solved, setSolved] = useState<string[]>([]);
+  const [moves, setMoves] = useState(0);
+
+  const chooseRight = (pair: Pair) => {
+    if (!selected) return;
+    const nextMoves = moves + 1;
+    setMoves(nextMoves);
+    const match = pairs.find((item) => item.left === selected)?.right === pair.right;
+    if (match) {
+      const nextSolved = [...solved, selected];
+      setSolved(nextSolved);
+      if (nextSolved.length === pairs.length) window.setTimeout(() => onDone(nextMoves), 450);
+    }
+    setSelected(null);
+  };
+
+  return (
+    <section className="neu-card motion-pop-in mx-auto max-w-xl p-4">
+      <h2 className="mb-4 text-xl font-extrabold text-heading">اختر المفهوم ثم معناه</h2>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-3">{left.map((pair) => <Button key={pair.left} onClick={() => setSelected(pair.left)} disabled={solved.includes(pair.left)} variant={selected === pair.left ? "default" : "outline"} className="h-auto min-h-16 w-full whitespace-normal p-3 font-bold">{solved.includes(pair.left) ? <CheckCircle2 /> : null}{pair.left}</Button>)}</div>
+        <div className="space-y-3">{right.map((pair) => <Button key={pair.right} onClick={() => chooseRight(pair)} disabled={solved.includes(pair.left)} variant="outline" className="h-auto min-h-16 w-full whitespace-normal p-3 font-bold">{solved.includes(pair.left) ? <CheckCircle2 className="text-success" /> : null}{pair.right}</Button>)}</div>
+      </div>
+    </section>
+  );
+};
+
+const SequenceAdventure = ({ data, onDone }: { data: Sequencing; onDone: (mistakes: number) => void }) => {
+  const pool = useMemo(() => shuffle(data.items), [data.items]);
+  const [chosen, setChosen] = useState<string[]>([]);
+  const [mistakes, setMistakes] = useState(0);
+  const pick = (item: string) => {
+    if (chosen.includes(item)) return;
+    if (item !== data.items[chosen.length]) {
+      setMistakes((value) => value + 1);
+      return;
+    }
+    const next = [...chosen, item];
+    setChosen(next);
+    if (next.length === data.items.length) window.setTimeout(() => onDone(mistakes), 450);
+  };
+  return (
+    <section className="neu-card motion-pop-in mx-auto max-w-xl p-5">
+      <h2 className="text-xl font-extrabold text-heading">{data.instruction}</h2>
+      <p className="mb-4 mt-1 text-sm font-bold text-muted-foreground">اضغط العناصر حسب ترتيبها الصحيح</p>
+      <div className="space-y-3">{pool.map((item) => { const order = chosen.indexOf(item); return <Button key={item} onClick={() => pick(item)} disabled={order >= 0} variant={order >= 0 ? "default" : "outline"} className="h-auto min-h-16 w-full justify-between whitespace-normal p-4 text-right font-bold"><span>{item}</span>{order >= 0 && <span className="rounded-full bg-primary-foreground/20 px-2 py-1">{order + 1}</span>}</Button>; })}</div>
+    </section>
+  );
+};
+
+interface MemoryCard { id: string; pairId: string; text: string }
+const MemoryAdventure = ({ pairs, onDone }: { pairs: Pair[]; onDone: (moves: number) => void }) => {
+  const cards = useMemo<MemoryCard[]>(() => shuffle(pairs.flatMap((pair, index) => [
+    { id: `${index}-a`, pairId: String(index), text: pair.left },
+    { id: `${index}-b`, pairId: String(index), text: pair.right },
+  ])), [pairs]);
+  const [open, setOpen] = useState<string[]>([]);
+  const [solved, setSolved] = useState<string[]>([]);
+  const [moves, setMoves] = useState(0);
+
+  const reveal = (card: MemoryCard) => {
+    if (open.length === 2 || open.includes(card.id) || solved.includes(card.pairId)) return;
+    const nextOpen = [...open, card.id];
+    setOpen(nextOpen);
+    if (nextOpen.length !== 2) return;
+    const nextMoves = moves + 1;
+    setMoves(nextMoves);
+    const first = cards.find((item) => item.id === nextOpen[0]);
+    if (first?.pairId === card.pairId) {
+      const nextSolved = [...solved, card.pairId];
+      window.setTimeout(() => { setSolved(nextSolved); setOpen([]); if (nextSolved.length === pairs.length) onDone(nextMoves); }, 500);
+    } else {
+      window.setTimeout(() => setOpen([]), 700);
+    }
+  };
+
+  return (
+    <section className="motion-pop-in mx-auto max-w-xl">
+      <h2 className="mb-4 text-center text-xl font-extrabold text-heading">اكشف البطاقات المتطابقة معرفياً</h2>
+      <div className="grid grid-cols-3 gap-3">{cards.map((card) => { const visible = open.includes(card.id) || solved.includes(card.pairId); return <Button key={card.id} onClick={() => reveal(card)} variant={visible ? "default" : "outline"} className="memory-card h-auto min-h-24 whitespace-normal p-2 text-center font-extrabold">{visible ? card.text : <Brain className="h-7 w-7 adventure-pulse" />}</Button>; })}</div>
+    </section>
   );
 };
 
