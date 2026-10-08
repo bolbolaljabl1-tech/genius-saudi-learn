@@ -32,22 +32,6 @@
           "properties": {}
         },
         "outputSchema": null
-      },
-      {
-        "name": "list_subscription_plans",
-        "title": "List subscription plans",
-        "description": "Return the available subscription plans for منصة الطالب العبقري with price in SAR and duration.",
-        "annotations": {
-          "readOnlyHint": true,
-          "idempotentHint": true,
-          "openWorldHint": false
-        },
-        "inputSchema": {
-          "$schema": "http://json-schema.org/draft-07/schema#",
-          "type": "object",
-          "properties": {}
-        },
-        "outputSchema": null
       }
     ]
   }

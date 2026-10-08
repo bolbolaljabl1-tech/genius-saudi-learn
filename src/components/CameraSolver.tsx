@@ -2,13 +2,16 @@ import { useState, useRef } from "react";
 import { Camera, Loader2, ArrowRight, ImageIcon, Volume2, VolumeX, Youtube, Lightbulb } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import ShareButton from "./ShareButton";
+import AchievementCard from "./AchievementCard";
 
 interface CameraSolverProps {
   onBack: () => void;
   onXP: () => void;
+  studentName: string;
+  stars: number;
 }
 
-const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
+const CameraSolver = ({ onBack, onXP, studentName, stars }: CameraSolverProps) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [hint, setHint] = useState("");
@@ -211,6 +214,15 @@ const CameraSolver = ({ onBack, onXP }: CameraSolverProps) => {
         )}
 
         {answer && <ShareButton context="camera" resultContainerRef={resultRef} />}
+        {answer && (
+          <AchievementCard
+            studentName={studentName}
+            activity="حل سؤال مصور"
+            scoreLabel="اكتمل التحليل والشرح"
+            earnedStars={20}
+            totalStars={stars}
+          />
+        )}
       </div>
     </div>
   );

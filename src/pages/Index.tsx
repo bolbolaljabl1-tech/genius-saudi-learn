@@ -22,6 +22,7 @@ import { useXP } from "@/hooks/useXP";
 import { useTTS } from "@/hooks/useTTS";
 import { useIdleNotify } from "@/hooks/useIdleNotify";
 import { useOvertakeNotify } from "@/hooks/useOvertakeNotify";
+import { canAccessStudentScreen } from "@/lib/access-policy";
 
 type Screen = "stage" | "dashboard" | "subject" | "search" | "lesson" | "quiz" | "camera" | "leaderboard" | "games" | "selftest" | "foundation" | "studio";
 
@@ -40,7 +41,7 @@ const Index = () => {
   const backRef = useRef(false);
 
   const setScreen = (next: Screen) => {
-    setScreenRaw(next);
+    if (canAccessStudentScreen()) setScreenRaw(next);
   };
 
   useEffect(() => {
@@ -156,7 +157,7 @@ const Index = () => {
       {screen === "search" && <div className="motion-screen-in"><LessonSearch subject={subject} stage={stage} onSearch={handleLessonSearch} onBack={() => setScreen("subject")} /></div>}
       {screen === "lesson" && <div className="motion-screen-in"><LessonContent lessonTitle={lessonTitle} subject={subject} stage={stage} onStartQuiz={() => setScreen("quiz")} onBack={() => setScreen(fromFoundation ? "foundation" : "search")} onVideoXP={() => addXP(10)} /></div>}
       {screen === "quiz" && <div className="motion-screen-in"><QuizModule lessonTitle={lessonTitle} subject={subject} stage={stage} studentName={studentName} stars={xp} onBack={() => setScreen("lesson")} onRestart={() => { setScreen("lesson"); setTimeout(() => setScreen("quiz"), 100); }} onQuizComplete={handleQuizComplete} /></div>}
-      {screen === "camera" && <div className="motion-screen-in"><CameraSolver onBack={() => setScreen("stage")} onXP={() => { addXP(20); recordCompletion("camera"); }} /></div>}
+      {screen === "camera" && <div className="motion-screen-in"><CameraSolver onBack={() => setScreen("stage")} onXP={() => { addXP(20); recordCompletion("camera"); }} studentName={studentName} stars={xp} /></div>}
       {screen === "leaderboard" && <Leaderboard onBack={() => setScreen("stage")} currentName={studentName} currentXP={xp} />}
       {screen === "games" && <div className="motion-screen-in"><GamesHub onBack={() => setScreen("stage")} onXP={(amount) => { addXP(amount); recordCompletion("game"); }} onBadge={(badge) => awardBadge(badge)} studentName={studentName} stars={xp} /></div>}
       {screen === "studio" && <div className="motion-screen-in"><QuizStudio onBack={() => setScreen("stage")} onXP={(n) => { addXP(n); recordCompletion("studio"); }} onBadge={(b) => awardBadge(b)} studentName={studentName} stage={stage} stars={xp} /></div>}
