@@ -81,7 +81,7 @@ const WeeklyCompetitionBanner = ({ onOpenLeaderboard }: WeeklyCompetitionBannerP
                 مسابقة العباقرة الأسبوعية
               </span>
               <span className="block font-tajawal text-sm font-bold leading-relaxed text-royal-blue-foreground sm:text-base">
-                أعلى ثلاثة طلاب حصولاً على نقاط (XP) خلال أسبوع واحد يحصلون على اشتراك فصل دراسي مجاني بالكامل!
+                أعلى ثلاثة طلاب جمعاً للنجوم خلال أسبوع واحد يحصلون على وسام العبقري الأسبوعي.
               </span>
               <span className="mt-1 block text-xs font-extrabold text-matte-gold">
                 اضغط لعرض لوحة المتصدرين

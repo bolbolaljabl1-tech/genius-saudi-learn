@@ -33,49 +33,19 @@ var get_platform_info_default = defineTool({
   }
 });
 
-// src/lib/mcp/tools/list-subscription-plans.ts
-import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.0";
-
-// src/lib/payment-config.ts
-var PLAN_PRICES = {
-  semester: { price: 30, label: "\u0627\u0634\u062A\u0631\u0627\u0643 \u0641\u0635\u0644 \u062F\u0631\u0627\u0633\u064A \u0648\u0627\u062D\u062F", period: "\u0644\u0644\u0641\u0635\u0644 \u0627\u0644\u0648\u0627\u062D\u062F" },
-  yearly: { price: 50, label: "\u0627\u0634\u062A\u0631\u0627\u0643 \u0633\u0646\u0629 \u0643\u0627\u0645\u0644\u0629 - \u0639\u0631\u0636 \u062E\u0627\u0635", period: "\u0633\u0646\u0648\u064A\u0627\u064B" }
-};
-
-// src/lib/mcp/tools/list-subscription-plans.ts
-var list_subscription_plans_default = defineTool2({
-  name: "list_subscription_plans",
-  title: "List subscription plans",
-  description: "Return the available subscription plans for \u0645\u0646\u0635\u0629 \u0627\u0644\u0637\u0627\u0644\u0628 \u0627\u0644\u0639\u0628\u0642\u0631\u064A with price in SAR and duration.",
-  inputSchema: {},
-  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
-  handler: () => {
-    const plans = Object.entries(PLAN_PRICES).map(([id, p]) => ({
-      id,
-      label: p.label,
-      price_sar: p.price,
-      period: p.period
-    }));
-    return {
-      content: [{ type: "text", text: JSON.stringify(plans, null, 2) }],
-      structuredContent: { plans }
-    };
-  }
-});
-
 // src/lib/mcp/index.ts
 var SUPABASE_ISSUER = "https://kjubpaflsffnioixbfec.supabase.co/auth/v1";
 var mcp_default = defineMcp({
   name: "genius-student-mcp",
   title: "\u0645\u0646\u0635\u0629 \u0627\u0644\u0637\u0627\u0644\u0628 \u0627\u0644\u0639\u0628\u0642\u0631\u064A MCP",
   version: "0.1.0",
-  instructions: "Tools for \u0645\u0646\u0635\u0629 \u0627\u0644\u0637\u0627\u0644\u0628 \u0627\u0644\u0639\u0628\u0642\u0631\u064A, the Arabic learning platform for primary and middle school students. Use `get_platform_info` for a platform overview, and `list_subscription_plans` to fetch available plans and pricing in SAR.",
+  instructions: "Tools for \u0645\u0646\u0635\u0629 \u0627\u0644\u0637\u0627\u0644\u0628 \u0627\u0644\u0639\u0628\u0642\u0631\u064A, the free Arabic learning platform for primary and middle school students. Use `get_platform_info` for a platform overview.",
   auth: auth.oauth.issuer({
     issuer: SUPABASE_ISSUER,
     acceptedAudiences: ["authenticated"],
     resourceName: "\u0645\u0646\u0635\u0629 \u0627\u0644\u0637\u0627\u0644\u0628 \u0627\u0644\u0639\u0628\u0642\u0631\u064A MCP"
   }),
-  tools: [get_platform_info_default, list_subscription_plans_default]
+  tools: [get_platform_info_default]
 });
 
 // lovable-mcp-supabase-entry.ts
