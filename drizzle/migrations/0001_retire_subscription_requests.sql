@@ -1,0 +1,1 @@
+COMMENT ON TABLE public.subscription_requests IS 'DEPRECATED: subscriptions removed; retained historical requests are no longer used by the free student platform';

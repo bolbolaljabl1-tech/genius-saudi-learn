@@ -8,6 +8,13 @@
       "when": 1790894701035,
       "tag": "0000_tighten_open_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793789789970,
+      "tag": "0001_retire_subscription_requests",
+      "breakpoints": true
     }
   ]
 }
