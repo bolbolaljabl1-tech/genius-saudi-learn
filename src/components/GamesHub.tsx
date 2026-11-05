@@ -13,6 +13,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
+import { useActivityDelay } from "@/hooks/useActivityDelay";
 import AchievementCard from "./AchievementCard";
 
 interface GamesHubProps {
@@ -56,6 +57,7 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName, stars }: GamesHubProps) 
   const [pack, setPack] = useState<GamePack | null>(null);
   const [mode, setMode] = useState<Mode | null>(null);
   const [result, setResult] = useState<{ label: string; earned: number } | null>(null);
+  const memoryPairs = useMemo(() => pack?.matching.slice(0, 6) ?? [], [pack]);
 
   const generate = async () => {
     if (!grade || !topic.trim()) {
@@ -161,12 +163,13 @@ const GamesHub = ({ onBack, onXP, onBadge, studentName, stars }: GamesHubProps) 
 
       {pack && mode === "matching" && <MatchingAdventure pairs={pack.matching} onDone={(moves) => finish(`${pack.matching.length} أزواج في ${moves} محاولات`, 40)} />}
       {pack && mode === "sequence" && <SequenceAdventure data={pack.sequencing} onDone={(mistakes) => finish(`اكتمل الترتيب مع ${mistakes} أخطاء`, 35)} />}
-      {pack && mode === "memory" && <MemoryAdventure pairs={pack.matching.slice(0, 6)} onDone={(moves) => finish(`${pack.matching.slice(0, 6).length} أزواج في ${moves} محاولات`, 45)} />}
+      {pack && mode === "memory" && <MemoryAdventure pairs={memoryPairs} onDone={(moves) => finish(`${memoryPairs.length} أزواج في ${moves} محاولات`, 45)} />}
     </div>
   );
 };
 
 const MatchingAdventure = ({ pairs, onDone }: { pairs: Pair[]; onDone: (moves: number) => void }) => {
+  const schedule = useActivityDelay();
   const left = useMemo(() => shuffle(pairs), [pairs]);
   const right = useMemo(() => shuffle(pairs), [pairs]);
   const [selected, setSelected] = useState<string | null>(null);
@@ -181,7 +184,7 @@ const MatchingAdventure = ({ pairs, onDone }: { pairs: Pair[]; onDone: (moves: n
     if (match) {
       const nextSolved = [...solved, selected];
       setSolved(nextSolved);
-      if (nextSolved.length === pairs.length) window.setTimeout(() => onDone(nextMoves), 450);
+      if (nextSolved.length === pairs.length) schedule(() => onDone(nextMoves), 450);
     }
     setSelected(null);
   };
@@ -198,6 +201,7 @@ const MatchingAdventure = ({ pairs, onDone }: { pairs: Pair[]; onDone: (moves: n
 };
 
 const SequenceAdventure = ({ data, onDone }: { data: Sequencing; onDone: (mistakes: number) => void }) => {
+  const schedule = useActivityDelay();
   const pool = useMemo(() => shuffle(data.items), [data.items]);
   const [chosen, setChosen] = useState<string[]>([]);
   const [mistakes, setMistakes] = useState(0);
@@ -209,7 +213,7 @@ const SequenceAdventure = ({ data, onDone }: { data: Sequencing; onDone: (mistak
     }
     const next = [...chosen, item];
     setChosen(next);
-    if (next.length === data.items.length) window.setTimeout(() => onDone(mistakes), 450);
+    if (next.length === data.items.length) schedule(() => onDone(mistakes), 450);
   };
   return (
     <section className="neu-card motion-pop-in mx-auto max-w-xl p-5">
@@ -222,6 +226,7 @@ const SequenceAdventure = ({ data, onDone }: { data: Sequencing; onDone: (mistak
 
 interface MemoryCard { id: string; pairId: string; text: string }
 const MemoryAdventure = ({ pairs, onDone }: { pairs: Pair[]; onDone: (moves: number) => void }) => {
+  const schedule = useActivityDelay();
   const cards = useMemo<MemoryCard[]>(() => shuffle(pairs.flatMap((pair, index) => [
     { id: `${index}-a`, pairId: String(index), text: pair.left },
     { id: `${index}-b`, pairId: String(index), text: pair.right },
@@ -240,9 +245,9 @@ const MemoryAdventure = ({ pairs, onDone }: { pairs: Pair[]; onDone: (moves: num
     const first = cards.find((item) => item.id === nextOpen[0]);
     if (first?.pairId === card.pairId) {
       const nextSolved = [...solved, card.pairId];
-      window.setTimeout(() => { setSolved(nextSolved); setOpen([]); if (nextSolved.length === pairs.length) onDone(nextMoves); }, 500);
+      schedule(() => { setSolved(nextSolved); setOpen([]); if (nextSolved.length === pairs.length) onDone(nextMoves); }, 500);
     } else {
-      window.setTimeout(() => setOpen([]), 700);
+      schedule(() => setOpen([]), 700);
     }
   };
 
