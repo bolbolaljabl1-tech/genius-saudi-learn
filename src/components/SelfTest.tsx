@@ -101,12 +101,18 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
   const [seconds, setSeconds] = useState(TEST_SECONDS);
   const [result, setResult] = useState<{ score: number; max: number; feedback: string; earned: number } | null>(null);
   const intervalRef = useRef<number | null>(null);
+  const submitRef = useRef<() => void>(() => {});
+  const submittedRef = useRef(false);
 
   useEffect(() => {
     if (phase !== "test") return;
     intervalRef.current = window.setInterval(() => {
       setSeconds((s) => {
-        if (s <= 1) { window.clearInterval(intervalRef.current!); submit(); return 0; }
+        if (s <= 1) {
+          if (intervalRef.current !== null) window.clearInterval(intervalRef.current);
+          submitRef.current();
+          return 0;
+        }
         return s - 1;
       });
     }, 1000);
@@ -115,6 +121,7 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
   }, [phase]);
 
   const startTest = async () => {
+    submittedRef.current = false;
     setPhase("loading"); setError("");
     try {
       const types = qType === "mixed" ? ["mcq","tf"]
@@ -133,7 +140,9 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
   };
 
   const submit = () => {
-    if (!test) return;
+    if (!test || submittedRef.current) return;
+    submittedRef.current = true;
+    if (intervalRef.current !== null) window.clearInterval(intervalRef.current);
     let score = 0; let max = 0;
     test.questions.forEach((q, i) => {
       const pts = q.points || (q.type === "calligraphy" ? 6 : q.type === "matching" ? (q.right?.length || 4) : q.type === "fill" ? (q.blanks?.length || 1) : 1);
@@ -166,6 +175,7 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
     onXP?.(earned);
     setPhase("result");
   };
+  submitRef.current = submit;
 
   const fmt = (s: number) => `${String(Math.floor(s/60)).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
 

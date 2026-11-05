@@ -6,6 +6,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 import AchievementCard from "./AchievementCard";
+import { useActivityDelay } from "@/hooks/useActivityDelay";
 
 interface QuizStudioProps {
   onBack: () => void;
@@ -64,6 +65,7 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage, stars }: QuizSt
   const [flash, setFlash] = useState<{ ok: boolean; text: string } | null>(null);
   const [finished, setFinished] = useState(false);
   const [earnedStars, setEarnedStars] = useState(0);
+  const roundRef = useRef({ score: 0, combo: 0, bestCombo: 0, finished: false });
   const [board, setBoard] = useState<{ student_name: string; xp: number }[]>([]);
 
   const fetchBoard = useCallback(async () => {
@@ -82,18 +84,23 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage, stars }: QuizSt
 
   const registerAnswer = (ok: boolean, base: number) => {
     if (ok) {
-      const nextCombo = combo + 1;
+      const nextCombo = roundRef.current.combo + 1;
       const multiplier = nextCombo >= 5 ? 3 : nextCombo >= 3 ? 2 : 1;
       setCombo(nextCombo);
-      setBestCombo((b) => Math.max(b, nextCombo));
-      setScore((s) => s + base * multiplier);
+      roundRef.current.combo = nextCombo;
+      roundRef.current.bestCombo = Math.max(roundRef.current.bestCombo, nextCombo);
+      roundRef.current.score += base * multiplier;
+      setBestCombo(roundRef.current.bestCombo);
+      setScore(roundRef.current.score);
     } else {
+      roundRef.current.combo = 0;
       setCombo(0);
     }
     showFlash(ok);
   };
 
   const resetRound = () => {
+    roundRef.current = { score: 0, combo: 0, bestCombo: 0, finished: false };
     setScore(0); setCombo(0); setBestCombo(0); setFinished(false); setFlash(null); setEarnedStars(0);
   };
 
@@ -126,11 +133,13 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage, stars }: QuizSt
   };
 
   const finishRound = async () => {
+    if (roundRef.current.finished) return;
+    roundRef.current.finished = true;
     setFinished(true);
-    const earned = Math.max(5, Math.round(score / 2));
+    const earned = Math.max(5, Math.round(roundRef.current.score / 2));
     setEarnedStars(earned);
     onXP(earned);
-    if (bestCombo >= 5) onBadge("وسام السلسلة الذهبية");
+    if (roundRef.current.bestCombo >= 5) onBadge("وسام السلسلة الذهبية");
     if (studentName) {
       const { data: existing } = await (supabase as any)
         .from("leaderboard").select("id, xp").eq("student_name", studentName).maybeSingle();
@@ -343,6 +352,7 @@ const TimerBar = ({ left, total }: { left: number; total: number }) => (
 
 /* ---------------- MCQ ---------------- */
 const McqGame = ({ items, onAnswer, onDone }: { items: MCQ[]; onAnswer: (ok: boolean, base: number) => void; onDone: () => void }) => {
+  const schedule = useActivityDelay();
   const list = useMemo(() => shuffle(items), [items]);
   const [i, setI] = useState(0);
   const [picked, setPicked] = useState<number | null>(null);
@@ -354,7 +364,7 @@ const McqGame = ({ items, onAnswer, onDone }: { items: MCQ[]; onAnswer: (ok: boo
   }, [i, list.length, onDone]);
 
   const expire = useCallback(() => {
-    if (picked === null) { setPicked(-1); onAnswer(false, 0); window.setTimeout(next, 1200); }
+    if (picked === null) { setPicked(-1); onAnswer(false, 0); schedule(next, 1200); }
   }, [picked, onAnswer, next]);
 
   const left = useCountdown(20, i, expire, picked === null);
@@ -363,7 +373,7 @@ const McqGame = ({ items, onAnswer, onDone }: { items: MCQ[]; onAnswer: (ok: boo
     if (picked !== null) return;
     setPicked(idx);
     onAnswer(idx === q.correctIndex, 10);
-    window.setTimeout(next, 1400);
+    schedule(next, 1400);
   };
 
   return (
@@ -396,6 +406,7 @@ const McqGame = ({ items, onAnswer, onDone }: { items: MCQ[]; onAnswer: (ok: boo
 
 /* ---------------- Speed ---------------- */
 const SpeedGame = ({ items, onAnswer, onDone }: { items: SpeedItem[]; onAnswer: (ok: boolean, base: number) => void; onDone: () => void }) => {
+  const schedule = useActivityDelay();
   const list = useMemo(() => shuffle(items), [items]);
   const [i, setI] = useState(0);
   const [locked, setLocked] = useState(false);
@@ -407,7 +418,7 @@ const SpeedGame = ({ items, onAnswer, onDone }: { items: SpeedItem[]; onAnswer: 
   }, [i, list.length, onDone]);
 
   const expire = useCallback(() => {
-    if (!locked) { setLocked(true); onAnswer(false, 0); window.setTimeout(next, 900); }
+    if (!locked) { setLocked(true); onAnswer(false, 0); schedule(next, 900); }
   }, [locked, onAnswer, next]);
 
   const left = useCountdown(8, i, expire, !locked);
@@ -416,7 +427,7 @@ const SpeedGame = ({ items, onAnswer, onDone }: { items: SpeedItem[]; onAnswer: 
     if (locked) return;
     setLocked(true);
     onAnswer(val === q.isTrue, 8);
-    window.setTimeout(next, 900);
+    schedule(next, 900);
   };
 
   return (
