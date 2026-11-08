@@ -4,4 +4,6 @@ Persist locally completed activity counts at the existing student progress hook;
 Keep student access free at the main page entry; any future paid access must use one server-verified entitlement guard there so content gating cannot diverge across screens.
 Use the shared AchievementCard for activity completion so student name, earned stars, total stars, and device sharing stay consistent.
 Cancel delayed activity callbacks on unmount through useActivityDelay so leaving a round cannot award stars or interrupt another round.
-Keep the home guide action in StageSelection's header and pass its handler from Index, so the existing voice and support dialog remain connected without a duplicate floating guide.
+Keep the home guide action in VideoHeader through StageSelection and pass its handler from Index, so the existing voice and support dialog remain connected without a duplicate floating guide.
+Use VideoHeader's optional welcomeAudioSrc for a real welcome recording; render the audio control only when a source is supplied and stop media on unmount to avoid phantom playback.
+Load external font stylesheets through a document-head link at the app entry, never CSS URL imports, so font loading does not depend on the CSS compiler.

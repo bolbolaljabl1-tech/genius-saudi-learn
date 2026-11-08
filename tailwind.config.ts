@@ -14,6 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
+        andalus: ["Andalus", "Traditional Arabic", "Amiri", "serif"],
         tajawal: ["Tajawal", "sans-serif"],
         amiri: ["Amiri", "serif"],
         ruqaa: ["Aref Ruqaa", "serif"],

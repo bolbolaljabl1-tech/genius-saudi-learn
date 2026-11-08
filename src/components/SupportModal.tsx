@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
-import { X, Send, Bell, HelpCircle } from "lucide-react";
+import { useState } from "react";
+import { Send, Bell, HelpCircle, Plus, Minus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
@@ -10,11 +12,35 @@ interface SupportModalProps {
 const faqs = [
   {
     q: "كيف أبدأ رحلتي في رحاب منصة الطالب العبقري؟",
-    a: "اختر مرحلتك الدراسية من الصفحة الرئيسية، ثم انتقل إلى المادة والدرس الذي تريده. يمكنك أيضاً تجربة 'صور سؤالك' أو 'ألعاب العباقرة' مباشرة.",
+    a: "أهلاً بك! اختر المرحلة الابتدائية أو المتوسطة، ثم المادة والصف والفصل الدراسي. اختر عنوان الدرس لعرض شرحه، وافتح كتاب المادة أو ابدأ المغامرة. الوصول متاح مجاناً لجميع الطلاب.",
   },
   {
-    q: "ما هي الكنوز التعليمية التي تنتظرني في المنصة؟",
-    a: "ستجد: شروحات ذكية، حلولاً فورية للأسئلة بالكاميرا، شبكة تحدي العباقرة، تحديات الأصدقاء أونلاين، استوديو صَمِّم لعبتك بنفسك، وأوسمة ولوحة شرف.",
+    q: "كيف أستفيد من قسم التأسيس؟",
+    a: "اختر مادة من مواد التأسيس، ثم محور المهارة الذي تحتاج إليه. يمكنك مراجعة الشرح والبدء في نشاطه، أو فتح السبورة التفاعلية الذكية.",
+  },
+  {
+    q: "كيف أستخدم صور سؤالك؟",
+    a: "التقط صورة واضحة للسؤال أو اخترها من المعرض. أضف توضيحاً في الحقل الاختياري إن احتجت، ثم اطلب تحليل السؤال. يمكنك الاستماع إلى الشرح ومشاركة إنجازك بعد إكمال النشاط. راجع الحل مع معلمك عند الحاجة، فقد تخطئ الإجابات المولّدة.",
+  },
+  {
+    q: "ما الألعاب التعليمية المتاحة؟",
+    a: "في ألعاب العباقرة اختر الصف واكتب موضوعاً أو اسم درس، ثم اختر نشاط توصيل المفاهيم أو الترتيب أو الذاكرة وابدأ اللعب.",
+  },
+  {
+    q: "كيف أصمّم لعبتي بنفسي؟",
+    a: "افتح استوديو صَمِّم لعبتك بنفسك، وحدّد الصف والموضوع. بعد توليد المحتوى اختر نمط الأسئلة متعددة الخيارات أو المطابقة أو الترتيب أو الصواب والخطأ.",
+  },
+  {
+    q: "كيف أختبر نفسي؟",
+    a: "حدّد الصف والمادة وعدد الأسئلة ونوعها. يمكنك اختيار دروس محدّدة أو ترك الحقل فارغاً لاختبار شامل. أجب قبل انتهاء الوقت، ثم راجع نتيجتك وإجاباتك.",
+  },
+  {
+    q: "أين أجد إنجازاتي وأشاركها؟",
+    a: "اضغط إنجازاتي في الرئيسية لمشاهدة اسمك ومرحلتك ورصيدك وعدد الأنشطة المكتملة. بطاقة الإنجاز في نهاية النشاط تتيح المشاركة عبر جهازك، ولوحة المتصدرين تعرض ترتيب الطلاب. إنجازات هذا الجهاز تُحفظ محلياً، وقد تفقدها عند مسح بيانات المتصفح.",
+  },
+  {
+    q: "ماذا أفعل إذا تعذّر تحميل المحتوى؟",
+    a: "تحقّق من اتصال الإنترنت وأعد المحاولة. تستخدم الشروحات وتحليل الصور وتوليد الأنشطة خدمات ذكية تحتاج إلى اتصال. استخدم رجوع للعودة للشاشة السابقة أو راسل إدارة المنصة عند استمرار المشكلة.",
   },
   {
     q: "كيف أشارك أفكاري أو أطلب العون من المشرف العام؟",
@@ -27,24 +53,6 @@ const SupportModal = ({ onClose }: SupportModalProps) => {
   const [name, setName] = useState("");
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
-
-  useEffect(() => {
-    if ("Notification" in window && Notification.permission === "default") {
-      const t = setTimeout(() => {
-        toast({ title: "هل تريد السماح لتطبيق منصة الطالب العبقري بإرسال إشعارات إليك؟" });
-        setTimeout(() => {
-          Notification.requestPermission().then((perm) => {
-            if (perm === "granted") {
-              new Notification("منصة الطالب العبقري", {
-                body: "تم تفعيل الإشعارات بنجاح! 🎓",
-              });
-            }
-          });
-        }, 800);
-      }, 600);
-      return () => clearTimeout(t);
-    }
-  }, []);
 
   const handleSend = async () => {
     if (!name.trim() || !message.trim()) {
@@ -65,30 +73,29 @@ const SupportModal = ({ onClose }: SupportModalProps) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="bg-card rounded-3xl shadow-2xl w-full max-w-md p-6 animate-scale-in max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="text-2xl font-extrabold text-heading flex items-center gap-2">
+    <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
+      <DialogContent dir="rtl" className="z-[100] w-[calc(100%-2rem)] max-w-lg max-h-[85dvh] overflow-y-auto rounded-lg bg-card p-5 pt-12 font-amiri [&>button]:left-4 [&>button]:right-auto">
+        <div className="mb-4">
+          <DialogTitle className="font-andalus text-3xl font-bold text-heading flex items-center gap-2 leading-relaxed tracking-normal">
             <HelpCircle className="w-6 h-6 text-matte-gold" />
-            الدعم الفني
-          </h2>
-          <button onClick={onClose} className="p-1 rounded-full hover:bg-muted">
-            <X className="w-5 h-5 text-muted-foreground" />
-          </button>
+            دليل استكشاف المنصة
+          </DialogTitle>
+          <DialogDescription className="text-base leading-7">أهلاً بك، نتمنى لك رحلة تعليمية ممتعة ومليئة بالإنجازات.</DialogDescription>
         </div>
 
         <div className="space-y-3 mb-5">
           {faqs.map((f, i) => (
-            <div key={i} className="rounded-2xl border-2 border-matte-gold/30 bg-matte-gold/5 overflow-hidden">
-              <button
+            <div key={i} className="border-b border-border overflow-hidden">
+              <Button variant="ghost"
                 onClick={() => setOpenIdx(openIdx === i ? null : i)}
-                className="w-full text-right px-4 py-3 font-bold text-base text-foreground flex items-start gap-2"
+                aria-expanded={openIdx === i} aria-controls={`guide-answer-${i}`}
+                className="h-auto whitespace-normal w-full text-right px-1 py-3 font-bold text-lg text-foreground flex items-start gap-2"
               >
-                <span className="text-matte-gold flex-shrink-0">{openIdx === i ? "−" : "+"}</span>
+                {openIdx === i ? <Minus className="mt-1 shrink-0 text-matte-gold" /> : <Plus className="mt-1 shrink-0 text-matte-gold" />}
                 <span className="flex-1">{f.q}</span>
-              </button>
+              </Button>
               {openIdx === i && (
-                <div className="px-4 pb-4 text-body-blue text-base leading-7 font-bold">{f.a}</div>
+                <div id={`guide-answer-${i}`} className="px-1 pb-4 text-royal-blue text-lg leading-8">{f.a}</div>
               )}
             </div>
           ))}
@@ -98,12 +105,12 @@ const SupportModal = ({ onClose }: SupportModalProps) => {
           href="https://wa.me/966538583621"
           target="_blank"
           rel="noopener noreferrer"
-          className="w-full mb-3 py-3 rounded-2xl bg-green-600 text-white font-extrabold flex items-center justify-center gap-2 active:scale-95 transition-all"
+          className="w-full mb-3 py-3 rounded-lg bg-primary text-primary-foreground font-extrabold flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
           💬 فتح المحادثة عبر واتساب
         </a>
 
-        <button
+        <Button
           onClick={() => {
             if ("Notification" in window) {
               Notification.requestPermission().then((perm) => {
@@ -116,11 +123,11 @@ const SupportModal = ({ onClose }: SupportModalProps) => {
               });
             }
           }}
-          className="w-full mb-5 py-3 rounded-2xl bg-royal-blue text-matte-gold font-extrabold flex items-center justify-center gap-2 active:scale-95 transition-all"
+          className="h-auto w-full mb-5 py-3 rounded-lg bg-royal-blue text-matte-gold hover:bg-royal-blue/90 font-extrabold flex items-center justify-center gap-2 active:scale-95 transition-all"
         >
           <Bell className="w-5 h-5" />
           تفعيل الإشعارات
-        </button>
+        </Button>
 
         <div className="border-t-2 border-matte-gold/20 pt-4 space-y-3">
           <p className="text-base font-bold text-heading">هل تريد إرسال رسالة للمشرف العام؟</p>
@@ -138,17 +145,18 @@ const SupportModal = ({ onClose }: SupportModalProps) => {
             rows={3}
             className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base resize-none focus:outline-none focus:ring-2 focus:ring-ring"
           />
-          <button
+          <Button
             onClick={handleSend}
             disabled={sending}
-            className="w-full gradient-emerald text-primary-foreground font-bold py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
+            className="h-auto w-full gradient-emerald text-primary-foreground font-bold py-3 rounded-lg flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <Send className="w-4 h-4" />
             {sending ? "جاري الإرسال..." : "إرسال"}
-          </button>
+          </Button>
         </div>
-      </div>
-    </div>
+        <p className="text-center text-matte-gold font-bold mt-2">منصة الطالب العبقري - 2026 🎓</p>
+      </DialogContent>
+    </Dialog>
   );
 };
 
