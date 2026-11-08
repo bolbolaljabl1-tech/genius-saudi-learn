@@ -83,7 +83,7 @@ const Index = () => {
   const [lessonTitle, setLessonTitle] = useState("");
   const [fromFoundation, setFromFoundation] = useState(false);
   const { xp, studentName, progress, addXP, awardBadge, saveStudentName, recordCompletion } = useXP();
-  const { speak } = useTTS();
+  const { speak, stop } = useTTS();
   const [showNameModal, setShowNameModal] = useState(false);
   const [showWhisper, setShowWhisper] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
@@ -92,7 +92,7 @@ const Index = () => {
 
 
   const openGuide = () => {
-    speak("أهلاً بك في منصة الطالب العبقري. اختر مرحلتك الدراسية، ثم المادة والدرس الذي تريده. استخدم صور سؤالك لحل التمارين بالكاميرا، وتحدى أصدقاءك في ألعاب العباقرة، وتابع تقدمك عبر النجوم والأوسمة. نتمنى لك رحلة تعليمية ممتعة.");
+    speak("أهلاً بك في منصة الطالب العبقري. اختر مرحلتك الدراسية، ثم المادة والدرس الذي تريده. استخدم صور سؤالك لمراجعة التمارين بالكاميرا، واستمتع بألعاب التوصيل والترتيب والذاكرة، وتابع تقدمك عبر إنجازاتي. نتمنى لك رحلة تعليمية ممتعة. منصة الطالب العبقري - 2026.");
     setShowSupport(true);
   };
 
@@ -169,7 +169,7 @@ const Index = () => {
       {screen === "selftest" && <div className="motion-screen-in"><SelfTest onBack={() => setScreen("stage")} onXP={(n) => { addXP(n); recordCompletion("selftest"); }} studentName={studentName} stars={xp} /></div>}
 
       {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}
-      {showSupport && <SupportModal onClose={() => setShowSupport(false)} />}
+      {showSupport && <SupportModal onClose={() => { stop(); setShowSupport(false); }} />}
       <ShareButton />
 
       <button
