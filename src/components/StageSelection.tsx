@@ -42,9 +42,9 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
         </div>
 
         {/* قسم التأسيس — مواد نافس الأربع */}
-        <button
+        <Button
           onClick={onFoundation}
-          className="w-full max-w-xl mb-4 px-4 py-3 rounded-2xl neu-card border-2 border-gold/50 text-right active:scale-[0.98] transition-all animate-scale-in hover:shadow-gold stage-card-3d"
+          className="h-auto whitespace-normal [&_svg]:size-7 w-full max-w-xl mb-4 px-4 py-3 rounded-2xl neu-card hover:bg-card border-2 border-gold/50 text-right active:scale-[0.98] transition-all animate-scale-in hover:shadow-gold stage-card-3d"
           style={{ animationDelay: "0.18s" }}
           aria-label="قسم التأسيس لمواد نافس الأربع"
         >
@@ -59,7 +59,7 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
               </span>
             </span>
           </span>
-        </button>
+        </Button>
 
 
 
@@ -72,10 +72,10 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
         {/* Stage Cards */}
         <div className="grid grid-cols-2 gap-3 w-full max-w-xl">
           {stages.map((stage) => (
-            <button
+            <Button
               key={stage.id}
               onClick={() => onSelect(stage.id)}
-              className="group bg-card rounded-xl px-2 py-3 text-center border border-border/60 transition-all duration-300 hover:-translate-y-1 hover:shadow-emerald-lg active:scale-[0.97] animate-scale-in cursor-pointer stage-card-3d"
+              className="h-auto whitespace-normal block group bg-card hover:bg-card rounded-xl px-2 py-3 text-center border border-border/60 transition-all duration-300 hover:-translate-y-1 hover:shadow-emerald-lg active:scale-[0.97] animate-scale-in cursor-pointer stage-card-3d"
               style={{ animationDelay: stage.delay }}
             >
               <div className="inline-flex items-center justify-center w-9 h-9 rounded-lg gradient-emerald shadow-emerald mb-1.5 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3">
@@ -83,32 +83,32 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
               </div>
               <h2 className="text-base font-extrabold text-heading mb-0">{stage.title}</h2>
               <p className="text-muted-foreground text-xs font-medium">{stage.description}</p>
-            </button>
+            </Button>
           ))}
         </div>
 
         {/* Leaderboard Button */}
-        <button onClick={onLeaderboard} className="w-full max-w-xl mt-6 mb-6 py-4 rounded-2xl neu-btn text-foreground font-extrabold text-xl hover:shadow-gold transition-all active:scale-[0.98] flex items-center justify-center gap-3 animate-scale-in" style={{ animationDelay: "0.4s" }}>
+        <Button onClick={onLeaderboard} className="h-auto whitespace-normal w-full max-w-xl mt-6 mb-6 py-4 rounded-2xl neu-btn text-foreground font-extrabold text-xl hover:shadow-gold transition-all active:scale-[0.98] flex items-center justify-center gap-3 animate-scale-in" style={{ animationDelay: "0.4s" }}>
           <Trophy className="w-6 h-6 text-gold" />
           🏆 لوحة المتصدرين
-        </button>
+        </Button>
 
         {/* Camera Solver Button */}
-        <button onClick={onCamera} className="adventure-interactive w-full max-w-xl mb-4 py-5 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-2xl shadow-emerald-lg flex items-center justify-center gap-3 animate-scale-in" style={{ animationDelay: "0.05s" }}>
+        <Button onClick={onCamera} className="h-auto whitespace-normal [&_svg]:size-7 adventure-interactive w-full max-w-xl mb-4 py-5 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-2xl shadow-emerald-lg flex items-center justify-center gap-3 animate-scale-in" style={{ animationDelay: "0.05s" }}>
           <Camera className="w-7 h-7" />
           📸 صور سؤالك
-        </button>
+        </Button>
 
         {/* Games Button */}
-        <button onClick={onGames} className="adventure-interactive w-full max-w-xl mb-4 py-5 rounded-2xl gradient-gold text-gold-foreground font-extrabold text-2xl shadow-gold flex items-center justify-center gap-3 animate-scale-in" style={{ animationDelay: "0.1s" }}>
+        <Button onClick={onGames} className="h-auto whitespace-normal [&_svg]:size-7 adventure-interactive w-full max-w-xl mb-4 py-5 rounded-2xl gradient-gold text-gold-foreground font-extrabold text-2xl shadow-gold flex items-center justify-center gap-3 animate-scale-in" style={{ animationDelay: "0.1s" }}>
           <Gamepad2 className="w-7 h-7 adventure-pulse" />
           🎮 ألعاب العباقرة
-        </button>
+        </Button>
 
         {/* AI Quiz Studio */}
-        <button
+        <Button
           onClick={onStudio}
-          className="w-full max-w-xl mb-4 py-5 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-2xl shadow-emerald-lg border-2 border-gold/60 active:scale-[0.98] transition-all flex flex-col items-center justify-center gap-1 animate-scale-in animate-gold-neon"
+          className="h-auto whitespace-normal [&_svg]:size-7 w-full max-w-xl mb-4 py-5 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-2xl shadow-emerald-lg border-2 border-gold/60 active:scale-[0.98] transition-all flex flex-col items-center justify-center gap-1 animate-scale-in animate-gold-neon"
           style={{ animationDelay: "0.12s" }}
           aria-label="صَمِّم لعبتك بنفسك"
         >
@@ -117,14 +117,14 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
             صَمِّم لعبتك بنفسك
           </span>
           <span className="text-sm font-bold opacity-90">استوديو التحديات التفاعلية بالذكاء الاصطناعي</span>
-        </button>
+        </Button>
 
 
         {/* Self Test Button */}
-        <button onClick={onSelfTest} className="w-full max-w-xl mb-4 py-5 rounded-2xl bg-royal-blue text-matte-gold font-extrabold text-2xl shadow-emerald-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in animate-gold-neon" style={{ animationDelay: "0.15s" }}>
+        <Button onClick={onSelfTest} className="h-auto whitespace-normal [&_svg]:size-7 w-full max-w-xl mb-4 py-5 rounded-2xl bg-royal-blue text-matte-gold font-extrabold text-2xl shadow-emerald-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in animate-gold-neon" style={{ animationDelay: "0.15s" }}>
           <ClipboardCheck className="w-7 h-7" />
           اختبر نفسك
-        </button>
+        </Button>
 
         <section aria-label="حسابات المنصة الرسمية" className="w-full max-w-xl mt-10 mb-28 text-center">
           <h2 className="font-aref text-2xl font-bold text-heading mb-4">تابع حسابات المنصة الرسمية</h2>
