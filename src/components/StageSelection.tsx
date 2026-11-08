@@ -1,6 +1,7 @@
 import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, ClipboardCheck, Blocks, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Music2, Twitter, ExternalLink } from "lucide-react";
+import VideoHeader from "@/components/VideoHeader";
 
 interface StageSelectionProps {
   onSelect: (stage: string) => void;
@@ -24,21 +25,20 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
   ];
 
   return (
-    <div className="min-h-screen flex flex-col items-center pt-2">
+    <div className="home-compact min-h-screen flex flex-col items-center">
+      <VideoHeader onGuide={onGuide} />
       <div className="w-full px-4 flex flex-col items-center">
-        <header dir="rtl" className="w-full max-w-3xl mb-5 border-b border-matte-gold/30 bg-royal-blue text-matte-gold">
-          <div className="grid grid-cols-2 sm:grid-cols-[auto_auto_auto_minmax(0,1fr)] items-center gap-x-3 gap-y-1 px-3 py-3 font-amiri text-base font-bold">
-            <Button variant="ghost" onClick={onGuide} className="h-auto min-h-11 px-1 whitespace-normal text-base text-matte-gold hover:bg-matte-gold/10 hover:text-matte-gold">دليل استكشاف المنصة</Button>
+        <div dir="rtl" className="w-full max-w-xl border-b border-matte-gold/30 text-royal-blue">
+          <div className="grid grid-cols-[auto_auto_minmax(0,1fr)] items-center gap-3 py-1 font-amiri text-base font-bold">
             <span dir="ltr" className="text-center tabular-nums">{xp.toLocaleString("en-US")} XP</span>
-            <Button variant="ghost" onClick={onDashboard} className="h-auto min-h-11 px-1 text-base text-matte-gold hover:bg-matte-gold/10 hover:text-matte-gold">إنجازاتي</Button>
+            <Button variant="ghost" onClick={onDashboard} className="h-auto min-h-11 px-1 text-base text-royal-blue hover:bg-muted hover:text-royal-blue">إنجازاتي</Button>
             <span className="min-w-0 text-center break-words leading-relaxed">{studentName || "اسم الطالب"}</span>
           </div>
-        </header>
+        </div>
 
-        <div className="w-full max-w-3xl text-center mb-6 py-4 animate-scale-in" dir="rtl">
-          <h1 className="font-ruqaa text-3xl sm:text-5xl font-bold text-heading leading-relaxed">منصة الطالب العبقري</h1>
-          <p className="font-amiri text-xl sm:text-2xl font-bold text-royal-blue mt-2 leading-relaxed">منصة تفاعلية ذكية للطلاب السعوديين</p>
-          <p className="font-amiri text-sm sm:text-base text-muted-foreground mt-3 leading-relaxed">صمم بكل فكر بواسطة الأستاذ جابر العبدلي - 2026</p>
+        <div className="w-full max-w-3xl text-center mb-4 py-3" dir="rtl">
+          <h1 className="font-andalus text-4xl sm:text-5xl font-bold text-heading leading-relaxed">منصة الطالب العبقري</h1>
+          <p className="font-andalus text-xl sm:text-2xl font-bold text-royal-blue mt-1 leading-relaxed">منصة تفاعلية ذكية للطلاب السعوديين</p>
         </div>
 
         {/* قسم التأسيس — مواد نافس الأربع */}
@@ -130,12 +130,12 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
           <h2 className="font-aref text-2xl font-bold text-heading mb-4">تابع حسابات المنصة الرسمية</h2>
           <div className="grid grid-cols-2 gap-3">
             <a href="https://x.com/tchjaber" target="_blank" rel="noopener noreferrer" aria-label="تابع منصة الطالب العبقري على إكس" className="social-follow-link group">
-              <Twitter className="w-[23.8px] h-[23.8px] sm:w-[27.2px] sm:h-[27.2px] transition-transform group-hover:scale-110" aria-hidden="true" />
+              <Twitter className="w-5 h-5 transition-transform group-hover:scale-110" aria-hidden="true" />
               <span className="text-lg font-extrabold">إكس</span>
               <ExternalLink className="w-4 h-4 opacity-70" aria-hidden="true" />
             </a>
             <a href="https://www.tiktok.com/@.al71393" target="_blank" rel="noopener noreferrer" aria-label="تابع منصة الطالب العبقري على تيك توك" className="social-follow-link group">
-              <Music2 className="w-[23.8px] h-[23.8px] sm:w-[27.2px] sm:h-[27.2px] transition-transform group-hover:scale-110" aria-hidden="true" />
+              <Music2 className="w-5 h-5 transition-transform group-hover:scale-110" aria-hidden="true" />
               <span className="text-lg font-extrabold">تيك توك</span>
               <ExternalLink className="w-4 h-4 opacity-70" aria-hidden="true" />
             </a>
