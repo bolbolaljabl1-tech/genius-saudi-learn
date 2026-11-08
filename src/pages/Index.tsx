@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { MessageCircleHeart, Map } from "lucide-react";
+import { MessageCircleHeart } from "lucide-react";
 import StageSelection from "@/components/StageSelection";
 import StudentDashboard from "@/components/StudentDashboard";
 import FoundationHub from "@/components/FoundationHub";
@@ -82,7 +82,7 @@ const Index = () => {
   const [subject, setSubject] = useState("");
   const [lessonTitle, setLessonTitle] = useState("");
   const [fromFoundation, setFromFoundation] = useState(false);
-  const { xp, studentName, streak, progress, addXP, awardBadge, saveStudentName, recordCompletion } = useXP();
+  const { xp, studentName, progress, addXP, awardBadge, saveStudentName, recordCompletion } = useXP();
   const { speak } = useTTS();
   const [showNameModal, setShowNameModal] = useState(false);
   const [showWhisper, setShowWhisper] = useState(false);
@@ -90,6 +90,11 @@ const Index = () => {
   useIdleNotify(4);
   useOvertakeNotify(studentName, 60);
 
+
+  const openGuide = () => {
+    speak("أهلاً بك في منصة الطالب العبقري. اختر مرحلتك الدراسية، ثم المادة والدرس الذي تريده. استخدم صور سؤالك لحل التمارين بالكاميرا، وتحدى أصدقاءك في ألعاب العباقرة، وتابع تقدمك عبر النجوم والأوسمة. نتمنى لك رحلة تعليمية ممتعة.");
+    setShowSupport(true);
+  };
 
   const handleStageSelect = (s: string) => { setStage(s); localStorage.setItem("genius_selected_stage", s); setScreen("subject"); };
   const handleSubjectSelect = (s: string) => { setSubject(s); setScreen("search"); };
@@ -113,7 +118,7 @@ const Index = () => {
   };
 
   return (
-    <main className="pt-14 pb-16">
+    <main className={screen === "stage" ? "pb-16" : "pt-14 pb-16"}>
       {showNameModal && <StudentNameModal onSave={handleNameSave} />}
       {showSplash && (
         <SplashIntro
@@ -137,7 +142,7 @@ const Index = () => {
 
           xp={xp}
           studentName={studentName}
-          streak={streak}
+          onGuide={openGuide}
         />
         </div>
       )}
@@ -166,20 +171,6 @@ const Index = () => {
       {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}
       {showSupport && <SupportModal onClose={() => setShowSupport(false)} />}
       <ShareButton />
-
-      {/* Compact top guide banner — single-line, emoji-free, voice-guided. */}
-      <button
-        onClick={() => {
-          speak("أهلاً بك في منصة الطالب العبقري. اختر مرحلتك الدراسية، ثم المادة والدرس الذي تريده. استخدم صور سؤالك لحل التمارين بالكاميرا، وتحدى أصدقاءك في ألعاب العباقرة، وتابع تقدمك عبر النجوم والأوسمة. نتمنى لك رحلة تعليمية ممتعة.");
-          setShowSupport(true);
-        }}
-        className="fixed top-12 left-1/2 -translate-x-1/2 z-[70] h-8 px-3 inline-flex items-center gap-1.5 rounded-full bg-royal-blue text-matte-gold border border-matte-gold/30 shadow-sm text-xs font-extrabold active:scale-95 transition"
-        aria-label="دليل استكشاف المنصة"
-        title="دليل استكشاف المنصة"
-      >
-        <Map className="w-3.5 h-3.5" />
-        <span className="whitespace-nowrap">دليل استكشاف المنصة</span>
-      </button>
 
       <button
         onClick={() => setShowWhisper(true)}
