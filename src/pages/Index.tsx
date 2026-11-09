@@ -170,7 +170,7 @@ const Index = () => {
 
       {showWhisper && <WhisperModal onClose={() => setShowWhisper(false)} />}
       {showSupport && <SupportModal onClose={() => { stop(); setShowSupport(false); }} />}
-      <ShareButton />
+      {!showSupport && <ShareButton />}
 
       <button
         onClick={() => setShowWhisper(true)}
