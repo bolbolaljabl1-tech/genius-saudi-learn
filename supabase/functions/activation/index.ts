@@ -58,14 +58,14 @@ async function handle(request: Request) {
     const code = typeof body.code === "string" ? body.code.trim() : "";
     if (!PREVIEW_ACCESS_CODE) return json({ error: "server_misconfigured" }, 500);
     const valid = timingSafeEqual(await hmac(ADMIN_SESSION_SECRET, `g:${code}`), await hmac(ADMIN_SESSION_SECRET, `g:${PREVIEW_ACCESS_CODE}`));
-    return valid ? json({ ok: true }) : json({ ok: false }, 401);
+    return valid ? json({ ok: true }) : json({ ok: false });
   }
 
   if (body.action === "admin_login") {
     const passphrase = typeof body.passphrase === "string" ? body.passphrase : "";
     if (!ADMIN_PASSPHRASE || !ADMIN_SESSION_SECRET) return json({ error: "server_misconfigured" }, 500);
     const valid = timingSafeEqual(await hmac(ADMIN_SESSION_SECRET, `p:${passphrase}`), await hmac(ADMIN_SESSION_SECRET, `p:${ADMIN_PASSPHRASE}`));
-    return valid ? json({ ok: true, token: await issueAdminToken(), expiresIn: ADMIN_TOKEN_TTL_SECONDS }) : json({ ok: false }, 401);
+    return valid ? json({ ok: true, token: await issueAdminToken(), expiresIn: ADMIN_TOKEN_TTL_SECONDS }) : json({ ok: false });
   }
 
   const token = typeof body.adminToken === "string" ? body.adminToken : "";
