@@ -7,3 +7,4 @@ Cancel delayed activity callbacks on unmount through useActivityDelay so leaving
 Keep the home guide action in VideoHeader through StageSelection and pass its handler from Index, so the existing voice and support dialog remain connected without a duplicate floating guide.
 Use VideoHeader's optional welcomeAudioSrc for a real welcome recording; render the audio control only when a source is supplied and stop media on unmount to avoid phantom playback.
 Load external font stylesheets through a document-head link at the app entry, never CSS URL imports, so font loading does not depend on the CSS compiler.
+Resolve home welcome media pointer URLs against the verified published Lovable origin and show an original-frame poster on playback failure, because the custom domain returns 404 for the managed asset endpoint.
