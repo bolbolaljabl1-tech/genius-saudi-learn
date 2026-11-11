@@ -1,8 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { CircleHelp, Pause, Play, Volume2, VolumeX } from "lucide-react";
-import welcomeVideo from "@/assets/platform-welcome.mp4.asset.json";
+import welcomeVideo from "@/assets/welcome-mobile.mp4.asset.json";
+import welcomePoster from "@/assets/welcome-poster.jpg.asset.json";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+
+// The custom domain does not serve the managed asset endpoint; use the
+// verified published asset origin for both media files.
+const mediaOrigin = "https://genius-saudi-learn.lovable.app";
+const videoSrc = new URL(welcomeVideo.url, mediaOrigin).href;
+const posterSrc = new URL(welcomePoster.url, mediaOrigin).href;
 
 interface VideoHeaderProps {
   onGuide: () => void;
@@ -53,10 +60,9 @@ export default function VideoHeader({ onGuide, welcomeAudioSrc }: VideoHeaderPro
   return (
     <header className="relative w-full bg-royal-blue" aria-label="منصة الطالب العبقري">
       <div className="relative mx-auto max-w-3xl">
-        <video ref={videoRef} src={welcomeVideo.url} autoPlay loop muted playsInline preload="auto"
+        {failed ? <img src={posterSrc} alt="منصة الطالب العبقري" className="block aspect-video w-full object-contain" /> : <video ref={videoRef} src={videoSrc} poster={posterSrc} autoPlay loop muted playsInline preload="metadata"
           className="block aspect-video w-full object-contain" aria-label="الفيديو الترحيبي للمنصة"
-          onPause={() => setPaused(true)} onPlay={() => setPaused(false)} onError={() => setFailed(true)} />
-        {failed && <p role="status" className="absolute inset-0 flex items-center justify-center px-16 text-center font-amiri text-lg text-matte-gold">تعذّر تحميل الفيديو، يمكنك متابعة رحلتك التعليمية.</p>}
+          onPause={() => setPaused(true)} onPlay={() => setPaused(false)} onError={() => setFailed(true)} />}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="ghost" size="icon" onClick={onGuide} aria-label="دليل استكشاف المنصة"
