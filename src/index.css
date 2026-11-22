@@ -53,6 +53,13 @@
     --matte-gold: 43 72% 55%;
     --matte-gold-foreground: 220 60% 15%;
 
+    --hive-boys: 217 78% 45%;
+    --hive-boys-soft: 210 100% 96%;
+    --hive-girls: 323 76% 45%;
+    --hive-girls-soft: 320 100% 97%;
+    --hive-neutral: 271 60% 45%;
+    --hive-neutral-soft: 270 100% 98%;
+
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
     --sidebar-primary: 240 5.9% 10%;

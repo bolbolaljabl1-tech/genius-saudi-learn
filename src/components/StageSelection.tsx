@@ -1,4 +1,5 @@
-import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, ClipboardCheck, Blocks, Sparkles } from "lucide-react";
+import { GraduationCap, BookOpen, Camera, Trophy, Gamepad2, ClipboardCheck, Blocks, Sparkles, Hexagon } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Music2, Twitter, ExternalLink } from "lucide-react";
 import VideoHeader from "@/components/VideoHeader";
@@ -119,6 +120,14 @@ const StageSelection = ({ onSelect, onCamera, onLeaderboard, onGames, onSelfTest
           <span className="text-sm font-bold opacity-90">استوديو التحديات التفاعلية بالذكاء الاصطناعي</span>
         </Button>
 
+
+        <Button asChild className="h-auto whitespace-normal [&_svg]:size-7 w-full max-w-xl mb-4 py-4 rounded-2xl bg-royal-blue text-matte-gold font-extrabold text-xl shadow-gold border-2 border-matte-gold/50 active:scale-[0.98] transition-all hover:bg-royal-blue/90 animate-scale-in">
+          <Link to="/letter-hive" className="flex items-center justify-center gap-3" aria-label="فتح صانع لعبة خلية الحروف التفاعلية">
+            <Hexagon className="w-7 h-7" />
+            <span>🐝 صانع خلية الحروف</span>
+            <span className="text-sm font-bold opacity-90">للمعلمين والمعلمات</span>
+          </Link>
+        </Button>
 
         {/* Self Test Button */}
         <Button onClick={onSelfTest} className="h-auto whitespace-normal [&_svg]:size-7 w-full max-w-xl mb-4 py-5 rounded-2xl bg-royal-blue text-matte-gold font-extrabold text-2xl shadow-emerald-lg active:scale-[0.98] transition-all flex items-center justify-center gap-3 animate-scale-in animate-gold-neon" style={{ animationDelay: "0.15s" }}>

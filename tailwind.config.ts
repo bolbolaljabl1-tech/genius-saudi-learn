@@ -81,6 +81,20 @@ export default {
           DEFAULT: "hsl(var(--matte-gold))",
           foreground: "hsl(var(--matte-gold-foreground))",
         },
+        hive: {
+          boys: {
+            DEFAULT: "hsl(var(--hive-boys))",
+            soft: "hsl(var(--hive-boys-soft))",
+          },
+          girls: {
+            DEFAULT: "hsl(var(--hive-girls))",
+            soft: "hsl(var(--hive-girls-soft))",
+          },
+          neutral: {
+            DEFAULT: "hsl(var(--hive-neutral))",
+            soft: "hsl(var(--hive-neutral-soft))",
+          },
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",
