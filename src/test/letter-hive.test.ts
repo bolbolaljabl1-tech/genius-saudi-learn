@@ -9,7 +9,7 @@ import {
   validateQuestion,
 } from "@/lib/letter-hive";
 
- describe("Letter Hive generator", () => {
+describe("Letter Hive generator", () => {
   it("ships exactly 28 playable sample questions for both modes", () => {
     const questions = createSampleQuestions();
     expect(questions).toHaveLength(28);

@@ -47,12 +47,12 @@ const themes: Array<{ id: HiveTheme; title: string; description: string; card: s
 
 const inputClass = "mt-2 min-h-12 w-full rounded-xl border border-input bg-background px-4 py-3 text-lg text-foreground outline-none transition placeholder:text-muted-foreground/70 focus:border-primary focus:ring-2 focus:ring-primary/20";
 
-function StepHeading({ number, title, description, icon: Icon }: { number: number; title: string; description: string; icon: typeof Palette }) {
+function StepHeading({ id, number, title, description, icon: Icon }: { id: string; number: number; title: string; description: string; icon: typeof Palette }) {
   return (
     <div className="mb-5 flex items-start gap-3">
       <span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-matte-gold text-xl font-black text-matte-gold-foreground shadow-gold">{number}</span>
       <div className="min-w-0 flex-1">
-        <h2 className="flex items-center gap-2 text-xl font-black text-heading sm:text-2xl"><Icon className="h-6 w-6 text-primary" aria-hidden="true" />{title}</h2>
+        <h2 id={id} className="flex items-center gap-2 text-xl font-black text-heading sm:text-2xl"><Icon className="h-6 w-6 text-primary" aria-hidden="true" />{title}</h2>
         <p className="mt-1 text-sm leading-relaxed text-muted-foreground sm:text-base">{description}</p>
       </div>
     </div>
@@ -179,7 +179,7 @@ export default function LetterHive() {
 
       <div className="mx-auto max-w-5xl space-y-6 px-3 py-6 sm:px-6 sm:py-8">
         <section className="rounded-3xl border border-matte-gold/30 bg-card p-4 shadow-sm sm:p-6" aria-labelledby="identity-heading">
-          <StepHeading number={1} title="إعدادات الهوية والسمة" description="سمِّ لعبتك واختر ألوانها ونمط الأسئلة المناسب لدرسك." icon={Palette} />
+          <StepHeading id="identity-heading" number={1} title="إعدادات الهوية والسمة" description="سمِّ لعبتك واختر ألوانها ونمط الأسئلة المناسب لدرسك." icon={Palette} />
           <div className="grid gap-4 sm:grid-cols-2">
             <label className="block font-bold text-foreground">
               عنوان الدرس أو اللعبة <span className="text-destructive">*</span>
@@ -228,7 +228,7 @@ export default function LetterHive() {
         </section>
 
         <section id="questions-step" className="scroll-mt-4 rounded-3xl border border-border bg-card p-4 shadow-sm sm:p-6" aria-labelledby="questions-heading">
-          <StepHeading number={2} title="محرر الأسئلة" description="أضف الأسئلة واحدًا واحدًا، أو الصق بنكًا كاملًا بالصيغة السريعة." icon={ListChecks} />
+          <StepHeading id="questions-heading" number={2} title="محرر الأسئلة" description="أضف الأسئلة واحدًا واحدًا، أو الصق بنكًا كاملًا بالصيغة السريعة." icon={ListChecks} />
 
           <div className="mb-4 flex flex-col gap-3 rounded-2xl bg-secondary/60 p-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 font-extrabold text-foreground" aria-live="polite">
@@ -315,7 +315,7 @@ export default function LetterHive() {
         </section>
 
         <section className="rounded-3xl border-2 border-matte-gold/40 bg-card p-4 shadow-gold sm:p-6" aria-labelledby="generate-heading">
-          <StepHeading number={3} title="المعاينة والتوليد والتنزيل" description="جرّب الخلايا والأجراس والأصوات، ثم نزّل نسخة HTML مستقلة تعمل دون إنترنت." icon={Download} />
+          <StepHeading id="generate-heading" number={3} title="المعاينة والتوليد والتنزيل" description="جرّب الخلايا والأجراس والأصوات، ثم نزّل نسخة HTML مستقلة تعمل دون إنترنت." icon={Download} />
           <div className="mb-5 grid grid-cols-3 gap-2 text-center">
             <div className="rounded-xl bg-secondary/70 p-3"><strong className="block text-xl text-royal-blue">{validCount}</strong><span className="text-xs font-bold text-muted-foreground">سؤال صالح</span></div>
             <div className="rounded-xl bg-secondary/70 p-3"><strong className="block text-xl text-royal-blue">5×5</strong><span className="text-xs font-bold text-muted-foreground">لوحة الخلية</span></div>
