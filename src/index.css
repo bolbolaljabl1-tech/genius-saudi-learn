@@ -565,4 +565,22 @@
       animation: none;
     }
   }
+
+  /* تنسيق نصوص الأسئلة باللون الأزرق الواضح وضمان سلامة التشكيل على الجوال */
+  .question-text-blue {
+    color: #1D4ED8;
+  }
+  .dark .question-text-blue {
+    color: #65DDF2;
+  }
+  .tashkeel-text {
+    direction: rtl;
+    unicode-bidi: isolate;
+    line-height: 2.15 !important;
+    padding-top: 0.15em;
+    padding-bottom: 0.15em;
+    overflow: visible;
+    letter-spacing: normal;
+  }
+
 }

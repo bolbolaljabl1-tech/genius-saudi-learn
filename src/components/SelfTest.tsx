@@ -104,6 +104,8 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
   const submitRef = useRef<() => void>(() => {});
   const submittedRef = useRef(false);
 
+  const isElementary = grade.includes("الابتدائي");
+
   useEffect(() => {
     if (phase !== "test") return;
     intervalRef.current = window.setInterval(() => {
@@ -166,10 +168,15 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
       }
     });
     const pct = Math.round((score / max) * 100);
-    const feedback = pct >= 90 ? "أداء متميز يدل على فهم عميق وتحليل دقيق. واصل على هذا النهج."
-      : pct >= 70 ? "نتيجة جيدة جداً. راجع الأسئلة التي أخطأت بها وستصل إلى الإتقان."
-      : pct >= 50 ? "نتيجة مقبولة. ركّز على الاستيعاب لا الحفظ، وأعد قراءة الشرح بعد كل خطأ."
-      : "تحتاج إلى مراجعة منظمة. ابدأ بقراءة الدرس بهدوء ثم أعد المحاولة بأسئلة أقل.";
+    const feedback = isElementary
+      ? (pct >= 90 ? "أَدَاءٌ مُتَمَيِّزٌ يَدُلُّ عَلَى فَهْمٍ عَمِيقٍ وَتَحْلِيلٍ دَقِيقٍ. وَاصِلْ عَلَى هَذَا النَّهْجِ."
+        : pct >= 70 ? "نَتِيجَةٌ جَيِّدَةٌ جِدًّا. رَاجِعِ الْأَسْئِلَةَ الَّتِي أَخْطَأْتَ بِهَا وَسَتَصِلُ إِلَى الْإِتْقَانِ."
+        : pct >= 50 ? "نَتِيجَةٌ مَقْبُولَةٌ. رَكِّزْ عَلَى الِاسْتِيعَابِ لَا الْحِفْظِ، وَأَعِدْ قِرَاءَةَ الشَّرْحِ بَعْدَ كُلِّ خَطَأٍ."
+        : "تَحْتَاجُ إِلَى مُرَاجَعَةٍ مُنَظَّمَةٍ. ابْدَأْ بِقِرَاءَةِ الدَّرْسِ بِهُدُوءٍ ثُمَّ أَعِدِ الْمُحَاوَلَةَ بِأَسْئِلَةٍ أَقَلَّ.")
+      : (pct >= 90 ? "أداء متميز يدل على فهم عميق وتحليل دقيق. واصل على هذا النهج."
+        : pct >= 70 ? "نتيجة جيدة جداً. راجع الأسئلة التي أخطأت بها وستصل إلى الإتقان."
+        : pct >= 50 ? "نتيجة مقبولة. ركّز على الاستيعاب لا الحفظ، وأعد قراءة الشرح بعد كل خطأ."
+        : "تحتاج إلى مراجعة منظمة. ابدأ بقراءة الدرس بهدوء ثم أعد المحاولة بأسئلة أقل.");
     const earned = Math.round((score / max) * 30);
     setResult({ score, max, feedback, earned });
     onXP?.(earned);
@@ -240,37 +247,60 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center px-4">
         <Loader2 className="w-14 h-14 text-primary animate-spin mb-4" />
-        <p className="text-foreground font-extrabold text-2xl">جاري إعداد اختبارك الذكي...</p>
+        <p className={`text-foreground font-extrabold text-2xl ${isElementary ? "tashkeel-text" : ""}`}>
+          {isElementary ? "جَارٍ إِعْدَادُ اخْتِبَارِكَ الذَّكِيِّ..." : "جاري إعداد اختبارك الذكي..."}
+        </p>
       </div>
     );
   }
 
   if (phase === "test" && test) {
     return (
-      <div className="min-h-screen px-4 py-6">
-        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur py-2 -mx-4 px-4 flex items-center justify-between mb-4 border-b">
-          <button onClick={onBack} className="font-bold text-base text-muted-foreground">إنهاء</button>
-          <div className="flex items-center gap-2 font-extrabold text-xl text-foreground"><Timer className="w-6 h-6 text-primary" />{fmt(seconds)}</div>
-          <button onClick={submit} className="px-4 py-2 rounded-xl gradient-emerald text-primary-foreground font-extrabold flex items-center gap-1"><Send className="w-4 h-4" />إرسال</button>
+      <div className="min-h-screen px-4 py-6" dir="rtl">
+        <div className="sticky top-0 z-30 bg-background/95 backdrop-blur py-2.5 -mx-4 px-4 flex items-center justify-between mb-4 border-b">
+          <button onClick={onBack} className={`font-bold text-base text-muted-foreground ${isElementary ? "tashkeel-text" : ""}`}>
+            {isElementary ? "إِنْهَاءٌ" : "إنهاء"}
+          </button>
+          <div className="flex items-center gap-2 font-extrabold text-xl text-foreground" dir="ltr">
+            <Timer className="w-6 h-6 text-primary" />
+            <span>{fmt(seconds)}</span>
+          </div>
+          <button onClick={submit} className={`px-4 py-2 rounded-xl gradient-emerald text-primary-foreground font-extrabold flex items-center gap-1.5 ${isElementary ? "tashkeel-text" : ""}`}>
+            <Send className="w-4 h-4" />
+            <span>{isElementary ? "إِرْسَالٌ" : "إرسال"}</span>
+          </button>
         </div>
 
         <div className="max-w-2xl mx-auto space-y-5">
           {test.reading_passage && (
             <div className="neu-card p-5 bg-primary/5 border-2 border-primary/20">
-              <h3 className="font-extrabold text-foreground text-xl mb-2">نص فهم المقروء</h3>
-              <p className="text-body-blue text-lg leading-9 whitespace-pre-wrap">{test.reading_passage}</p>
+              <h3 className={`font-extrabold text-foreground text-xl mb-2 ${isElementary ? "tashkeel-text" : ""}`}>
+                {isElementary ? "نَصُّ فَهْمِ الْمَقْرُوءِ" : "نص فهم المقروء"}
+              </h3>
+              <p dir="rtl" className={`text-foreground text-lg whitespace-pre-wrap ${isElementary ? "tashkeel-text" : "leading-9"}`}>
+                {test.reading_passage}
+              </p>
             </div>
           )}
 
           {test.questions.map((q, i) => (
             <div key={i} className="neu-card p-5">
-              <p className="font-extrabold text-foreground text-lg mb-3">{i + 1}. {q.question}</p>
+              <p
+                dir="rtl"
+                className={`font-extrabold question-text-blue text-lg mb-3.5 ${isElementary ? "tashkeel-text" : "leading-relaxed"}`}
+              >
+                {i + 1}. {q.question}
+              </p>
 
               {q.type === "mcq" && q.options && (
-                <div className="space-y-2">
+                <div className="space-y-2.5">
                   {q.options.map((opt, j) => (
-                    <button key={j} onClick={() => setAnswers({ ...answers, [i]: j })}
-                      className={`w-full text-right p-3 rounded-xl border-2 font-bold text-base ${answers[i] === j ? "border-primary bg-primary/10" : "border-input"}`}>
+                    <button
+                      key={j}
+                      dir="rtl"
+                      onClick={() => setAnswers({ ...answers, [i]: j })}
+                      className={`w-full text-right p-3.5 rounded-xl border-2 font-bold text-base text-foreground transition-colors ${isElementary ? "tashkeel-text" : "leading-relaxed"} ${answers[i] === j ? "border-primary bg-primary/10" : "border-input bg-card hover:border-primary/40"}`}
+                    >
                       {["أ","ب","ج","د"][j]}) {opt}
                     </button>
                   ))}
@@ -279,17 +309,36 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
 
               {q.type === "tf" && (
                 <div className="flex gap-3">
-                  <button onClick={() => setAnswers({ ...answers, [i]: true })} className={`flex-1 p-3 rounded-xl border-2 font-extrabold text-lg ${answers[i] === true ? "border-success bg-success/10" : "border-input"}`}>صح</button>
-                  <button onClick={() => setAnswers({ ...answers, [i]: false })} className={`flex-1 p-3 rounded-xl border-2 font-extrabold text-lg ${answers[i] === false ? "border-destructive bg-destructive/10" : "border-input"}`}>خطأ</button>
+                  <button
+                    type="button"
+                    dir="rtl"
+                    onClick={() => setAnswers({ ...answers, [i]: true })}
+                    className={`flex-1 p-3.5 rounded-xl border-2 font-extrabold text-lg text-foreground transition-colors ${isElementary ? "tashkeel-text" : ""} ${answers[i] === true ? "border-success bg-success/10 text-success" : "border-input bg-card hover:border-success/40"}`}
+                  >
+                    {isElementary ? "صَحٌّ" : "صح"}
+                  </button>
+                  <button
+                    type="button"
+                    dir="rtl"
+                    onClick={() => setAnswers({ ...answers, [i]: false })}
+                    className={`flex-1 p-3.5 rounded-xl border-2 font-extrabold text-lg text-foreground transition-colors ${isElementary ? "tashkeel-text" : ""} ${answers[i] === false ? "border-destructive bg-destructive/10 text-destructive" : "border-input bg-card hover:border-destructive/40"}`}
+                  >
+                    {isElementary ? "خَطَأٌ" : "خطأ"}
+                  </button>
                 </div>
               )}
 
               {q.type === "calligraphy" && (
                 <div>
-                  <p className="text-2xl font-ruqaa text-matte-gold bg-royal-blue p-4 rounded-xl mb-3 text-center">{q.question}</p>
+                  <p dir="rtl" className={`text-2xl font-ruqaa text-matte-gold bg-royal-blue p-4 rounded-xl mb-3 text-center ${isElementary ? "tashkeel-text" : ""}`}>
+                    {q.question}
+                  </p>
                   <textarea
-                    value={answers[i] || ""} onChange={(e) => setAnswers({ ...answers, [i]: e.target.value })}
-                    rows={3} placeholder="أعد كتابة العبارة بخطك..."
+                    dir="rtl"
+                    value={answers[i] || ""}
+                    onChange={(e) => setAnswers({ ...answers, [i]: e.target.value })}
+                    rows={3}
+                    placeholder={isElementary ? "أَعِدْ كِتَابَةَ الْعِبَارَةِ بِخَطِّكَ..." : "أعد كتابة العبارة بخطك..."}
                     className="w-full p-3 rounded-xl border-2 border-input bg-background text-foreground text-lg font-bold"
                   />
                 </div>
@@ -297,23 +346,26 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
 
               {q.type === "matching" && q.left && q.right && (
                 <div className="space-y-3">
-                  <div className="grid grid-cols-2 gap-2 text-center font-extrabold text-foreground text-base">
-                    <div className="bg-primary/10 rounded-lg py-2">العمود (أ)</div>
-                    <div className="bg-primary/10 rounded-lg py-2">العمود (ب)</div>
+                  <div className={`grid grid-cols-2 gap-2 text-center font-extrabold text-foreground text-base ${isElementary ? "tashkeel-text" : ""}`}>
+                    <div className="bg-primary/10 rounded-lg py-2">{isElementary ? "الْعَمُودُ (أ)" : "العمود (أ)"}</div>
+                    <div className="bg-primary/10 rounded-lg py-2">{isElementary ? "الْعَمُودُ (ب)" : "العمود (ب)"}</div>
                   </div>
                   {q.right.map((r, rIdx) => (
                     <div key={rIdx} className="grid grid-cols-2 gap-2 items-center">
-                      <div className="p-3 rounded-xl border-2 border-input bg-background font-bold text-base">{r}</div>
+                      <div dir="rtl" className={`p-3 rounded-xl border-2 border-input bg-background text-foreground font-bold text-base ${isElementary ? "tashkeel-text" : ""}`}>
+                        {r}
+                      </div>
                       <select
+                        dir="rtl"
                         value={(answers[i] && answers[i][rIdx] !== undefined) ? answers[i][rIdx] : ""}
                         onChange={(e) => {
                           const cur = { ...(answers[i] || {}) };
                           cur[rIdx] = e.target.value === "" ? undefined : Number(e.target.value);
                           setAnswers({ ...answers, [i]: cur });
                         }}
-                        className="p-3 rounded-xl border-2 border-input bg-background text-foreground font-bold"
+                        className={`p-3 rounded-xl border-2 border-input bg-background text-foreground font-bold ${isElementary ? "tashkeel-text" : ""}`}
                       >
-                        <option value="">اختر المقابل...</option>
+                        <option value="">{isElementary ? "اخْتَرِ الْمُقَابِلَ..." : "اختر المقابل..."}</option>
                         {q.left!.map((l, lIdx) => <option key={lIdx} value={lIdx}>{l}</option>)}
                       </select>
                     </div>
@@ -322,11 +374,11 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
               )}
 
               {q.type === "fill" && Array.isArray(q.blanks) && (
-                <div className="space-y-2">
-                  <p className="text-body-blue text-lg leading-9 whitespace-pre-wrap">{q.question}</p>
+                <div className="space-y-2.5">
                   {q.blanks.map((_, bIdx) => (
                     <input
                       key={bIdx}
+                      dir="rtl"
                       type="text"
                       value={(answers[i] && answers[i][bIdx]) || ""}
                       onChange={(e) => {
@@ -334,7 +386,7 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
                         cur[bIdx] = e.target.value;
                         setAnswers({ ...answers, [i]: cur });
                       }}
-                      placeholder={`الفراغ رقم ${bIdx + 1}`}
+                      placeholder={isElementary ? `الْفَرَاغُ رَقْمُ ${bIdx + 1}` : `الفراغ رقم ${bIdx + 1}`}
                       className="w-full p-3 rounded-xl border-2 border-input bg-background text-foreground text-lg font-bold"
                     />
                   ))}
@@ -343,7 +395,9 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
             </div>
           ))}
 
-          <button onClick={submit} className="w-full py-4 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-xl shadow-emerald active:scale-[0.98]">إرسال الإجابات</button>
+          <button onClick={submit} className={`w-full py-4 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-xl shadow-emerald active:scale-[0.98] ${isElementary ? "tashkeel-text" : ""}`}>
+            {isElementary ? "إِرْسَالُ الْإِجَابَاتِ" : "إرسال الإجابات"}
+          </button>
         </div>
       </div>
     );
@@ -352,13 +406,15 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
   if (phase === "result" && result && test) {
     const pct = Math.round((result.score / result.max) * 100);
     return (
-      <div className="min-h-screen px-4 py-6">
+      <div className="min-h-screen px-4 py-6" dir="rtl">
         <div className="max-w-2xl mx-auto space-y-4">
           <div className="neu-card p-6 text-center">
-            <h2 className="text-3xl font-extrabold text-heading mb-3">نتيجة الاختبار</h2>
-            <p className="text-5xl font-extrabold text-primary mb-2">{result.score} / {result.max}</p>
-            <p className="text-2xl font-extrabold text-gold mb-4">{pct}%</p>
-            <p className="text-body-blue text-lg leading-8 font-bold">{result.feedback}</p>
+            <h2 className={`text-3xl font-extrabold text-heading mb-3 ${isElementary ? "tashkeel-text" : ""}`}>
+              {isElementary ? "نَتِيجَةُ الِاخْتِبَارِ" : "نتيجة الاختبار"}
+            </h2>
+            <p className="text-5xl font-extrabold text-primary mb-2" dir="ltr">{result.score} / {result.max}</p>
+            <p className="text-2xl font-extrabold text-gold mb-4" dir="ltr">{pct}%</p>
+            <p className={`text-foreground text-lg font-bold ${isElementary ? "tashkeel-text" : "leading-8"}`}>{result.feedback}</p>
           </div>
 
           <AchievementCard
@@ -369,7 +425,9 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
             totalStars={stars}
           />
 
-          <h3 className="font-extrabold text-foreground text-xl mt-6">التغذية الراجعة المفصلة</h3>
+          <h3 className={`font-extrabold text-foreground text-xl mt-6 ${isElementary ? "tashkeel-text" : ""}`}>
+            {isElementary ? "التَّغْذِيَةُ الرَّاجِعَةُ الْمُفَصَّلَةُ" : "التغذية الراجعة المفصلة"}
+          </h3>
           {test.questions.map((q, i) => {
             const a = answers[i];
             const correct = q.type === "mcq" ? a === q.correctIndex
@@ -381,33 +439,51 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
             return (
               <div key={i} className={`neu-card p-4 border-2 ${correct ? "border-success/30" : "border-destructive/30"}`}>
                 <div className="flex items-start gap-2 mb-2">
-                  {correct ? <CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-1" /> : <XCircle className="w-5 h-5 text-destructive shrink-0 mt-1" />}
-                  <p className="font-extrabold text-foreground">{i + 1}. {q.question}</p>
+                  {correct ? <CheckCircle2 className="w-5 h-5 text-success shrink-0 mt-1.5" /> : <XCircle className="w-5 h-5 text-destructive shrink-0 mt-1.5" />}
+                  <p dir="rtl" className={`font-extrabold question-text-blue ${isElementary ? "tashkeel-text" : "leading-relaxed"}`}>
+                    {i + 1}. {q.question}
+                  </p>
                 </div>
                 {q.type === "mcq" && q.options && typeof q.correctIndex === "number" && (
-                  <p className="text-sm text-muted-foreground">الإجابة الصحيحة: {["أ","ب","ج","د"][q.correctIndex]}) {q.options[q.correctIndex]}</p>
+                  <p dir="rtl" className={`text-sm font-bold text-muted-foreground ${isElementary ? "tashkeel-text" : ""}`}>
+                    {isElementary ? "الْإِجَابَةُ الصَّحِيحَةُ: " : "الإجابة الصحيحة: "}
+                    {["أ","ب","ج","د"][q.correctIndex]}) {q.options[q.correctIndex]}
+                  </p>
                 )}
                 {q.type === "tf" && (
-                  <p className="text-sm text-muted-foreground">الإجابة الصحيحة: {q.correctBool ? "صح" : "خطأ"}</p>
+                  <p dir="rtl" className={`text-sm font-bold text-muted-foreground ${isElementary ? "tashkeel-text" : ""}`}>
+                    {isElementary ? "الْإِجَابَةُ الصَّحِيحَةُ: " : "الإجابة الصحيحة: "}
+                    {q.correctBool ? (isElementary ? "صَحٌّ" : "صح") : (isElementary ? "خَطَأٌ" : "خطأ")}
+                  </p>
                 )}
                 {q.type === "matching" && Array.isArray(q.pairs) && q.left && q.right && (
-                  <ul className="text-sm text-muted-foreground space-y-1 mt-1">
+                  <ul dir="rtl" className={`text-sm font-bold text-muted-foreground space-y-1 mt-1 ${isElementary ? "tashkeel-text" : ""}`}>
                     {q.pairs.map((p, idx) => (
                       <li key={idx}>{q.right![idx]} ← {q.left![p]}</li>
                     ))}
                   </ul>
                 )}
                 {q.type === "fill" && Array.isArray(q.blanks) && (
-                  <p className="text-sm text-muted-foreground">الإجابات: {q.blanks.join(" — ")}</p>
+                  <p dir="rtl" className={`text-sm font-bold text-muted-foreground ${isElementary ? "tashkeel-text" : ""}`}>
+                    {isElementary ? "الْإِجَابَاتُ الصَّحِيحَةُ: " : "الإجابات: "}
+                    {q.blanks.join(" — ")}
+                  </p>
                 )}
-                <p className="text-body-blue text-base mt-2 leading-7">{q.explanation}</p>
+                <p dir="rtl" className={`text-foreground text-base mt-2 ${isElementary ? "tashkeel-text" : "leading-7"}`}>
+                  {q.explanation}
+                </p>
               </div>
             );
           })}
 
           <div className="flex gap-3">
-            <button onClick={() => { setPhase("config"); setResult(null); setTest(null); }} className="flex-1 py-4 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-lg flex items-center justify-center gap-2"><RotateCcw className="w-5 h-5" />اختبار جديد</button>
-            <button onClick={onBack} className="flex-1 py-4 rounded-2xl neu-btn text-foreground font-extrabold text-lg">العودة</button>
+            <button onClick={() => { setPhase("config"); setResult(null); setTest(null); }} className={`flex-1 py-4 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-lg flex items-center justify-center gap-2 ${isElementary ? "tashkeel-text" : ""}`}>
+              <RotateCcw className="w-5 h-5" />
+              {isElementary ? "اخْتِبَارٌ جَدِيدٌ" : "اختبار جديد"}
+            </button>
+            <button onClick={onBack} className={`flex-1 py-4 rounded-2xl neu-btn text-foreground font-extrabold text-lg ${isElementary ? "tashkeel-text" : ""}`}>
+              {isElementary ? "الْعَوْدَةُ" : "العودة"}
+            </button>
           </div>
           <p className="text-center font-ruqaa text-matte-gold text-base pt-4">منصة الطالب العبقري - 2026</p>
         </div>

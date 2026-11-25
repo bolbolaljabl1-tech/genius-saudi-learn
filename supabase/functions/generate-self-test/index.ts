@@ -58,6 +58,7 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    const isElementary = grade.includes("الابتدائي");
     const isArabic = subject.includes("لغتي") || subject.includes("العربية");
     const isEnglish = subject.includes("الإنجليزية") || subject.toLowerCase().includes("english");
 
@@ -104,6 +105,7 @@ ${isArabic ? "4) الرسم الكتابي (type=calligraphy): عبارة وطن
 ${formatRules}
 ${(wantsMatching || wantsFill) ? extraTypes : ""}
 الصف: ${grade}. المادة: ${subject}. عدد الأسئلة المطلوب: ${count}.
+${isElementary ? "- إلزامي وحاسم للمرحلة الابتدائية: يجب تشكيل جميع النصوص العربية بالكامل (الفتحة، الضمة، الكسرة، السكون، الشدة، والتنوين) تشكيلاً نحوياً وصرفياً صحيحاً ودقيقاً في نص فهم المقروء، ونص السؤال، وجميع خيارات الإجابة، وعناصر المزاوجة، والفراغات، والتغذية الراجعة لدعم القراءة السليمة لدى طلاب المرحلة الابتدائية." : ""}
 ${lessons ? `قيد إلزامي: اقصر جميع الأسئلة حصرياً على هذه الدروس/المواضيع المحددة من الطالب ولا تخرج عنها مطلقاً: «${lessons}». لا تُدرج أي محتوى خارج هذا النطاق.` : ""}`;
 
     const payload = {

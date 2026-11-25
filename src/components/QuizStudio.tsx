@@ -155,6 +155,7 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage, stars }: QuizSt
   };
 
   const multiplier = combo >= 5 ? 3 : combo >= 3 ? 2 : 1;
+  const isElementary = stage === "elementary" || grade.includes("الابتدائي");
 
   return (
     <div className="min-h-screen flex flex-col px-4 py-6 pb-28">
@@ -256,10 +257,10 @@ const QuizStudio = ({ onBack, onXP, onBadge, studentName, stage, stars }: QuizSt
 
       {mode && !finished && pack && (
         <div className="w-full max-w-xl mx-auto">
-          {mode === "mcq" && <McqGame items={pack.mcq} onAnswer={registerAnswer} onDone={finishRound} />}
-          {mode === "speed" && <SpeedGame items={pack.speed} onAnswer={registerAnswer} onDone={finishRound} />}
-          {mode === "matching" && <MatchingGame pairs={pack.matching} onAnswer={registerAnswer} onDone={finishRound} />}
-          {mode === "sequencing" && <SequenceGame data={pack.sequencing} onAnswer={registerAnswer} onDone={finishRound} />}
+          {mode === "mcq" && <McqGame items={pack.mcq} isElementary={isElementary} onAnswer={registerAnswer} onDone={finishRound} />}
+          {mode === "speed" && <SpeedGame items={pack.speed} isElementary={isElementary} onAnswer={registerAnswer} onDone={finishRound} />}
+          {mode === "matching" && <MatchingGame pairs={pack.matching} isElementary={isElementary} onAnswer={registerAnswer} onDone={finishRound} />}
+          {mode === "sequencing" && <SequenceGame data={pack.sequencing} isElementary={isElementary} onAnswer={registerAnswer} onDone={finishRound} />}
         </div>
       )}
 
@@ -351,7 +352,7 @@ const TimerBar = ({ left, total }: { left: number; total: number }) => (
 );
 
 /* ---------------- MCQ ---------------- */
-const McqGame = ({ items, onAnswer, onDone }: { items: MCQ[]; onAnswer: (ok: boolean, base: number) => void; onDone: () => void }) => {
+const McqGame = ({ items, isElementary, onAnswer, onDone }: { items: MCQ[]; isElementary?: boolean; onAnswer: (ok: boolean, base: number) => void; onDone: () => void }) => {
   const schedule = useActivityDelay();
   const list = useMemo(() => shuffle(items), [items]);
   const [i, setI] = useState(0);
@@ -377,10 +378,14 @@ const McqGame = ({ items, onAnswer, onDone }: { items: MCQ[]; onAnswer: (ok: boo
   };
 
   return (
-    <div key={i} className="neu-card p-5 animate-scale-in">
+    <div key={i} className="neu-card p-5 animate-scale-in" dir="rtl">
       <TimerBar left={left} total={20} />
-      <p className="text-sm font-extrabold text-muted-foreground mb-2">السؤال {i + 1} من {list.length}</p>
-      <h2 className="text-xl font-extrabold text-heading mb-4 leading-relaxed">{q.question}</h2>
+      <p className={`text-sm font-extrabold text-muted-foreground mb-2 ${isElementary ? "tashkeel-text" : ""}`}>
+        {isElementary ? `السُّؤَالُ ${i + 1} مِنْ ${list.length}` : `السؤال ${i + 1} من ${list.length}`}
+      </p>
+      <h2 dir="rtl" className={`text-xl font-extrabold question-text-blue mb-4 ${isElementary ? "tashkeel-text" : "leading-relaxed"}`}>
+        {q.question}
+      </h2>
       <div className="space-y-3">
         {q.options.map((opt, idx) => {
           const isCorrect = idx === q.correctIndex;
@@ -388,9 +393,10 @@ const McqGame = ({ items, onAnswer, onDone }: { items: MCQ[]; onAnswer: (ok: boo
           return (
             <button
               key={idx}
+              dir="rtl"
               onClick={() => choose(idx)}
               disabled={picked !== null}
-              className={`w-full text-right px-4 py-4 rounded-2xl font-extrabold text-lg transition-all active:scale-[0.98] ${state || "neu-btn"}`}
+              className={`w-full text-right px-4 py-4 rounded-2xl font-extrabold text-lg transition-all active:scale-[0.98] ${isElementary ? "tashkeel-text" : ""} ${state || "neu-btn"}`}
             >
               {opt}
             </button>
@@ -398,14 +404,16 @@ const McqGame = ({ items, onAnswer, onDone }: { items: MCQ[]; onAnswer: (ok: boo
         })}
       </div>
       {picked !== null && q.explanation && (
-        <p className="mt-4 text-base font-bold text-muted-foreground leading-relaxed animate-slide-up">{q.explanation}</p>
+        <p dir="rtl" className={`mt-4 text-base font-bold text-muted-foreground animate-slide-up ${isElementary ? "tashkeel-text" : "leading-relaxed"}`}>
+          {q.explanation}
+        </p>
       )}
     </div>
   );
 };
 
 /* ---------------- Speed ---------------- */
-const SpeedGame = ({ items, onAnswer, onDone }: { items: SpeedItem[]; onAnswer: (ok: boolean, base: number) => void; onDone: () => void }) => {
+const SpeedGame = ({ items, isElementary, onAnswer, onDone }: { items: SpeedItem[]; isElementary?: boolean; onAnswer: (ok: boolean, base: number) => void; onDone: () => void }) => {
   const schedule = useActivityDelay();
   const list = useMemo(() => shuffle(items), [items]);
   const [i, setI] = useState(0);
@@ -431,16 +439,20 @@ const SpeedGame = ({ items, onAnswer, onDone }: { items: SpeedItem[]; onAnswer: 
   };
 
   return (
-    <div key={i} className="neu-card p-5 animate-scale-in">
+    <div key={i} className="neu-card p-5 animate-scale-in" dir="rtl">
       <TimerBar left={left} total={8} />
-      <p className="text-sm font-extrabold text-muted-foreground mb-2">العبارة {i + 1} من {list.length}</p>
-      <h2 className="text-2xl font-extrabold text-heading mb-6 leading-relaxed min-h-24">{q.statement}</h2>
+      <p className={`text-sm font-extrabold text-muted-foreground mb-2 ${isElementary ? "tashkeel-text" : ""}`}>
+        {isElementary ? `الْعِبَارَةُ ${i + 1} مِنْ ${list.length}` : `العبارة ${i + 1} من ${list.length}`}
+      </p>
+      <h2 dir="rtl" className={`text-2xl font-extrabold question-text-blue mb-6 min-h-24 ${isElementary ? "tashkeel-text" : "leading-relaxed"}`}>
+        {q.statement}
+      </h2>
       <div className="grid grid-cols-2 gap-4">
-        <button onClick={() => answer(true)} disabled={locked} className="py-6 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-2xl shadow-emerald-lg active:scale-[0.96] transition">
-          صواب
+        <button onClick={() => answer(true)} disabled={locked} className={`py-6 rounded-2xl gradient-emerald text-primary-foreground font-extrabold text-2xl shadow-emerald-lg active:scale-[0.96] transition ${isElementary ? "tashkeel-text" : ""}`}>
+          {isElementary ? "صَوَابٌ" : "صواب"}
         </button>
-        <button onClick={() => answer(false)} disabled={locked} className="py-6 rounded-2xl bg-destructive text-destructive-foreground font-extrabold text-2xl shadow-lg active:scale-[0.96] transition">
-          خطأ
+        <button onClick={() => answer(false)} disabled={locked} className={`py-6 rounded-2xl bg-destructive text-destructive-foreground font-extrabold text-2xl shadow-lg active:scale-[0.96] transition ${isElementary ? "tashkeel-text" : ""}`}>
+          {isElementary ? "خَطَأٌ" : "خطأ"}
         </button>
       </div>
     </div>
@@ -448,7 +460,7 @@ const SpeedGame = ({ items, onAnswer, onDone }: { items: SpeedItem[]; onAnswer: 
 };
 
 /* ---------------- Matching ---------------- */
-const MatchingGame = ({ pairs, onAnswer, onDone }: { pairs: Pair[]; onAnswer: (ok: boolean, base: number) => void; onDone: () => void }) => {
+const MatchingGame = ({ pairs, isElementary, onAnswer, onDone }: { pairs: Pair[]; isElementary?: boolean; onAnswer: (ok: boolean, base: number) => void; onDone: () => void }) => {
   const lefts = useMemo(() => shuffle(pairs), [pairs]);
   const rights = useMemo(() => shuffle(pairs), [pairs]);
   const [selLeft, setSelLeft] = useState<string | null>(null);
@@ -472,8 +484,10 @@ const MatchingGame = ({ pairs, onAnswer, onDone }: { pairs: Pair[]; onAnswer: (o
   };
 
   return (
-    <div className="neu-card p-5 animate-scale-in">
-      <p className="text-base font-extrabold text-heading mb-4">اختر المصطلح ثم اختر معناه الصحيح</p>
+    <div className="neu-card p-5 animate-scale-in" dir="rtl">
+      <p className={`text-base font-extrabold question-text-blue mb-4 ${isElementary ? "tashkeel-text" : ""}`}>
+        {isElementary ? "اخْتَرِ الْمُصْطَلَحَ ثُمَّ اخْتَرْ مَعْنَاهُ الصَّحِيحَ" : "اختر المصطلح ثم اختر معناه الصحيح"}
+      </p>
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-3">
           {lefts.map((p) => {
@@ -481,9 +495,10 @@ const MatchingGame = ({ pairs, onAnswer, onDone }: { pairs: Pair[]; onAnswer: (o
             return (
               <button
                 key={p.left}
+                dir="rtl"
                 onClick={() => !done && setSelLeft(p.left)}
                 disabled={done}
-                className={`w-full px-3 py-4 rounded-2xl font-extrabold text-base transition-all active:scale-[0.97] ${done ? "gradient-emerald text-primary-foreground shadow-emerald" : selLeft === p.left ? "gradient-gold text-gold-foreground shadow-gold" : "neu-btn"}`}
+                className={`w-full px-3 py-4 rounded-2xl font-extrabold text-base transition-all active:scale-[0.97] ${isElementary ? "tashkeel-text" : ""} ${done ? "gradient-emerald text-primary-foreground shadow-emerald" : selLeft === p.left ? "gradient-gold text-gold-foreground shadow-gold" : "neu-btn"}`}
               >
                 {p.left}
               </button>
@@ -496,9 +511,10 @@ const MatchingGame = ({ pairs, onAnswer, onDone }: { pairs: Pair[]; onAnswer: (o
             return (
               <button
                 key={p.right}
+                dir="rtl"
                 onClick={() => !done && pickRight(p)}
                 disabled={done}
-                className={`w-full px-3 py-4 rounded-2xl font-extrabold text-base transition-all active:scale-[0.97] ${done ? "gradient-emerald text-primary-foreground shadow-emerald" : wrong === p.right ? "bg-destructive text-destructive-foreground" : "neu-btn"}`}
+                className={`w-full px-3 py-4 rounded-2xl font-extrabold text-base transition-all active:scale-[0.97] ${isElementary ? "tashkeel-text" : ""} ${done ? "gradient-emerald text-primary-foreground shadow-emerald" : wrong === p.right ? "bg-destructive text-destructive-foreground" : "neu-btn"}`}
               >
                 {p.right}
               </button>
@@ -511,7 +527,7 @@ const MatchingGame = ({ pairs, onAnswer, onDone }: { pairs: Pair[]; onAnswer: (o
 };
 
 /* ---------------- Sequencing ---------------- */
-const SequenceGame = ({ data, onAnswer, onDone }: { data: Sequencing; onAnswer: (ok: boolean, base: number) => void; onDone: () => void }) => {
+const SequenceGame = ({ data, isElementary, onAnswer, onDone }: { data: Sequencing; isElementary?: boolean; onAnswer: (ok: boolean, base: number) => void; onDone: () => void }) => {
   const pool = useMemo(() => shuffle(data.items), [data.items]);
   const [chosen, setChosen] = useState<string[]>([]);
   const [shake, setShake] = useState<string | null>(null);
@@ -533,18 +549,23 @@ const SequenceGame = ({ data, onAnswer, onDone }: { data: Sequencing; onAnswer: 
   };
 
   return (
-    <div className="neu-card p-5 animate-scale-in">
-      <p className="text-base font-extrabold text-heading mb-1">{data.instruction}</p>
-      <p className="text-sm font-bold text-muted-foreground mb-4">اضغط العناصر بالتسلسل الصحيح</p>
+    <div className="neu-card p-5 animate-scale-in" dir="rtl">
+      <p dir="rtl" className={`text-base font-extrabold question-text-blue mb-1 ${isElementary ? "tashkeel-text" : ""}`}>
+        {data.instruction}
+      </p>
+      <p className={`text-sm font-bold text-muted-foreground mb-4 ${isElementary ? "tashkeel-text" : ""}`}>
+        {isElementary ? "اضْغَطِ الْعَنَاصِرَ بِالتَّسَلْسُلِ الصَّحِيحِ" : "اضغط العناصر بالتسلسل الصحيح"}
+      </p>
       <div className="space-y-3">
         {pool.map((item) => {
           const order = chosen.indexOf(item);
           return (
             <button
               key={item}
+              dir="rtl"
               onClick={() => pick(item)}
               disabled={order >= 0}
-              className={`w-full text-right px-4 py-4 rounded-2xl font-extrabold text-base transition-all active:scale-[0.97] flex items-center justify-between gap-3 ${order >= 0 ? "gradient-emerald text-primary-foreground shadow-emerald" : shake === item ? "bg-destructive text-destructive-foreground" : "neu-btn"}`}
+              className={`w-full text-right px-4 py-4 rounded-2xl font-extrabold text-base transition-all active:scale-[0.97] flex items-center justify-between gap-3 ${isElementary ? "tashkeel-text" : ""} ${order >= 0 ? "gradient-emerald text-primary-foreground shadow-emerald" : shake === item ? "bg-destructive text-destructive-foreground" : "neu-btn"}`}
             >
               <span>{item}</span>
               {order >= 0 && <span className="shrink-0 w-8 h-8 rounded-full bg-white/25 flex items-center justify-center">{order + 1}</span>}
