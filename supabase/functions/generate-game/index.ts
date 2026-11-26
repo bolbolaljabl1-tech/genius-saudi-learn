@@ -6,6 +6,69 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function tashkeelDensity(texts: string[]): number {
+  const joined = texts.filter(Boolean).join(" ");
+  const letters = joined.match(/[\u0621-\u064A]/g);
+  if (!letters || letters.length === 0) return 1;
+  const marks = joined.match(/[\u064B-\u0652\u0670]/g);
+  return (marks ? marks.length : 0) / letters.length;
+}
+
+async function enforceGameTashkeel(pack: any, key: string): Promise<any> {
+  try {
+    const samples: string[] = [];
+    if (pack.title) samples.push(pack.title);
+    for (const q of pack.mcq || []) {
+      if (q.question) samples.push(q.question);
+      if (Array.isArray(q.options)) samples.push(...q.options);
+      if (q.explanation) samples.push(q.explanation);
+    }
+    for (const p of pack.matching || []) {
+      if (p.left) samples.push(p.left);
+      if (p.right) samples.push(p.right);
+    }
+    if (pack.sequencing?.instruction) samples.push(pack.sequencing.instruction);
+    if (Array.isArray(pack.sequencing?.items)) samples.push(...pack.sequencing.items);
+    for (const s of pack.speed || []) {
+      if (s.statement) samples.push(s.statement);
+    }
+
+    if (tashkeelDensity(samples) >= 0.58) return pack;
+
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          {
+            role: "system",
+            content: `أنت مُدَقِّقٌ لُغَوِيٌّ وَخَبِيرٌ فِي الضَّبْطِ بِالشَّكْلِ التَّامِّ لِلْمَرْحَلَةِ الِابْتِدَائِيَّةِ.
+أَعِدْ إِخْرَاجَ كَائِنِ JSON الْمُرْسَلِ بَعْدَ وَضْعِ التَّشْكِيلِ الْكَامِلِ الدَّقِيقِ (الْفَتْحَةُ، الضَّمَّةُ، الْكَسْرَةُ، السُّكُونُ، الشَّدَّةُ، وَالتَّنْوِينُ) عَلَى كُلِّ حَرْفٍ وَكُلِّ كَلِمَةٍ عَرَبِيَّةٍ فِي جَمِيعِ الْحُقُولِ النَّصِّيَّةِ (title, mcq, matching, sequencing, speed) مَعَ الْحِفَاظِ التَّامِّ عَلَى correctIndex وَ isTrue وَبِنْيَةِ الْبَيَانَاتِ دُونَ أَيِّ تَغْيِيرٍ.`,
+          },
+          { role: "user", content: JSON.stringify(pack) },
+        ],
+        response_format: { type: "json_object" },
+      }),
+    });
+    if (!res.ok) return pack;
+    const vData = await res.json();
+    const raw = vData.choices?.[0]?.message?.content;
+    if (typeof raw === "string") {
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (m) {
+        const parsed = JSON.parse(m[0]);
+        if (parsed && Array.isArray(parsed.mcq) && parsed.mcq.length === pack.mcq.length) {
+          return parsed;
+        }
+      }
+    }
+  } catch (err) {
+    console.error("enforceGameTashkeel fallback:", err);
+  }
+  return pack;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -34,6 +97,8 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
+    const isElementary = stage === "elementary" || grade.includes("الابتدائي");
+
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
@@ -49,7 +114,7 @@ serve(async (req) => {
 - لا تستخدم أي عبارات تحدد الجنس أو العمر.
 - الأسئلة دقيقة علمياً ومرتبطة مباشرة بالموضوع أو المحتوى المرسل.
 - اجعل الصياغة قصيرة وواضحة تناسب العرض على شاشة الجوال.
-${(stage === "elementary" || grade.includes("الابتدائي")) ? "- الطالب في المرحلة الابتدائية: استخدم كلمات سهلة وجملاً قصيرة، والتزم بتشكيل جميع النصوص العربية بالكامل (الفتحة، الضمة، الكسرة، السكون، الشدة، والتنوين) تشكيلاً صحيحاً في الأسئلة، والخيارات، وأزواج المطابقة، وعناصر الترتيب، وعبارات الصواب والخطأ، والتوضيحات." : ""}
+${isElementary ? "- قَاعِدَةٌ إِلْزَامِيَّةٌ لِلْمَرْحَلَةِ الِابْتِدَائِيَّةِ: اسْتَخْدِمْ كَلِمَاتٍ سَهْلَةً وَجُمَلًا قَصِيرَةً، وَالْتَزِمْ بِتَشْكِيلِ جَمِيعِ النُّصُوصِ الْعَرَبِيَّةِ بِالْكَامِلِ (الْفَتْحَةُ، الضَّمَّةُ، الْكَسْرَةُ، السُّكُونُ، الشَّدَّةُ، وَالتَّنْوِينُ) عَلَى كُلِّ كَلِمَةٍ وَكُلِّ حَرْفٍ فِي الْأَسْئِلَةِ، وَالْخِيَارَاتِ، وَأَزْوَاجِ الْمُطَابَقَةِ، وَعَنَاصِرِ التَّرْتِيبِ، وَعِبَارَاتِ الصَّوَابِ وَالْخَطَأِ، وَالتَّوْضِيحَاتِ دُونَ اسْتِثْنَاءٍ." : ""}
 ${grade ? `- الطالب في ${grade}: اضبط مستوى الصعوبة والمفردات والمفاهيم لتناسب هذا الصف تماماً وفق المنهج السعودي.` : ""}`,
           },
           {
@@ -57,6 +122,7 @@ ${grade ? `- الطالب في ${grade}: اضبط مستوى الصعوبة وا
             content: `صمم حزمة ألعاب تعليمية متكاملة عن: "${topic || "المحتوى المرفق"}".
 ${grade ? `الصف الدراسي المستهدف: ${grade}.` : ""}
 ${content ? `المحتوى الدراسي المرجعي:\n${content}` : ""}
+${isElementary ? "تنبيه إلزامي: اشكل جميع الكلمات والحروف تشكيلاً كاملاً ودقيقاً في كل أجزاء الحزمة." : ""}
 
 المطلوب أربع صيغ:
 1. ثمانية أسئلة اختيار من متعدد بأربعة خيارات.
@@ -148,7 +214,11 @@ ${content ? `المحتوى الدراسي المرجعي:\n${content}` : ""}
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) throw new Error("No tool call in response");
-    const pack = JSON.parse(toolCall.function.arguments);
+    let pack = JSON.parse(toolCall.function.arguments);
+
+    if (isElementary) {
+      pack = await enforceGameTashkeel(pack, LOVABLE_API_KEY);
+    }
 
     return new Response(JSON.stringify(pack), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

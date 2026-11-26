@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowRight, Loader2, Timer, Send, RotateCcw, CheckCircle2, XCircle } from "lucide-react";
+import { ArrowRight, Loader2, Timer, Send, RotateCcw, CheckCircle2, XCircle, BookOpen } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import AchievementCard from "./AchievementCard";
 
@@ -273,11 +273,14 @@ const SelfTest = ({ onBack, onXP, studentName, stars }: SelfTestProps) => {
 
         <div className="max-w-2xl mx-auto space-y-5">
           {test.reading_passage && (
-            <div className="neu-card p-5 bg-primary/5 border-2 border-primary/20">
-              <h3 className={`font-extrabold text-foreground text-xl mb-2 ${isElementary ? "tashkeel-text" : ""}`}>
-                {isElementary ? "نَصُّ فَهْمِ الْمَقْرُوءِ" : "نص فهم المقروء"}
-              </h3>
-              <p dir="rtl" className={`text-foreground text-lg whitespace-pre-wrap ${isElementary ? "tashkeel-text" : "leading-9"}`}>
+            <div className="reading-passage-card p-5 sm:p-6 animate-slide-up">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full reading-passage-badge mb-3 shadow-sm">
+                <BookOpen className="w-5 h-5 text-emerald-700 shrink-0" />
+                <h3 className={`font-extrabold text-lg ${isElementary ? "tashkeel-text" : ""}`}>
+                  {isElementary ? "نَصُّ فَهْمِ الْمَقْرُوءِ" : "نص فهم المقروء"}
+                </h3>
+              </div>
+              <p dir="rtl" className={`reading-passage-text text-xl whitespace-pre-wrap ${isElementary ? "tashkeel-text" : ""}`}>
                 {test.reading_passage}
               </p>
             </div>

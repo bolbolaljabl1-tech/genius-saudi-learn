@@ -6,12 +6,63 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+function tashkeelDensity(texts: string[]): number {
+  const joined = texts.filter(Boolean).join(" ");
+  const letters = joined.match(/[\u0621-\u064A]/g);
+  if (!letters || letters.length === 0) return 1;
+  const marks = joined.match(/[\u064B-\u0652\u0670]/g);
+  return (marks ? marks.length : 0) / letters.length;
+}
+
+async function enforceQuizTashkeel(quizData: any, key: string): Promise<any> {
+  try {
+    const samples: string[] = [];
+    for (const q of quizData.questions || []) {
+      if (q.question) samples.push(q.question);
+      if (Array.isArray(q.options)) samples.push(...q.options);
+      if (q.explanation) samples.push(q.explanation);
+    }
+    if (tashkeelDensity(samples) >= 0.58) return quizData;
+
+    const res = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          {
+            role: "system",
+            content: `أنت مُدَقِّقٌ لُغَوِيٌّ وَخَبِيرٌ فِي الضَّبْطِ بِالشَّكْلِ التَّامِّ لِلْمَرْحَلَةِ الِابْتِدَائِيَّةِ.
+أَعِدْ إِخْرَاجَ كَائِنِ JSON الْمُرْسَلِ بَعْدَ وَضْعِ التَّشْكِيلِ الْكَامِلِ الدَّقِيقِ (الْفَتْحَةُ، الضَّمَّةُ، الْكَسْرَةُ، السُّكُونُ، الشَّدَّةُ، وَالتَّنْوِينُ) عَلَى كُلِّ حَرْفٍ وَكُلِّ كَلِمَةٍ عَرَبِيَّةٍ فِي (question, options, explanation) مَعَ الْحِفَاظِ التَّامِّ عَلَى correctIndex وَعَدَدِ الْأَسْئِلَةِ وَالْخِيَارَاتِ دُونَ أَيِّ تَغْيِيرٍ.`,
+          },
+          { role: "user", content: JSON.stringify(quizData) },
+        ],
+        response_format: { type: "json_object" },
+      }),
+    });
+    if (!res.ok) return quizData;
+    const vData = await res.json();
+    const raw = vData.choices?.[0]?.message?.content;
+    if (typeof raw === "string") {
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (m) {
+        const parsed = JSON.parse(m[0]);
+        if (parsed && Array.isArray(parsed.questions) && parsed.questions.length === quizData.questions.length) {
+          return parsed;
+        }
+      }
+    }
+  } catch (err) {
+    console.error("enforceQuizTashkeel fallback:", err);
+  }
+  return quizData;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const blocked = abuseCheck(req, { limit: 10, windowMs: 60_000, requireOrigin: true, corsHeaders });
   if (blocked) return blocked;
-
 
   try {
     const contentLength = Number(req.headers.get("content-length") ?? "0");
@@ -33,6 +84,7 @@ serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
     const isElementary = stage === "elementary";
+    const isEnglish = subject.includes("الإنجليزية") || subject.toLowerCase().includes("english");
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -49,13 +101,15 @@ serve(async (req) => {
 
 قواعد صارمة:
 - لا تستخدم أي كلمات تحدد الجنس أو العمر (مثل: يا بطل، يا ابنتي).
-${isElementary ? "- الطالب في المرحلة الابتدائية: اجعل الأسئلة بسيطة جداً بكلمات سهلة، والتزم بتشكيل جميع النصوص العربية بالكامل (الفتحة، الضمة، الكسرة، السكون، الشدة، والتنوين) تشكيلاً صحيحاً في نص السؤال، وجميع الخيارات الأربعة، وشرح الإجابة." : "- اجعل الأسئلة مناسبة لمستوى الطالب."}
+${isElementary ? "- قَاعِدَةٌ إِلْزَامِيَّةٌ لِلْمَرْحَلَةِ الِابْتِدَائِيَّةِ: اجْعَلِ الْأَسْئِلَةَ بَسِيطَةً بِكَلِمَاتٍ سَهْلَةٍ، وَالْتَزِمْ بِتَشْكِيلِ جَمِيعِ النُّصُوصِ الْعَرَبِيَّةِ بِالْكَامِلِ (الْفَتْحَةُ، الضَّمَّةُ، الْكَسْرَةُ، السُّكُونُ، الشَّدَّةُ، وَالتَّنْوِينُ) عَلَى كُلِّ كَلِمَةٍ وَكُلِّ حَرْفٍ فِي نَصِّ السُّؤَالِ، وَجَمِيعِ الْخِيَارَاتِ الْأَرْبَعَةِ، وَشَرْحِ الْإِجَابَةِ دُونَ اسْتِثْنَاءٍ." : "- اجعل الأسئلة مناسبة لمستوى الطالب."}
 - كل سؤال يحتوي على: نص السؤال، 4 خيارات، رقم الإجابة الصحيحة (0-3)، شرح مختصر.
-- اختم شرح كل سؤال بـ: "منصة الطالب العبقري - 2026"`
+- اختم شرح كل سؤال بـ: "${isElementary ? "مِنَصَّةُ الطَّالِبِ الْعَبْقَرِيِّ - 2026" : "منصة الطالب العبقري - 2026"}"`
           },
           {
             role: "user",
-            content: `أنشئ 10 أسئلة اختيار من متعدد عن درس "${lessonTitle}" في مادة "${subject}".`
+            content: isElementary
+              ? `أَنْشِئْ 10 أَسْئِلَةِ اخْتِيَارٍ مِنْ مُتَعَدِّدٍ عَنْ دَرْسِ "${lessonTitle}" فِي مَادَّةِ "${subject}" مَعَ التَّشْكِيلِ الْكَامِلِ لِجَمِيعِ الْكَلِمَاتِ وَالْحُرُوفِ.`
+              : `أنشئ 10 أسئلة اختيار من متعدد عن درس "${lessonTitle}" في مادة "${subject}".`
           }
         ],
         tools: [
@@ -111,7 +165,11 @@ ${isElementary ? "- الطالب في المرحلة الابتدائية: اج�
     const data = await response.json();
     const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) throw new Error("No tool call in response");
-    const quizData = JSON.parse(toolCall.function.arguments);
+    let quizData = JSON.parse(toolCall.function.arguments);
+
+    if (isElementary && !isEnglish) {
+      quizData = await enforceQuizTashkeel(quizData, LOVABLE_API_KEY);
+    }
 
     return new Response(JSON.stringify(quizData), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },

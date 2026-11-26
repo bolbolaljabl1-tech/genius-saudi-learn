@@ -573,12 +573,40 @@
   .dark .question-text-blue {
     color: #65DDF2;
   }
+
+  /* بطاقة ونص فهم المقروء بألوان مبهجة ومحببة للأطفال وتباين واضح للحركات التشكيلية */
+  .reading-passage-card {
+    background: linear-gradient(135deg, #FFFBEB 0%, #F0F9FF 52%, #ECFDF5 100%);
+    border: 2.5px solid #34D399;
+    border-radius: 1.35rem;
+    box-shadow:
+      0 10px 28px -8px rgba(16, 185, 129, 0.22),
+      inset 0 2px 0 rgba(255, 255, 255, 0.95);
+  }
+  .dark .reading-passage-card {
+    background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(6, 78, 59, 0.45));
+    border-color: #34D399;
+  }
+  .reading-passage-badge {
+    background: linear-gradient(90deg, #FEF3C7 0%, #D1FAE5 100%);
+    color: #065F46;
+    border: 1.5px solid #F59E0B;
+  }
+  .reading-passage-text {
+    color: #0F5257;
+    font-weight: 700;
+    line-height: 2.4 !important;
+  }
+  .dark .reading-passage-text {
+    color: #A7F3D0;
+  }
+
   .tashkeel-text {
     direction: rtl;
     unicode-bidi: isolate;
-    line-height: 2.15 !important;
-    padding-top: 0.15em;
-    padding-bottom: 0.15em;
+    line-height: 2.25 !important;
+    padding-top: 0.18em;
+    padding-bottom: 0.18em;
     overflow: visible;
     letter-spacing: normal;
   }

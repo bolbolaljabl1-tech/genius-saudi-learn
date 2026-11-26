@@ -18,7 +18,6 @@ async function callGateway(payload: unknown, key: string, attempts = 3): Promise
     });
     if (r.ok) return r;
     last = r;
-    // Retry only on transient errors
     if (r.status === 503 || r.status === 502 || r.status === 504 || r.status === 500) {
       await sleep(700 * (i + 1));
       continue;
@@ -28,12 +27,81 @@ async function callGateway(payload: unknown, key: string, attempts = 3): Promise
   return last!;
 }
 
+// Compute ratio of tashkeel diacritics to Arabic base letters
+function tashkeelDensity(texts: string[]): number {
+  const joined = texts.filter(Boolean).join(" ");
+  const letters = joined.match(/[\u0621-\u064A]/g);
+  if (!letters || letters.length === 0) return 1;
+  const marks = joined.match(/[\u064B-\u0652\u0670]/g);
+  return (marks ? marks.length : 0) / letters.length;
+}
+
+// Second-pass full vocalizer guarantee for elementary students
+async function enforceFullTashkeel(parsed: any, key: string): Promise<any> {
+  try {
+    const samples: string[] = [];
+    if (parsed.reading_passage) samples.push(parsed.reading_passage);
+    for (const q of parsed.questions || []) {
+      if (q.question) samples.push(q.question);
+      if (Array.isArray(q.options)) samples.push(...q.options);
+      if (Array.isArray(q.left)) samples.push(...q.left);
+      if (Array.isArray(q.right)) samples.push(...q.right);
+      if (q.explanation) samples.push(q.explanation);
+    }
+
+    const passageDensity = parsed.reading_passage ? tashkeelDensity([parsed.reading_passage]) : 1;
+    const overallDensity = tashkeelDensity(samples);
+
+    // If both passage and overall text already have rich full diacritics (>= 0.58), keep as-is
+    if (passageDensity >= 0.58 && overallDensity >= 0.58) {
+      return parsed;
+    }
+
+    const vocalizePayload = {
+      model: "google/gemini-3-flash-preview",
+      messages: [
+        {
+          role: "system",
+          content: `أنت مُدَقِّقٌ لُغَوِيٌّ وَخَبِيرٌ فِي الضَّبْطِ بِالشَّكْلِ التَّامِّ لِكُتُبِ الْمَرْحَلَةِ الِابْتِدَائِيَّةِ السُّعُودِيَّةِ.
+مُهِمَّتُكَ الْوَحِيدَةُ: إِعَادَةُ إِخْرَاجِ كَائِنِ JSON الْمُرْسَلِ بَعْدَ وَضْعِ التَّشْكِيلِ الْكَامِلِ الدَّقِيقِ (الْفَتْحَةُ، الضَّمَّةُ، الْكَسْرَةُ، السُّكُونُ، الشَّدَّةُ، وَالتَّنْوِينُ) عَلَى كُلِّ حَرْفٍ وَكُلِّ كَلِمَةٍ عَرَبِيَّةٍ فِي جَمِيعِ الْحُقُولِ النَّصِّيَّةِ (reading_passage, question, options, left, right, blanks, acceptedBlanks, explanation).
+
+قَوَاعِدُ صَارِمَةٌ:
+1. لَا تَتْرُكْ أَيَّ كَلِمَةٍ أَوْ حَرْفٍ قَابِلٍ لِلضَّبْطِ دُونَ حَرَكَةٍ، خَاصَّةً فِي نَصِّ فَهْمِ الْمَقْرُوءِ (reading_passage) وَأَوَاخِرِ الْكَلِمَاتِ وَأَحْرُفِ الْجَرِّ وَالْأَفْعَالِ وَالْأَسْمَاءِ.
+2. مِثَالٌ عَلَى الدِّقَّةِ الْمَطْلُوبَةِ: «ذَهَبَ أَحْمَدُ مَعَ أُسْرَتِهِ إِلَى الْحَدِيقَةِ الْجَمِيلَةِ فِي الصَّبَاحِ الْبَاكِرِ، وَشَاهَدَ الْأَزْهَارَ الْمُلَوَّنَةَ وَالْعَصَافِيرَ تُغَرِّدُ فَوْقَ الْأَغْصَانِ».
+3. حَافِظْ عَلَى جَمِيعِ الْمَفَاتِيحِ وَالْأَرْقَامِ (correctIndex, correctBool, pairs, points, usesPassage) وَتَرْتِيبِ الْعَنَاصِرِ كَمَا هِيَ تَمَامًا دُونَ أَيِّ تَغْيِيرٍ.`,
+        },
+        {
+          role: "user",
+          content: JSON.stringify(parsed),
+        },
+      ],
+      response_format: { type: "json_object" },
+    };
+
+    const res = await callGateway(vocalizePayload, key, 2);
+    if (!res.ok) return parsed;
+    const vData = await res.json();
+    const rawContent = vData.choices?.[0]?.message?.content;
+    if (typeof rawContent === "string") {
+      const m = rawContent.match(/\{[\s\S]*\}/);
+      if (m) {
+        const vocalized = JSON.parse(m[0]);
+        if (vocalized && Array.isArray(vocalized.questions) && vocalized.questions.length === parsed.questions.length) {
+          return vocalized;
+        }
+      }
+    }
+  } catch (err) {
+    console.error("enforceFullTashkeel fallback:", err);
+  }
+  return parsed;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const blocked = abuseCheck(req, { limit: 10, windowMs: 60_000, requireOrigin: true, corsHeaders });
   if (blocked) return blocked;
-
 
   try {
     const contentLength = Number(req.headers.get("content-length") ?? "0");
@@ -85,14 +153,18 @@ ${isArabic ? "4) الرسم الكتابي (type=calligraphy): عبارة وطن
     2) جميع التصنيفات النحوية/الصرفية المقبولة (مفرد/مركّب) إن كان السؤال إعرابياً أو صرفياً.
     3) المشتقات والصيغ المختلفة لنفس الجذر إذا كانت صحيحة سياقياً.
     4) للأسئلة الرقمية: كل الصيغ المكافئة (عدد/كسر/نسبة) بالأرقام القياسية 0-9 فقط.
-  أمثلة توضيحية للأسلوب المطلوب:
-    • "الطلاب ____ بجد لتحقيق النجاح" → ["يدرسون","يجتهدون","يعملون","يكدّون","يثابرون","يجدّون","يسعون"]
-    • "عاقب المعلم الطالب ____ على إهماله" → ["المقصر","المهمل","الكسول","المتهاون","الغافل","المتكاسل"]
-    • "وقف الجنود ____ إجلالاً للعلم" → ["مستعدين","صامدين","وقوفاً","منتصبين","خاشعين","مُحيّين"]
-    • "قرأت الكتاب ____ فهماً عميقاً" → ["قراءة","قراءةً","تأملاً","تدبراً","فحصاً"]
   لا تترك acceptedBlanks فارغة أبداً لأي فراغ. الجواب الأساسي في blanks يجب أن يكون أيضاً ضمن acceptedBlanks.
   للأسئلة الرقمية اكتب الرقم بالأرقام العربية القياسية فقط (0-9) ولا تستخدم الأرقام الهندية.`;
 
+    const elementaryTashkeelRule = isElementary
+      ? `
+⚠️ قَاعِدَةٌ إِلْزَامِيَّةٌ قُصْوَى لِلْمَرْحَلَةِ الِابْتِدَائِيَّةِ التَّأْسِيسِيَّةِ:
+- يَجِبُ تَشْكِيلُ جَمِيعِ النُّصُوصِ الْعَرَبِيَّةِ بِالْكَامِلِ (الْفَتْحَةُ، الضَّمَّةُ، الْكَسْرَةُ، السُّكُونُ، الشَّدَّةُ، وَالتَّنْوِينُ) عَلَى كُلِّ كَلِمَةٍ وَكُلِّ حَرْفٍ دُونَ اسْتِثْنَاءٍ!
+- يَشْمَلُ ذَلِكَ بِشَكْلٍ خَاصٍّ وَإِلْزَامِيٍّ: نَصَّ فَهْمِ الْمَقْرُوءِ (reading_passage) بِالْكَامِلِ مِنْ أَوَّلِ حَرْفٍ إِلَى آخِرِ حَرْفٍ، وَنَصَّ كُلِّ سُؤَالٍ، وَجَمِيعَ خِيَارَاتِ الْإِجَابَةِ، وَعَنَاصِرَ الْمُزَاوَجَةِ، وَالْفَرَاغَاتِ، وَالتَّغْذِيَةَ الرَّاجِعَةَ.
+- مِثَالٌ إِلْزَامِيٌّ لِأُسْلُوبِ كِتَابَةِ نَصِّ فَهْمِ الْمَقْرُوءِ:
+  «خَرَجَ سَالِمٌ مَعَ أُسْرَتِهِ إِلَى الْبُسْتَانِ فِي يَوْمٍ رَبِيعِيٍّ جَمِيلٍ، فَرَأَى الْأَشْجَارَ الْخَضْرَاءَ وَالْأَزْهَارَ الْمُتَفَتِّحَةَ، وَشَكَرَ اللَّهَ عَلَى نِعَمِهِ الْكَثِيرَةِ».
+- يُمْنَعُ مَنْعًا بَاتًّا تَرْكُ أَيِّ جُمْلَةٍ أَوْ فَقْرَةٍ غَيْرَ مَشْكُولَةٍ.`
+      : "";
 
     const systemPrompt = `أنت خبير تعليمي ملم بأنظمة هيئة تقويم التعليم والتدريب السعودية.
 أنشئ اختباراً يقيس الفهم والاستيعاب والتحليل (لا الحفظ).
@@ -105,14 +177,19 @@ ${isArabic ? "4) الرسم الكتابي (type=calligraphy): عبارة وطن
 ${formatRules}
 ${(wantsMatching || wantsFill) ? extraTypes : ""}
 الصف: ${grade}. المادة: ${subject}. عدد الأسئلة المطلوب: ${count}.
-${isElementary ? "- إلزامي وحاسم للمرحلة الابتدائية: يجب تشكيل جميع النصوص العربية بالكامل (الفتحة، الضمة، الكسرة، السكون، الشدة، والتنوين) تشكيلاً نحوياً وصرفياً صحيحاً ودقيقاً في نص فهم المقروء، ونص السؤال، وجميع خيارات الإجابة، وعناصر المزاوجة، والفراغات، والتغذية الراجعة لدعم القراءة السليمة لدى طلاب المرحلة الابتدائية." : ""}
+${elementaryTashkeelRule}
 ${lessons ? `قيد إلزامي: اقصر جميع الأسئلة حصرياً على هذه الدروس/المواضيع المحددة من الطالب ولا تخرج عنها مطلقاً: «${lessons}». لا تُدرج أي محتوى خارج هذا النطاق.` : ""}`;
 
     const payload = {
-      model: "google/gemini-2.5-flash",
+      model: isElementary ? "google/gemini-3-flash-preview" : "google/gemini-2.5-flash",
       messages: [
         { role: "system", content: systemPrompt },
-        { role: "user", content: `أنشئ ${count} أسئلة لمادة ${subject} للصف ${grade}${lessons ? ` ضمن الدروس: ${lessons}` : ""}.` },
+        {
+          role: "user",
+          content: isElementary
+            ? `أَنْشِئْ ${count} أَسْئِلَةٍ لِمَادَّةِ ${subject} لِلصَّفِّ ${grade}${lessons ? ` ضِمْنَ الدُّرُوسِ: ${lessons}` : ""} مَعَ التَّشْكِيلِ الْكَامِلِ لِجَمِيعِ الْكَلِمَاتِ وَالْحُرُوفِ فِي نَصِّ فَهْمِ الْمَقْرُوءِ وَالْأَسْئِلَةِ وَالْخِيَارَاتِ.`
+            : `أنشئ ${count} أسئلة لمادة ${subject} للصف ${grade}${lessons ? ` ضمن الدروس: ${lessons}` : ""}.`,
+        },
       ],
       tools: [{
         type: "function",
@@ -122,7 +199,7 @@ ${lessons ? `قيد إلزامي: اقصر جميع الأسئلة حصرياً 
           parameters: {
             type: "object",
             properties: {
-              reading_passage: { type: "string" },
+              reading_passage: { type: "string", description: isElementary ? "نَصُّ فَهْمِ الْمَقْرُوءِ مَشْكُولًا بِالْكَامِلِ حَرْفًا حَرْفًا" : "نص فهم المقروء" },
               questions: {
                 type: "array",
                 items: {
@@ -184,7 +261,6 @@ ${lessons ? `قيد إلزامي: اقصر جميع الأسئلة حصرياً 
       catch (e) { console.error("JSON parse failed:", e); }
     }
     if (!parsed) {
-      // Fallback: try to parse from message content
       const content = data.choices?.[0]?.message?.content;
       if (typeof content === "string") {
         const m = content.match(/[\{\[][\s\S]*[\}\]]/);
@@ -195,6 +271,11 @@ ${lessons ? `قيد إلزامي: اقصر جميع الأسئلة حصرياً 
       return new Response(JSON.stringify({ error: "تعذر قراءة الاستجابة، حاول مرة أخرى" }), {
         status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+
+    // Guarantee 100% full vocalization for elementary students (especially reading_passage)
+    if (isElementary && !isEnglish) {
+      parsed = await enforceFullTashkeel(parsed, LOVABLE_API_KEY);
     }
 
     const stripDecor = (s: string) => (s || "").replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}✓✗]/gu, "").replace(/\s+/g, " ").trim();
